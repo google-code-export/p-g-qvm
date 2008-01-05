@@ -1164,7 +1164,7 @@ qboolean G_admin_ban_check( char *userinfo, char *reason, int rlen )
         "Banned player %s^7 (%s) tried to connnect (ban #%i by %s^7  expires %s reason: %s^7 )",
         Info_ValueForKey( userinfo, "name" ),
 	g_admin_bans[ i ]->name,
-        i,
+        i+1,
         g_admin_bans[ i ]->banner,
         duration,
         g_admin_bans[ i ]->reason
@@ -4143,7 +4143,7 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
   }
   else if( G_SayArgc() > 2 + skiparg )
   {
-    ADMP( va( "^3!%s: ^7usage: ^3!%s ^7(^5name|slot^7)\n", cmd, cmd ) );
+    ADMP( va( "^3!pause: ^7usage: ^7(^5name|slot^7)\n", cmd, cmd ) );
     return qfalse;
   }
   for( i = 0; pids[ i ] >= 0; i++ )
