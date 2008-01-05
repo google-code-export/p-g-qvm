@@ -1,1 +1,39 @@
-This will be updated later
+#labels Featured,Help
+The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exhausting to hunt down and find each feature. Here is a list of all the features.
+
+=Admin Commands=
+QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
+ * !*forcespec/!unforcespec* (F): Disable the ability of a player to join any team. If the player is playing the game, they are removed and forced to spectator.
+ * *!pause/!unpause* (S): Freeze a player where they are currently positioned. The freezed player cannot take any damage, give any damage, die, or move. They may rotate their view though. Works on spectators. _Note: Pause whole game feature removed due to [http://code.google.com/p/p-g-qvm/issues/detail?id=1 Bug 1]_
+ * *!buildlog* (U): Displays a list of recent builds. Running the newest version, with advanced syntax.
+ * *!revert* (U): Reverts a build action. Latest action. Uses advanced syntax.
+ * *!slap* (x): Does damage to a player, and sends them flying.
+ * *!l0* (l): Removes the admin of a level 1 admin. Used shares !l1 flag.
+ * *!switch* (X): swaps places with any other player in the game, even spectators.
+ * *!mix* (X): Mixes any other player into yourself. If both players are members of a team, you will generally get a bastard creature that cannot move, but can damage each other. If run on a spectator, it will force a spectator to look at the player (not follow, but look)
+ * *!steal* (T): Lets you steal health from another player. Does health in increments of 5.
+ * *!trade* (t): Lets you trade health with another player. They get yours and you get theirs. You cannot exceed your maximum health. Health is by number, and not percent, so if a full hp human trades with a dretch, the dretch will remain the same, but the human will only have 25 hp.
+ * *!drug* (Q): Applies a poison effect to a player, like basilisk gas.
+ * *!drop* (o): Drops a player from the server, without any log, any temporary ban, or any reason. Client sees server disconnected. Useful for ejecting laggers from server.
+ * *!cp* (Z): Center prints a message to all players. This works exactly like the cp console command, except that this does not support \n newlines.
+ * *!customgrav* (Q): Sets the gravity for ONE player. Set gravity to normal to match server gravity.
+ * *!explode* (Q): Causes a player to instantly explode, as if they blew up a grenade. Does same amount of damage as grenade, with same radius of splash. Affects structures or close players too.
+ * *!listmaps* (j): Displays a listing of ALL the maps on the server, by the name the server calls them.
+ * *!maplog* (j): Shows a list of the 5 most recently played maps.
+ * *!immunity* (b): Gives a player immunity from an IP ban. Player must have GUID and be registered with the server. Does nothing against GUID bans. Uses same flag as !ban.
+ * *!suspendban* (b): Suspends a ban in !showbans for up to 14 days.
+ 
+=Other Features=
+ * Newline for console cp. Use \n to insert line breaks in
+ * Extend votes, controlled by cvars beginning with 'g_extend'
+ * Buy anything, allows you to buy buildings and alien classes. 'g_buyAll'
+ * Multiple weapon slots allow players to hold more than one weapon. 'g_multipleWeapons'
+ * Control over poll votes. 'g_pollVotes'
+ * Faster, more powerful granger spit. Does same damage as blaster, at same repeat rate
+ * Reasons for Mute and Kick votes are required
+ * Search for !showbans, let you look for a name or IP
+ * Adminchat warnings. Know when a player tries to do something they shouldnt be able to, or a banned player tries to connect.
+
+There are many other features that i cant name off the top of my head, so feel free to update this page as you find them.
+
+Thank you
