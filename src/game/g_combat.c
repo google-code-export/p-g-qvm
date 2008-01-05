@@ -210,7 +210,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( meansOfDeath == MOD_SLAP )
   {
     if( self == attacker || !attacker )
-      trap_SendServerCommand( -1, va( "print \"%s^7 slapped themselves silly\n\"",
+      trap_SendServerCommand( -1, va( "print \"%s^7 slapped themself silly\n\"",
         self->client->pers.netname ) );
     else
       trap_SendServerCommand( -1,
@@ -225,7 +225,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   else if( meansOfDeath == MOD_EXPLODE )
     {
       if( self == attacker || !attacker )
-        trap_SendServerCommand( -1, va( "print \"%s^7 blew up.\n\"",
+        trap_SendServerCommand( -1, va( "print \"%s^7 blew up in a firey death.\n\"",
           self->client->pers.netname ) );
       else
         trap_SendServerCommand( -1,
