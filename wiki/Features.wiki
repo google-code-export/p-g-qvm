@@ -25,15 +25,32 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  
 =Other Features=
  * Newline for console cp. Use \n to insert line breaks in
- * Extend votes, controlled by cvars beginning with 'g_extend'
- * Buy anything, allows you to buy buildings and alien classes. 'g_buyAll'
- * Multiple weapon slots allow players to hold more than one weapon. 'g_multipleWeapons'
- * Control over poll votes. 'g_pollVotes'
+ * Extend votes, controlled by cvars beginning with `g_extend`
+ * Buy anything, allows you to buy buildings and alien classes. `g_buyAll`
+ * Multiple weapon slots allow players to hold more than one weapon. `g_multipleWeapons`
+ * Control over poll votes. `g_pollVotes`
  * Faster, more powerful granger spit. Does same damage as blaster, at same repeat rate
  * Reasons for Mute and Kick votes are required
  * Search for !showbans, let you look for a name or IP
  * Adminchat warnings. Know when a player tries to do something they shouldnt be able to, or a banned player tries to connect.
+ * Killer HP. When someone kills someone else, it tells you the killer's remaining HP. Cvar controlled, `g_killerHP`
+ * Radioactive turrets feature. Does damage to camping humans. Controlled by cvars beginning with `g_radiation'
 
+=Cvars=
+ * `g_killerHP`: Shows a victim how much health their killer had. *(Boolean)*
+ * `g_pollVotes`: Control if poll votes are enabled or disabled. *(Boolean)*
+ * `g_extendVotePercent`: Percent for extend votes to pass. *(Float)*
+ * `g_extendVote`: Controls if extend votes are enabled. *(Boolean)*
+ * `g_extendVotesPercent`: Controls the percent extend votes must have to pass. *(Float)*
+ * `g_extendVotesTime`: Controls the amount of time extend votes push the time limit back by. *(Float)*
+ * `g_extendVotesCount`: Controls how many extend votes may be called and passed during a game. *(Float)*
+ * `g_buyAll`: Allows the purchase of any item while on the human team. *(Boolean)*
+ * `g_multipleWeapons`: Allows humans to carry more than one main weapon. *(Boolean)*
+ * `g_radiationDamage`: Amount of damage given by radiation. *(Float)*
+ * `g_radiationTime`: The amount of time spent camping near turrets to engage irradiation. *(Float)*
+ * `g_radiationCredits`: Amount of credits a player must have to be damaged. *(Float)*
+ * `g_radiationCreditsCount`: Way the game counts credits. 0 for only current equipment, 1 for players account, 2 for both account and current equipment. *(Bitmask)*
+ 
 There are many other features that i cant name off the top of my head, so feel free to update this page as you find them.
 
 Thank you
