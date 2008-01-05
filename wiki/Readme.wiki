@@ -1,0 +1,6 @@
+#labels Featured,Info-Credits,Info-Help,Readme
+_An online copy of the readme. The real one comes in the zip with the qvm._
+
+This qvm was jointly developed for SST by Google and Paradox, with patches from many different people, mainly Lakitu7, Benmachine, Amanieu d'Antras, Rezyn, Google, and Paradox.
+
+There is an info file included in the readme. This *MUST* be included with all installations of the QVM. Place it in the info directory where your admin.dat is held.
