@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary A listing of all the features of this QVM.
 #labels Featured,Help
 The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exhausting to hunt down and find each feature. Here is a list of all the features.
 
