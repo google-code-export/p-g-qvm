@@ -2387,20 +2387,19 @@ void G_RunFrame( int levelTime )
   // if we are waiting for the level to restart, do nothing
   if( level.restarted )
     return;
-    
-  
-  if( level.paused ) 
+
+  if( level.paused )
   {
-    level.pausedTime = levelTime - level.time;
-    if( ( level.pausedTime % 3000 ) == 0) 
-      trap_SendServerCommand( -1, "cp \"The game has been paused. Please wait.\"" );
-    
-   for(i=0;i<level.maxclients;i++)
-   {
-     level.clients[ i ].ps.commandTime = levelTime;
-   }
-	
-   return;
+    if( ( levelTime % 6000 ) == 0)
+      trap_SendServerCommand( -1, "cp \"^3Game is paused.\"" );
+
+    level.startTime += levelTime - level.time;
+    trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ) );
+
+    if( levelTime - level.pauseTime > 3 * 60000 )
+    {
+      trap_SendConsoleCommand( EXEC_APPEND, "!unpause" );
+    }
   }
 
   level.framenum++;
@@ -2545,8 +2544,6 @@ void G_RunFrame( int levelTime )
       G_Printf( "%4i: %s\n", i, g_entities[ i ].classname );
 
     trap_Cvar_Set( "g_listEntity", "0" );
-  
-  level.pausedTime=0;
   }
 }
 

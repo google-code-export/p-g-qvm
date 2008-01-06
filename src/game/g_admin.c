@@ -245,12 +245,14 @@ g_admin_cmd_t g_admin_cmds[ ] =
      },
      
     {"pause", G_admin_pause, "S",
-      "prevent a player from interacting with the game.",
-      "(^5name|slot^7)"
+      "prevent a player from interacting with the game."
+      "  * will pause all players, using no argument will pause game clock",
+      "(^5name|slot|*^7)"
     },
     {"unpause", G_admin_pause, "S",
-      "allow a player to interact with the game",
-      "(^5name|slot^7)"
+      "allow a player to interact with the game."
+      "  * will unpause all players, using no argument will unpause game clock",
+      "(^5name|slot|*^7)"
      },
      
     {"buildlog", G_admin_buildlog, "U",
@@ -1009,11 +1011,12 @@ static int admin_listadmins( gentity_t *ent, int start, char *search, int minlev
         break;
       }
     }
-    ADMBP( va( "%4i %4i %s^7 (*%s) %s^7\n",
+    ADMBP( va( "%4i %4i %s^7 (*%s) ^1%1s ^7%s^7\n",
       i,
       l,
       lname,
       guid_stub,
+      ( G_admin_permission( &g_entities[ i ], ADMF_BANIMMUNITY ) ) ? "I" : "",
       vic->client->pers.netname ) );
     drawn++;
   }
@@ -2793,6 +2796,12 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
       Q_strncpyz( immune, "I", sizeof( immune ) );
     }
 
+    if( p->pers.paused )
+    {
+      // use immunity slot for paused player status
+      Q_strncpyz( immune, "L", sizeof( immune ) );
+    }
+
     l = 0;
     G_SanitiseName( p->pers.netname, n2 );
     n[ 0 ] = '\0';
@@ -3860,6 +3869,12 @@ qboolean G_admin_putmespec( gentity_t *ent, int skiparg )
 	ADMP( "!specme: sorry, but console isn't allowed on the spectators team\n");
 	return qfalse;
   }
+
+  if( level.paused )
+  {
+    ADMP("!specme: disabled when game is paused\n");
+    return qfalse;
+  }
   
   if(ent->client->pers.teamSelection == PTE_NONE)
     return qfalse;
@@ -4092,31 +4107,95 @@ AP( va( "print \"^3!unforcespec: ^7%s^7 has allowed joining of teams for ^7%s\n\
 
 }
 
+static qboolean G_admin_global_pause( gentity_t *ent, int skiparg )
+{
+  if( level.paused )
+  {
+    level.pauseTime = level.time;
+    ADMP( "^3!pause: ^7Game is already paused, unpause timer reset\n" );
+    return qfalse;
+  }
+
+  level.paused = qtrue;
+  level.pauseTime = level.time;
+
+  level.pause_speed = g_speed.value;
+  level.pause_gravity = g_gravity.value;
+  level.pause_knockback = g_knockback.value;
+  level.pause_ff = g_friendlyFire.integer;
+  level.pause_ffb = g_friendlyBuildableFire.integer;
+
+  g_speed.value = 0;
+  g_gravity.value = 0;
+  g_knockback.value = 0;
+  g_friendlyFire.integer = 0;
+  g_friendlyBuildableFire.integer = 0;
+
+  CP( "cp \"^1Game is PAUSED\"" );
+  AP( va( "print \"^3!pause: ^7The game has been paused by %s\n\"",
+    ( ent ) ? ent->client->pers.netname : "console" ) );
+
+  return qtrue;
+}
+
+static qboolean G_admin_global_unpause( gentity_t *ent, int skiparg )
+{
+  if( !level.paused )
+  {
+    ADMP( "^3!unpause: ^7Game is not paused\n" );
+    return qfalse;
+  }
+
+  level.paused = qfalse;
+
+  g_speed.value = level.pause_speed;
+  g_gravity.value = level.pause_gravity;
+  g_knockback.value = level.pause_knockback;
+  g_friendlyFire.integer = level.pause_ff;
+  g_friendlyBuildableFire.integer = level.pause_ffb;
+
+  CP( "cp \"^2Game is RESUMED\"" );
+  AP( va( "print \"^3!unpause: ^7The game has been resumed by %s\n\"",
+    ( ent ) ? ent->client->pers.netname : "console" ) );
+
+  return qtrue;
+}
+
 qboolean G_admin_pause( gentity_t *ent, int skiparg )
 { //this is all very similar to denybuild, 
   //it performs an essentially identical function
   int i, j = 0, pids[ MAX_CLIENTS + 1 ];
   char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   char command[ MAX_ADMIN_CMD_LEN ], *cmd;
-  int minargc;
   qboolean targeted = qfalse;
   //targeted is set to ensure we don't get spam when pausing everybody
   gentity_t *vic;
-
-  minargc = 2 + skiparg;
-  
-  if( G_SayArgc() < minargc )
-  {
-  //Removed game-wide pause, and made it echo an error message, with instructions.
-  	ADMP( va( "^3!pause: ^7usage: ^3!pause ^7(^5name|slot^7)\n" ) );
-    return qfalse;
-  }
 
   G_SayArgv( skiparg, command, sizeof( command ) );
   cmd = command;
   if( cmd && *cmd == '!' )
     cmd++;
-  if( G_SayArgc() == 1 + skiparg )
+
+  if( G_SayArgc() < 2 + skiparg )
+  {
+    // global pause
+    if( !Q_stricmp( cmd, "pause" ) )
+    {
+      return G_admin_global_pause( ent, skiparg );
+    }
+    else
+    {
+      return G_admin_global_unpause( ent, skiparg );
+    }
+  }
+  if( G_SayArgc() != 2 + skiparg )
+  {
+    ADMP( va( "^3!pause: ^7usage: ^7(^5name|slot|*^7)\n", cmd, cmd ) );
+    return qfalse;
+  }
+
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+  if( !Q_stricmp( name, "*" ) )
   {
     for( i = 0; i < MAX_CLIENTS; i++ )
     {
@@ -4130,9 +4209,8 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
     }
     pids[ j ] = -1;
   }
-  else if( G_SayArgc() == 2 + skiparg )
+  else
   {
-    G_SayArgv( 1 + skiparg, name, sizeof( name ) );
     if( G_ClientNumbersFromString( name, pids ) != 1 )
     {
       G_MatchOnePlayer( pids, err, sizeof( err ) );
@@ -4141,11 +4219,7 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
     }
     targeted = qtrue;
   }
-  else if( G_SayArgc() > 2 + skiparg )
-  {
-    ADMP( va( "^3!pause: ^7usage: ^7(^5name|slot^7)\n", cmd, cmd ) );
-    return qfalse;
-  }
+
   for( i = 0; pids[ i ] >= 0; i++ )
   {
     vic = &g_entities[ pids[ i ] ];

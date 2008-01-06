@@ -4094,7 +4094,15 @@ void ClientCommand( int clientNum )
   // do tests here to reduce the amount of repeated code
 
   if( !( cmds[ i ].cmdFlags & CMD_INTERMISSION ) && ( level.intermissiontime || level.paused ) )
+  {
+    if ( level.paused &&
+         cmds[ i ].cmdHandler == Cmd_Team_f )
+    {
+      trap_SendServerCommand( clientNum,
+        "print \"Teams are locked when the game is paused\n\"" );
+    }
     return;
+  }
 
   if( cmds[ i ].cmdFlags & CMD_CHEAT && !g_cheats.integer )
   {
