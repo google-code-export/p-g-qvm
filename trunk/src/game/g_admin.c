@@ -4108,7 +4108,7 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
   if( G_SayArgc() < minargc )
   {
   //Removed game-wide pause, and made it echo an error message, with instructions.
-  	ADMP( va( "^3!%s: ^7usage: ^3!%s ^7(^5name|slot^7)\n", cmd, cmd ) );
+  	ADMP( va( "^3!pause: ^7usage: ^3!pause ^7(^5name|slot^7)\n" ) );
     return qfalse;
   }
 
