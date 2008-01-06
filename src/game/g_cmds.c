@@ -883,7 +883,13 @@ void Cmd_Team_f( gentity_t *ent )
   }
   else if( !Q_stricmp( s, "auto" ) )
   {
-    if( level.humanTeamLocked && level.alienTeamLocked )
+   if ( ent->client->pers.specd )
+    {
+      trap_SendServerCommand( ent-g_entities, va( "print \"you cannot join teams\n\"" ) );
+      return; 
+    }
+    
+    else if( level.humanTeamLocked && level.alienTeamLocked )
       team = PTE_NONE;
     else if( humans > aliens )
       team = PTE_ALIENS;
@@ -4094,15 +4100,7 @@ void ClientCommand( int clientNum )
   // do tests here to reduce the amount of repeated code
 
   if( !( cmds[ i ].cmdFlags & CMD_INTERMISSION ) && ( level.intermissiontime || level.paused ) )
-  {
-    if ( level.paused &&
-         cmds[ i ].cmdHandler == Cmd_Team_f )
-    {
-      trap_SendServerCommand( clientNum,
-        "print \"Teams are locked when the game is paused\n\"" );
-    }
     return;
-  }
 
   if( cmds[ i ].cmdFlags & CMD_CHEAT && !g_cheats.integer )
   {
