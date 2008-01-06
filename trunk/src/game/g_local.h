@@ -714,8 +714,14 @@ typedef struct
   qboolean          uncondHumanWin;
   qboolean          alienTeamLocked;
   qboolean          humanTeamLocked;
-  qboolean paused;
-  int pausedTime;
+
+  qboolean          paused;
+  int               pauseTime;
+  float             pause_speed;
+  float             pause_gravity;
+  float             pause_knockback;
+  int               pause_ff;
+  int               pause_ffb;
 
   int unlaggedIndex;
   int unlaggedTimes[ MAX_UNLAGGED_MARKERS ];

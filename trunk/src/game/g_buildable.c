@@ -1079,6 +1079,7 @@ void AAcidTube_Think( gentity_t *self )
         continue;
 
       if( enemy->client && enemy->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS &&
+          !level.paused &&
 	  !enemy->client->pers.paused )
       {
         self->timestamp = level.time;
@@ -1154,6 +1155,7 @@ void AHive_Think( gentity_t *self )
         continue;
 
       if( enemy->client && enemy->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS &&
+          !level.paused &&
 	  !enemy->client->pers.paused )
       {
         self->active = qtrue;
@@ -1751,6 +1753,7 @@ void HReactor_Think( gentity_t *self )
 	continue;
 
       if( enemy->client && !enemy->client->pers.paused &&
+          !level.paused &&
 	  enemy->client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS )
       {
         self->timestamp = level.time;
@@ -2085,6 +2088,9 @@ qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target, qboolean ign
   if( target->client->pers.paused )
     return qfalse;
 
+  if( level.paused )
+    return qfalse;
+
   if( target->health <= 0 )
     return qfalse;
 
@@ -2283,6 +2289,7 @@ void HTeslaGen_Think( gentity_t *self )
 
       if( enemy->client && enemy->client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS &&
           enemy->health > 0 && !enemy->client->pers.paused &&
+          !level.paused &&
           Distance( enemy->s.pos.trBase, self->s.pos.trBase ) <= TESLAGEN_RANGE )
       {
         VectorSubtract( enemy->s.pos.trBase, self->s.pos.trBase, dir );
@@ -2601,7 +2608,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
   //pack health, power and dcc
 
   //toggle spawned flag for buildables
-  if( !ent->spawned && ent->health > 0 && !level.pausedTime )
+  if( !ent->spawned && ent->health > 0 )
   {
     if( ent->buildTime + bTime < level.time )
       ent->spawned = qtrue;

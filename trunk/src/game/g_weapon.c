@@ -1537,6 +1537,9 @@ void FireWeapon( gentity_t *ent )
     VectorCopy( ent->s.pos.trBase, muzzle );
   }
 
+  // paused
+  if ( level.paused ) return;
+
   // fire the specific weapon
   switch( ent->s.weapon )
   {

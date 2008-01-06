@@ -1247,6 +1247,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     // check for godmode
     if ( targ->flags & FL_GODMODE && !g_devmapNoGod.integer)
       return;
+
+    // paused
+    if ( level.paused )
+      return;
     
     if(targ->s.eType == ET_BUILDABLE && g_cheats.integer && g_devmapNoStructDmg.integer)
 	    return;
