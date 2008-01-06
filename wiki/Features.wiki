@@ -1,5 +1,5 @@
+#summary One-sentence summary of this page.
 #labels Featured,Help
-# summary An overview of all the features included in this QVM
 The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exhausting to hunt down and find each feature. Here is a list of all the features.
 
 =Admin Commands=
