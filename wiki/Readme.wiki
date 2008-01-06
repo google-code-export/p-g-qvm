@@ -1,5 +1,5 @@
+#summary A copy of the readme that comes in the ZIP file.
 #labels Featured,Info-Credits,Info-Help,Readme
-_An online copy of the readme. The real one comes in the zip with the qvm._
 
 This qvm was jointly developed for SST by Google and Paradox, with patches from many different people, mainly Lakitu7, Benmachine, Amanieu d'Antras, Rezyn, Google, and Paradox.
 
