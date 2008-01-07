@@ -1,0 +1,26 @@
+#summary A list of all patches and code implemented, and links.
+#labels Info-Help
+
+=Rezyn=
+ * [http://mysite.verizon.net/johne/patches/tremlak501_checkban_subnet_fix.patch Subnet check]
+ * [http://p-g-qvm.googlecode.com/files/tremlak501_GUID_verify.patch Guid Verification]
+ * [http://mysite.verizon.net/johne/patches/tremlak501_banimmunity_v2.patch Ban Immunity]
+  * [http://mysite.verizon.net/johne/patches/tremlak501_banimmunity_listfix.patch List fix]
+ * [http://mysite.verizon.net/johne/patches/tremlak501_extend_vote.patch Flexible admin votes]
+ * [http://mysite.verizon.net/johne/patches/tremlak501_l0_v2.patch !l0 feature]
+ * [http://p-g-qvm.googlecode.com/files/tremlak501_listmaps_maplog.patch !listmaps and !maplog]
+ * [http://mysite.verizon.net/johne/patches/tremlak501_noregister_newbies.patch No newbie register]
+ * [http://mysite.verizon.net/johne/patches/tremlak501_pause_v2.patch !pause]
+ * [http://p-g-qvm.googlecode.com/files/tremlak501_showbans_search.patch !showbans search]
+ * [http://mysite.verizon.net/johne/patches/tremlak501_suspendban.patch !suspendban]
+
+=Benmachine=
+ * [http://www.bandstand.org.uk/~benm/coding/done.php#buildlog-revert !buildlog]
+ * [http://www.mercenariesguild.net/patches/?getfile=263 console cp newlines]
+ 
+=Amanieu d'Antras=
+ * [http://www.mercenariesguild.net/patches/?getfile=363 Admin warnings]
+ * [http://www.mercenariesguild.net/patches/?getfile=282 Radioactive turrets]
+
+=Lakitu7=
+ * [http://www.mercenariesguild.net/patches/?getfile=252 Lakitu7's 5.01 featureset]
