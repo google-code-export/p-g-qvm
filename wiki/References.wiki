@@ -13,6 +13,12 @@
  * [http://mysite.verizon.net/johne/patches/tremlak501_pause_v2.patch !pause]
  * [http://p-g-qvm.googlecode.com/files/tremlak501_showbans_search.patch !showbans search]
  * [http://mysite.verizon.net/johne/patches/tremlak501_suspendban.patch !suspendban]
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=11 !maplog results]
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=6] Decon protected warnings now show structure and are flood limited]
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=9 Duplicate ban warnings]
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=12 Banned player connect admin warning flood protected]
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=14 !denybuild granger fix]
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=15 Mute prevents taunts]
 
 =Benmachine=
  * [http://www.bandstand.org.uk/~benm/coding/done.php#buildlog-revert !buildlog]
@@ -24,3 +30,9 @@
 
 =Lakitu7=
  * [http://www.mercenariesguild.net/patches/?getfile=252 Lakitu7's 5.01 featureset]
+ * [http://www.mercenariesguild.net/patches/?do=details&task_id=122 Team vote updates]
+ * [http://www.mercenariesguild.net/patches/?do=details&task_id=122 Vote times (yes its by Rocinate, but i couldnt find a link)]
+ 
+=Google=
+ * Large number of commands unique to this qvm
+ * [http://code.google.com/p/p-g-qvm/issues/detail?id=13 Ban notice patch]

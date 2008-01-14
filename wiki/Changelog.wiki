@@ -1,0 +1,13 @@
+=1.4=
+ * Fixed !help comamnd listing, now alpahbetical
+ * Added !maplog results
+ * Added deconstruct fix, now shows structure name and is flood limited
+ * Added duplicate ban warnings
+ * Fixed tyrant costing 4 evos bug
+ * Fixed admin ban warning flood bug
+ * Added ban notices, appends value of cvar to all bans, cvar being g_banNotice.
+ * Fixed denybuild glitch with granger death
+ * Players cannot taunt when muted
+ * Added teamkill damage done
+ * Added Lakitu7's new teamvotes
+ * Added vote timers
