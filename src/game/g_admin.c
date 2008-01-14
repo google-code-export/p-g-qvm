@@ -67,10 +67,26 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "specified",
       "[^3name|slot#|IP^7] (^5time^7) (^5reason^7)"
     },
-
+	
+	{"buildlog", G_admin_buildlog, "U",
+      "display a list of recent builds and deconstructs, optionally specifying"
+      " a team",
+      "(^5xnum^7) (^5#skip^7) (^5-name|num^7) (^5a|h^7)",
+    },
+    
     {"cancelvote", G_admin_cancelvote, "c",
       "cancel a vote taking place",
       ""
+    },
+    
+    {"cp", G_admin_cp, "Z",
+      "display a message to all users",
+      "[^3message^7]"
+    },
+    
+    {"customgrav", G_admin_customgrav, "Q",
+      "set the gravity for a specific player. Normal gives normal server gravity",
+      "[^3name|slot#^7] [^3#/normal^7]"
     },
 
     {"denybuild", G_admin_denybuild, "d",
@@ -88,9 +104,34 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3mapname^7] (^5layout^7)"
     },
     
+    {"drop", G_admin_drop, "o",
+      "kick a client from the server without log",
+      "[^3name|slot#^7]"
+    },
+
+    {"drug", G_admin_drug, "Q",
+      "induce a gas like effect on a player",
+      "[^3name|slot#^7]"
+    },
+    
+    {"explode", G_admin_explode, "Q",
+      "cause a player to explode. Caution: damages surrounding players and structures.",
+      "[^3name|slot#^7]"
+    },
+	
+	{"forcespec", G_admin_forcespec, "F",
+      "disable joining of teams for a player",
+      "[^3name|slot#^7]"
+    },
+    
     {"help", G_admin_help, "h",
       "display commands available to you or help on a specific command",
       "(^5command^7)"
+    },
+	
+	    {"immunity", G_admin_immunity, "b",
+      "give a player ban immunity",
+      "[^3+|-^7](^5slot#^7)"
     },
 
     {"info", G_admin_info, "H",
@@ -101,6 +142,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"kick", G_admin_kick, "k",
       "kick a player with an optional reason",
       "(^5reason^7)"
+    },
+	
+	{"L0", G_admin_L0, "l",
+      "Sets a level 1 to level 0",
+      "[^3name|slot#^7]"
     },
     
     {"L1", G_admin_L1, "l",
@@ -122,6 +168,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "display a list of all available layouts for a map",
       "(^5mapname^7)"
     },
+	
+	{"listmaps", G_admin_listmaps, "j",
+      "display a list of available maps on the server",
+      ""
+    },
 
     {"listplayers", G_admin_listplayers, "i",
       "display a list of players, their client numbers and their levels",
@@ -136,6 +187,16 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"map", G_admin_map, "M",
       "load a map (and optionally force layout)",
       "[^3mapname^7] (^5layout^7)"
+    },
+	
+	{"maplog", G_admin_maplog, "j",
+      "show recently played maps",
+      ""
+    },
+	
+	{"mix", G_admin_mix, "X",
+      "mix another player into yourself",
+      "[^3name|slot#^7]"
     },
 
     {"mute", G_admin_mute, "m",
@@ -156,6 +217,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"passvote", G_admin_passvote, "V",
       "pass a vote currently taking place",
       ""
+    },
+	
+	{"pause", G_admin_pause, "S",
+      "prevent a player from interacting with the game."
+      "  * will pause all players, using no argument will pause game clock",
+      "(^5name|slot|*^7)"
     },
 
     {"putteam", G_admin_putteam, "p",
@@ -182,6 +249,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "restart the current map (optionally using named layout or keeping/switching teams)",
       "(^5layout^7) (^5keepteams|switchteams|keepteamslock|switchteamslock^7)"
     },
+	
+	{"revert", G_admin_revert, "U",
+      "revert one or more buildlog events, optionally of only one team",
+      "(^5xnum^7) (^5#ID^7) (^5-name|num^7) (^5a|h^7)"
+    },
 
     {"setlevel", G_admin_setlevel, "s",
       "sets the admin level of a player",
@@ -191,6 +263,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"showbans", G_admin_showbans, "B",
       "display a (partial) list of active bans.",
       "(^5start at ban#^7|name|IP)"
+    },
+	
+	{"slap", G_admin_slap, "x",
+      "Do damage to a player, and send them flying",
+      "[^3name|slot^7] (damage)"
     },
 
     {"spec999", G_admin_spec999, "P",
@@ -203,10 +280,32 @@ g_admin_cmd_t g_admin_cmds[ ] =
         "moves you to the spectators",
 	""
     },
+	
+	{"steal", G_admin_steal, "T",
+      "steal health from another player",
+      "[^3name|slot#^7]"
+    },
+	
+	{"suspendban", G_admin_suspendban, "b",
+      "suspend a ban for a length of time. time is specified as numbers "
+      "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
+      " or seconds if no units are specified",
+      "[^5ban #^7] [^5length^7]"
+    },
+	
+	{"switch", G_admin_switch, "X",
+      "switch places with somenone",
+      "[^3name|slot#^7]"
+    },
 
     {"time", G_admin_time, "C",
       "show the current local server time",
       ""},
+	  
+	{"trade", G_admin_trade, "t",
+      "trade health with another player",
+      "[^3name|slot#^7]"
+    },
 
     {"unban", G_admin_unban, "b",
       "unbans a player specified by the slot as seen in showbans",
@@ -222,126 +321,27 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "revoke designated builder privileges",
       "[^3name|slot#^7]"
     },
+	
+	{"unforcespec", G_admin_unforcespec, "F",
+      "enable joining of teams for a player",
+      "[^3name|slot#^7]"
+     },
     
     {"unmute", G_admin_mute, "m",
       "unmute a muted player",
       "[^3name|slot#^7]"
     },
+	
+	{"unpause", G_admin_pause, "S",
+      "allow a player to interact with the game."
+      "  * will unpause all players, using no argument will unpause game clock",
+      "(^5name|slot|*^7)"
+     }, 
 
     {
      "warn", G_admin_warn, "w",
       "Warn a player to cease or face admin intervention",
       "[^3name|slot#^7] [reason]"
-    },
-    //added commands
-     {"forcespec", G_admin_forcespec, "F",
-      "disable joining of teams for a player",
-      "[^3name|slot#^7]"
-    },
-
-    {"unforcespec", G_admin_unforcespec, "F",
-      "enable joining of teams for a player",
-      "[^3name|slot#^7]"
-     },
-     
-    {"pause", G_admin_pause, "S",
-      "prevent a player from interacting with the game."
-      "  * will pause all players, using no argument will pause game clock",
-      "(^5name|slot|*^7)"
-    },
-    {"unpause", G_admin_pause, "S",
-      "allow a player to interact with the game."
-      "  * will unpause all players, using no argument will unpause game clock",
-      "(^5name|slot|*^7)"
-     },
-     
-    {"buildlog", G_admin_buildlog, "U",
-      "display a list of recent builds and deconstructs, optionally specifying"
-      " a team",
-      "(^5xnum^7) (^5#skip^7) (^5-name|num^7) (^5a|h^7)",
-    },
-    
-    {"revert", G_admin_revert, "U",
-      "revert one or more buildlog events, optionally of only one team",
-      "(^5xnum^7) (^5#ID^7) (^5-name|num^7) (^5a|h^7)"
-    },
-    
-    {"slap", G_admin_slap, "x",
-      "Do damage to a player, and send them flying",
-      "[^3name|slot^7] (damage)"
-    },
-    
-    
-    {"L0", G_admin_L0, "l",
-      "Sets a level 1 to level 0",
-      "[^3name|slot#^7]"
-    },
-    //the long, long ass list of my commands
-    {"switch", G_admin_switch, "X",
-      "switch places with somenone",
-      "[^3name|slot#^7]"
-    },
-    
-    {"mix", G_admin_mix, "X",
-      "mix another player into yourself",
-      "[^3name|slot#^7]"
-    },
-    
-    {"steal", G_admin_steal, "T",
-      "steal health from another player",
-      "[^3name|slot#^7]"
-    },
-
-    {"trade", G_admin_trade, "t",
-      "trade health with another player",
-      "[^3name|slot#^7]"
-    },
-
-    {"drug", G_admin_drug, "Q",
-      "induce a gas like effect on a player",
-      "[^3name|slot#^7]"
-    },
-    
-    {"drop", G_admin_drop, "o",
-      "kick a client from the server without log",
-      "[^3name|slot#^7]"
-    },
-    
-    {"cp", G_admin_cp, "Z",
-      "display a message to all users",
-      "[^3message^7]"
-    },
-    
-    {"customgrav", G_admin_customgrav, "Q",
-      "set the gravity for a specific player. Normal gives normal server gravity",
-      "[^3name|slot#^7] [^3#/normal^7]"
-    },
-    
-    {"explode", G_admin_explode, "Q",
-      "cause a player to explode. Caution: damages surrounding players and structures.",
-      "[^3name|slot#^7]"
-    },
-    
-    {"listmaps", G_admin_listmaps, "j",
-      "display a list of available maps on the server",
-      ""
-    },
-    
-    {"maplog", G_admin_maplog, "j",
-      "show recently played maps",
-      ""
-    },
-    
-    {"immunity", G_admin_immunity, "b",
-      "give a player ban immunity",
-      "[^3+|-^7](^5slot#^7)"
-    },
-    
-    {"suspendban", G_admin_suspendban, "b",
-      "suspend a ban for a length of time. time is specified as numbers "
-      "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
-      " or seconds if no units are specified",
-      "[^5ban #^7] [^5length^7]"
     },
 
 
@@ -1108,81 +1108,92 @@ void G_admin_duration( int secs, char *duration, int dursize )
 
 qboolean G_admin_ban_check( char *userinfo, char *reason, int rlen )
 {
-  char *guid, *ip;
-  int i;
+  static char lastConnectIP[ 16 ] = {""};
+  static int lastConnectTime = 0;
+  char guid[ 33 ];
+  char ip[ 16 ];
+  char *value;
   qtime_t qt;
   int t;
+  int i;
  
   *reason = '\0'; 
-  t  = trap_RealTime( &qt ); 
   if( !*userinfo )
     return qfalse;
-  ip = Info_ValueForKey( userinfo, "ip" );
+
+  value = Info_ValueForKey( userinfo, "ip" );
+  Q_strncpyz( ip, value, sizeof( ip ) );
+  // strip port
+  value = strchr( ip, ':' );
+  if ( value )
+    *value = '\0';
   if( !*ip )
     return qfalse;
-  guid = Info_ValueForKey( userinfo, "cl_guid" );
+
+  value = Info_ValueForKey( userinfo, "cl_guid" );
+  Q_strncpyz( guid, value, sizeof( guid ) );
+
+  t  = trap_RealTime( &qt ); 
   for( i = 0; i < MAX_ADMIN_BANS && g_admin_bans[ i ]; i++ )
   {
     // 0 is for perm ban
     if( g_admin_bans[ i ]->expires != 0 &&
-         ( g_admin_bans[ i ]->expires - t ) < 1 )
+      ( g_admin_bans[ i ]->expires - t ) < 1 )
       continue;
-      if( g_admin_bans[ i ]->suspend >= t )
+    if( g_admin_bans[ i ]->suspend >= t )
       continue;
     if( strstr( ip, g_admin_bans[ i ]->ip ) == ip )
     {
       char duration[ 32 ];
+      qboolean immune = qfalse;
       
-
-      /* ban immunity check */
-      if (*guid)
+      // ban immunity
+      if( *guid )
       {
         int j;
-        char *flags;
 
         for( j = 0; j < MAX_ADMIN_ADMINS && g_admin_admins[ j ]; j++ )
         {
-          if( !Q_stricmp( guid, g_admin_admins[ j ]->guid ) )
+          if( !Q_stricmp( guid, g_admin_admins[ j ]->guid ) &&
+            strchr( g_admin_admins[ j ]->flags, ADMF_BANIMMUNITY ) )
           {
-            flags = g_admin_admins[ j ]->flags;
-            while( *flags )
-            {
-              if( *flags == ADMF_BANIMMUNITY )
-              {
-                G_Printf("Player with ban immunity connected from IP %s\n", ip);
-                return qfalse;
-              }
-              flags++;
-            }
+            immune = qtrue;
+            break;
           }
         }
       }
+      if( !immune )
+      {
+        G_admin_duration( ( g_admin_bans[ i ]->expires - t ),
+          duration, sizeof( duration ) );
 
-      
-      G_admin_duration( ( g_admin_bans[ i ]->expires - t ),
-        duration, sizeof( duration ) );
-      Com_sprintf(
-        reason,
-        rlen,
-        "Banned player %s^7 (%s) tried to connnect (ban #%i by %s^7  expires %s reason: %s^7 )",
-        Info_ValueForKey( userinfo, "name" ),
-	g_admin_bans[ i ]->name,
-        i+1,
-        g_admin_bans[ i ]->banner,
-        duration,
-        g_admin_bans[ i ]->reason
-      );
-      G_AdminsPrintf("%s\n",reason);
-      Com_sprintf(
-        reason,
-        rlen,
-        "You have been banned by %s^7 reason: %s^7 expires: %s",
-        g_admin_bans[ i ]->banner,
-        g_admin_bans[ i ]->reason,
-        duration
-      );
-      G_LogPrintf("Banned player tried to connect from IP %s\n", ip);
-      return qtrue;
+        if( t - lastConnectTime >= 10 ||
+          Q_stricmp( lastConnectIP, ip ) != 0 )
+        {
+          lastConnectTime = t;
+          Q_strncpyz( lastConnectIP, ip, sizeof( lastConnectIP ) );
+
+          G_AdminsPrintf(
+            "Banned player %s^7 (%s^7) tried to connect (ban #%i by %s^7 expires %s reason: %s^7 )\n",
+            Info_ValueForKey( userinfo, "name" ),
+            g_admin_bans[ i ]->name,
+            i+1,
+            g_admin_bans[ i ]->banner,
+            duration,
+            g_admin_bans[ i ]->reason );
+        }
+
+        Com_sprintf(
+          reason,
+          rlen,
+          "You have been banned by %s^7 reason: %s^7 expires: %s",
+          g_admin_bans[ i ]->banner,
+          g_admin_bans[ i ]->reason,
+          duration );
+        G_LogPrintf("Banned player tried to connect from IP %s\n", ip);
+
+        return qtrue;
+      }
     }
     if( *guid && !Q_stricmp( g_admin_bans[ i ]->guid, guid ) )
     {
@@ -1848,6 +1859,48 @@ qboolean G_admin_setlevel( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
+static void admin_check_duplicate_ban( int ban )
+{
+  qtime_t qt;
+  int t;
+  int i, j;
+  qboolean immune;
+
+  if ( ban < 0 || ban >= MAX_ADMIN_BANS || !g_admin_bans[ ban ] )
+    return;
+
+  t = trap_RealTime( &qt );
+  for( i = 0; i < MAX_ADMIN_BANS && g_admin_bans[ i ]; i++ )
+  {
+    if( g_admin_bans[ i ]->expires != 0
+      && ( g_admin_bans[ i ]->expires - t ) < 1 )
+    {
+      continue;
+    }
+
+    if( i != ban &&
+      strstr( g_admin_bans[ ban ]->ip, g_admin_bans[ i ]->ip ) == g_admin_bans[ ban ]->ip )
+    {
+      immune = qfalse;
+
+      for( j = 0; j < MAX_ADMIN_ADMINS && g_admin_admins[ j ]; j++ )
+      {
+        if( !Q_stricmp( g_admin_bans[ ban ]->guid, g_admin_admins[ j ]->guid ) &&
+          strchr( g_admin_admins[ j ]->flags, ADMF_BANIMMUNITY ) != NULL )
+        {
+          immune = qtrue;
+        }
+      }
+
+      G_AdminsPrintf( "ban #%d duplicates %sban #%d%s.\n",
+        ban + 1,
+        ( g_admin_bans[ i ]->suspend > t ) ? "SUSPENDED " : "",
+        i + 1,
+        ( immune ) ? ", player has immunity" : "" );
+    }
+  }
+}
+
 static qboolean admin_create_ban( gentity_t *ent,
   char *netname,
   char *guid,
@@ -1911,6 +1964,9 @@ static qboolean admin_create_ban( gentity_t *ent,
     return qfalse;
   }
   g_admin_bans[ i ] = b;
+
+  admin_check_duplicate_ban( i );
+
   return qtrue;
 }
 
@@ -2012,7 +2068,10 @@ qboolean G_admin_ban( gentity_t *ent, int skiparg )
   char n2[ MAX_NAME_LENGTH ];
   char s2[ MAX_NAME_LENGTH ];
   char guid_stub[ 9 ];
-
+  char notice[51];
+  
+  trap_Cvar_VariableStringBuffer( "g_banNotice", notice, sizeof( notice ) );
+  
   if( G_admin_permission( ent, ADMF_CAN_PERM_BAN ) &&
        G_admin_permission( ent, ADMF_UNACCOUNTABLE ) )
   {
@@ -2176,10 +2235,10 @@ qboolean G_admin_ban( gentity_t *ent, int skiparg )
 
   trap_SendServerCommand( g_admin_namelog[ logmatch ]->slot,
     va( "disconnect \"You have been banned.\n"
-      "admin:\n%s^7\nduration:\n%s\nreason:\n%s\"",
+      "admin:\n%s^7\nduration:\n%s\nreason:\n%s\n%s\"",
       ( ent ) ? ent->client->pers.netname : "console",
       duration,
-      ( *reason ) ? reason : "kicked by admin" ) );
+      ( *reason ) ? reason : "kicked by admin", notice ) );
 
   trap_DropClient(  g_admin_namelog[ logmatch ]->slot,
     va( "has been banned by %s^7 duration: %s, reason: %s",
@@ -2370,6 +2429,8 @@ qboolean G_admin_map( gentity_t *ent, int skiparg )
     }
   }
 
+  G_admin_maplog_result( "M" );
+
   trap_SendConsoleCommand( EXEC_APPEND, va( "map %s", map ) );
   level.restarted = qtrue;
   AP( va( "print \"^3!map: ^7map '%s' started by %s^7 %s\n\"", map,
@@ -2552,7 +2613,8 @@ qboolean G_admin_denybuild( gentity_t *ent, int skiparg )
     }
     vic->client->pers.denyBuild = qtrue;
     vic->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
-    if( vic->client->ps.stats[ STAT_PCLASS ]== PCL_ALIEN_BUILDER0 || ent->client->ps.stats[ STAT_PCLASS ] == PCL_ALIEN_BUILDER0_UPG )
+    if( vic->client->ps.stats[ STAT_PCLASS ] == PCL_ALIEN_BUILDER0 ||
+        vic->client->ps.stats[ STAT_PCLASS ] == PCL_ALIEN_BUILDER0_UPG )
     {
       vic->client->ps.stats[ STAT_HEALTH ] = vic->health = 0;
       player_die( vic, vic, vic, 100000, MOD_SUICIDE );
@@ -3581,6 +3643,8 @@ qboolean G_admin_restart( gentity_t *ent, int skiparg )
     trap_Cvar_Set( "g_lockTeamsAtStart", "1" );
   }
 
+  G_admin_maplog_result( "R" );
+
   trap_SendConsoleCommand( EXEC_APPEND, "map_restart" );
   
   if(teampref[ 0 ])
@@ -3601,6 +3665,7 @@ qboolean G_admin_nextmap( gentity_t *ent, int skiparg )
   trap_SetConfigstring( CS_WINNER, "Evacuation" );
   LogExit( va( "nextmap was run by %s",
     ( ent ) ? ent->client->pers.netname : "console" ) );
+  G_admin_maplog_result( "N" );
   return qtrue;
 }
 
@@ -5372,6 +5437,43 @@ void G_admin_maplog_update( void )
     maplog ) );
 }
 
+void G_admin_maplog_result( char *flag )
+{
+  char maplog[ MAX_CVAR_VALUE_STRING ];
+  int t;
+
+  if( !flag )
+    return;
+
+  if( g_adminMapLog.string[ 0 ] &&
+    g_adminMapLog.string[ 1 ] == ';' )
+  {
+    // only one result allowed
+    return;
+  }
+
+  if ( level.surrenderTeam != PTE_NONE )
+  {
+    if( flag[ 0 ] == 'a' )
+    {
+      if( level.surrenderTeam == PTE_HUMANS )
+        flag = "A";
+    }
+    else if( flag[ 0 ] == 'h' )
+    {
+      if( level.surrenderTeam == PTE_ALIENS )
+        flag = "H";
+    }
+  }
+
+  t = ( level.time - level.startTime ) / 1000;
+  Q_strncpyz( maplog, g_adminMapLog.string, sizeof( maplog ) );
+  trap_Cvar_Set( "g_adminMapLog", va( "%1s;%03d:%02d;%s",
+    flag,
+    t / 60, t % 60,
+    maplog ) );
+}
+
 qboolean G_admin_maplog( gentity_t *ent, int skiparg )
 {
   char maplog[ MAX_CVAR_VALUE_STRING ];
@@ -5385,6 +5487,9 @@ qboolean G_admin_maplog( gentity_t *ent, int skiparg )
   while( *ptr != '\0' && count < MAX_ADMIN_MAPLOG_LENGTH + 1 )
   {
     char *end;
+    const char *result = NULL;
+    char *clock = NULL;
+    char *colon;
 
     end = ptr;
     while( *end != ' ' && *end != '\0' ) end++;
@@ -5394,10 +5499,75 @@ qboolean G_admin_maplog( gentity_t *ent, int skiparg )
       end++;
     }
 
-    ADMBP( va( "%s%s%s\n",
+    if( ptr[ 0 ] && ptr[ 1 ] == ';' )
+    {
+      switch( ptr[ 0 ] )
+      {
+        case 't':
+          result = "^7tie";
+          break;
+        case 'a':
+          result = "^1Alien win";
+          break;
+        case 'A':
+          result = "^1Alien win ^7/ Humans admitted defeat";
+          break;
+        case 'h':
+          result = "^4Human win";
+          break;
+        case 'H':
+          result = "^4Human win ^7/ Aliens admitted defeat";
+          break;
+        case 'd':
+          result = "^5draw vote";
+          break;
+        case 'N':
+          result = "^6admin loaded next map";
+          break;
+        case 'r':
+          result = "^2restart vote";
+          break;
+        case 'R':
+          result = "^6admin restarted map";
+          break;
+        case 'm':
+          result = "^2map vote";
+          break;
+        case 'M':
+          result = "^6admin changed map";
+          break;
+        default:
+          result = "";
+          break;
+      }
+      ptr += 2;
+      colon = strchr( ptr, ';' );
+      if ( colon )
+      {
+        clock = ptr;
+        ptr = colon + 1;
+        *colon = '\0';
+
+        // right justification with -6%s doesnt work..
+        if( clock[ 0 ] == '0' && clock[ 1 ] != ':' )
+        {
+          if( clock[ 1 ] == '0' && clock[ 2 ] != ':' )
+            clock[ 1 ] = ' ';
+          clock[ 0 ] = ' ';
+        }
+      }
+    }
+    else if( count == 0 )
+    {
+      result = "^3current map";
+      clock = "  -:--";
+    }
+
+    ADMBP( va( "%s%20s %-6s %s^7\n",
       ( count == 0 ) ? "^3" : "^7",
       ptr,
-      ( count == 0 ) ? " (current map)" : "" ) );
+      ( clock ) ? clock : "",
+      ( result ) ? result : "" ) );
 
     ptr = end;
     count++;

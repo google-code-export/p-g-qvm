@@ -203,6 +203,7 @@ qboolean G_admin_immunity( gentity_t *ent, int skiparg );
 qboolean G_admin_suspendban( gentity_t *ent, int skiparg );
 qboolean G_admin_maplog( gentity_t *ent, int skiparg );
 void G_admin_maplog_update( void );
+void G_admin_maplog_result( char *flag );
 //all of my commands WEEEEEEEEEE
 qboolean G_admin_switch( gentity_t *ent, int skiparg ); 
 qboolean G_admin_mix( gentity_t *ent, int skiparg ); 

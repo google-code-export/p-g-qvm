@@ -1634,6 +1634,11 @@ void ClientThink_real( gentity_t *ent )
     ent->client->pers.cmd.buttons |= BUTTON_GESTURE;
   }
 
+  if( ent->client->pers.muted )
+  {
+    ent->client->pers.cmd.buttons &= ~BUTTON_GESTURE;
+  }
+
   pm.ps = &client->ps;
   pm.pmext = &client->pmext;
   pm.cmd = *ucmd;
