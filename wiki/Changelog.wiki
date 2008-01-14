@@ -1,3 +1,5 @@
+#summary A list of all changes with each update.
+#labels Info-Help,Featured
 =1.4=
  * Fixed !help comamnd listing, now alpahbetical
  * Added !maplog results
