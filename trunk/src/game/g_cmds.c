@@ -1403,6 +1403,18 @@ void Cmd_CallVote_f( gentity_t *ent )
     trap_SendServerCommand( ent-g_entities, "print \"Voting not allowed here\n\"" );
     return;
   }
+  
+  if( g_voteMinTime.integer
+    && ent->client->pers.firstConnect 
+    && level.time - ent->client->pers.enterTime < g_voteMinTime.integer * 1000
+    && !G_admin_permission( ent, ADMF_NO_VOTE_LIMIT ) 
+    && (level.numPlayingClients > 0 && level.numConnectedClients>1) )
+  {
+    trap_SendServerCommand( ent-g_entities, va(
+      "print \"You must wait %d seconds after connecting before calling a vote\n\"",
+      g_voteMinTime.integer ) );
+    return;
+  }
 
   if( level.voteTime )
   {
@@ -1569,6 +1581,16 @@ void Cmd_CallVote_f( gentity_t *ent )
   }
   else if( !Q_stricmp( arg1, "map_restart" ) )
   {
+    if( g_mapvoteMaxTime.integer 
+      && level.time >= g_mapvoteMaxTime.integer * 1000 
+      && !G_admin_permission( ent, ADMF_NO_VOTE_LIMIT ) 
+      && (level.numPlayingClients > 0 && level.numConnectedClients>1) )
+    {
+       trap_SendServerCommand( ent-g_entities, va(
+         "print \"You cannot call for a restart after %d seconds\n\"",
+         g_mapvoteMaxTime.integer ) );
+       return;
+    }
     Com_sprintf( level.voteString, sizeof( level.voteString ), "%s", arg1 );
     Com_sprintf( level.voteDisplayString,
         sizeof( level.voteDisplayString ), "Restart current map" );
@@ -1576,6 +1598,17 @@ void Cmd_CallVote_f( gentity_t *ent )
   }
   else if( !Q_stricmp( arg1, "map" ) )
   {
+    if( g_mapvoteMaxTime.integer 
+      && level.time >= g_mapvoteMaxTime.integer * 1000 
+      && !G_admin_permission( ent, ADMF_NO_VOTE_LIMIT ) 
+      && (level.numPlayingClients > 0 && level.numConnectedClients>1) )
+    {
+       trap_SendServerCommand( ent-g_entities, va(
+         "print \"You cannot call for a mapchange after %d seconds\n\"",
+         g_mapvoteMaxTime.integer ) );
+       return;
+    }
+  
     if( !trap_FS_FOpenFile( va( "maps/%s.bsp", arg2 ), NULL, FS_READ ) )
     {
       trap_SendServerCommand( ent - g_entities, va( "print \"callvote: "
@@ -1705,7 +1738,24 @@ void Cmd_Vote_f( gentity_t *ent )
   char msg[ 64 ];
 
   if( !level.voteTime )
-  {
+  { 
+    if( ent->client->pers.teamSelection != PTE_NONE )
+    {
+      // If there is a teamvote going on but no global vote, forward this vote on as a teamvote
+      // (ugly hack for 1.1 cgames + noobs who can't figure out how to use any command that isn't bound by default)
+      int     cs_offset = 0;
+      if( ent->client->pers.teamSelection == PTE_ALIENS )
+        cs_offset = 1;
+    
+      if( level.teamVoteTime[ cs_offset ] )
+      {
+         if( !(ent->client->ps.eFlags & EF_TEAMVOTED ) )
+        {
+          Cmd_TeamVote_f(ent); 
+	  return;
+        }
+      }
+    }
     trap_SendServerCommand( ent-g_entities, "print \"No vote in progress\n\"" );
     return;
   }
@@ -1787,6 +1837,18 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent - g_entities,
       "print \"You are muted and cannot call teamvotes\n\"" );
+    return;
+  }
+  
+  if( g_voteMinTime.integer
+    && ent->client->pers.firstConnect 
+    && level.time - ent->client->pers.enterTime < g_voteMinTime.integer * 1000
+    && !G_admin_permission( ent, ADMF_NO_VOTE_LIMIT ) 
+    && (level.numPlayingClients > 0 && level.numConnectedClients>1) )
+  {
+    trap_SendServerCommand( ent-g_entities, va(
+      "print \"You must wait %d seconds after connecting before calling a vote\n\"",
+      g_voteMinTime.integer ) );
     return;
   }
 
@@ -2382,19 +2444,34 @@ DBCommand
 Send command to all designated builders of selected team
 =================
 */
-void DBCommand( pTeam_t team, const char *text )
+void DBCommand( gentity_t *builder, pTeam_t team, const char *text )
 {
   int i;
   gentity_t *ent;
 
+  if( g_floodMinTime.integer &&
+    G_Flood_Limited( builder ) )
+  {
+    trap_SendServerCommand( builder-g_entities,
+      "print \"Your deconstruct attempt is flood-limited; wait before trying again\n\"" );
+    return;
+  }
+
+  trap_SendServerCommand( builder-g_entities, 
+    "print \"This structure is protected by designated builder\n\"" );
+
   for( i = 0, ent = g_entities + i; i < level.maxclients; i++, ent++ )
   {
-    if( !ent->client || ( ent->client->pers.connected != CON_CONNECTED ) ||
-        ( ent->client->pers.teamSelection != team ) ||
-	!ent->client->pers.designatedBuilder )
+    if( !ent->client || ent->client->pers.connected != CON_CONNECTED )
       continue;
 
-    trap_SendServerCommand( i, text );
+    if( ( ent->client->pers.teamSelection == team &&
+      ent->client->pers.designatedBuilder ) ||
+      ( ent->client->pers.teamSelection == PTE_NONE &&
+      G_admin_permission( ent, ADMF_SPEC_ALLCHAT ) ) )
+    {
+      trap_SendServerCommand( i, text );
+    }
   }
 }
 
@@ -2435,11 +2512,10 @@ void Cmd_Destroy_f( gentity_t *ent )
     if( ( ent->client->hovel->s.eFlags & EF_DBUILDER ) &&
       !ent->client->pers.designatedBuilder )
     {
-      trap_SendServerCommand( ent-g_entities, 
-        "print \"This structure is protected by designated builder\n\"" );
-      DBCommand( ent->client->pers.teamSelection,
-        va( "print \"%s^3 has attempted to decon a protected structure!\n\"",
-	ent->client->pers.netname ) );
+      DBCommand( ent, ent->client->pers.teamSelection,
+        va( "print \"%s^3 has attempted to decon a protected %s!\n\"",
+	ent->client->pers.netname,
+        BG_FindHumanNameForBuildable( ent->client->hovel->s.modelindex ) ) );
       return;
     }
     G_Damage( ent->client->hovel, ent, ent, forward, ent->s.origin, 
@@ -2469,11 +2545,10 @@ void Cmd_Destroy_f( gentity_t *ent )
       if( ( traceEnt->s.eFlags & EF_DBUILDER ) &&
         !ent->client->pers.designatedBuilder )
       {
-        trap_SendServerCommand( ent-g_entities, 
-          "print \"This structure is protected by designated builder\n\"" );
-        DBCommand( ent->client->pers.teamSelection,
-          va( "print \"%s^3 has attempted to decon a protected structure!\n\"",
-	  ent->client->pers.netname ) );
+        DBCommand( ent, ent->client->pers.teamSelection,
+          va( "print \"%s^3 has attempted to decon a protected %s!\n\"",
+	  ent->client->pers.netname,
+          BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
         return;
       }
  

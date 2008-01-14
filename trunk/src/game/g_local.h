@@ -369,7 +369,7 @@ typedef struct
   int                 nameChangeTime;
   int                 nameChanges;
 
-  // used to save persistant[] values while in SPECTATOR_FOLLOW mode
+    // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 savedScore;
   int                 savedCredit;
 
@@ -389,6 +389,8 @@ typedef struct
   statsCounters_t statscounters;	
   qboolean            cusgrav;
   int                 cusgravlvl;
+
+  qboolean            firstConnect;
 } clientPersistant_t;
 
 #define MAX_UNLAGGED_MARKERS 10
@@ -496,7 +498,9 @@ struct gclient_s
   unlagged_t          unlaggedBackup;
   unlagged_t          unlaggedCalc;
   int                 unlaggedTime;
-
+  
+  int               tkcredits[ MAX_CLIENTS ];
+  
 };
 
 
@@ -786,6 +790,7 @@ void      G_LeaveTeam( gentity_t *self );
 void      G_ChangeTeam( gentity_t *ent, pTeam_t newTeam );
 void      G_SanitiseName( char *in, char *out );
 void      G_PrivateMessage( gentity_t *ent );
+void      Cmd_TeamVote_f( gentity_t *ent ); 
 char      *G_statsString( statsCounters_t *sc, pTeam_t *pt );
 void      Cmd_Share_f( gentity_t *ent );
 void      Cmd_Donate_f( gentity_t *ent );
@@ -1003,8 +1008,7 @@ void      G_AddCreditToClient( gclient_t *client, short credit, qboolean cap );
 team_t    TeamCount( int ignoreClientNum, int team );
 void      SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectTremulousSpawnPoint( pTeam_t team, vec3_t preference, vec3_t origin, vec3_t angles );
-gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
-void      SpawnCorpse( gentity_t *ent );
+gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );void      SpawnCorpse( gentity_t *ent );
 void      respawn( gentity_t *ent );
 void      BeginIntermission( void );
 void      ClientSpawn( gentity_t *ent, gentity_t *spawn, vec3_t origin, vec3_t angles );
@@ -1331,6 +1335,11 @@ extern  vmCvar_t  g_multipleWeapons;
 
 extern vmCvar_t  g_slapKnockback;
 extern vmCvar_t  g_slapDamage;
+
+extern  vmCvar_t  g_banNotice;
+
+extern  vmCvar_t  g_voteMinTime;
+extern  vmCvar_t  g_mapvoteMaxTime;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

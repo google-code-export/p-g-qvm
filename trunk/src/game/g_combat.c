@@ -259,8 +259,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     // tjw: obviously this is a hack and belongs in the client, but
     //      this works as a temporary fix.
     trap_SendServerCommand( -1,
-      va( "print \"%s^7 was killed by ^1TEAMMATE^7 %s\n\"",
-      self->client->pers.netname, attacker->client->pers.netname ) );
+      va( "print \"%s^7 was killed by ^1TEAMMATE^7 %s^7 (Did %d damage to %d max)\n\"",
+      self->client->pers.netname, attacker->client->pers.netname, self->client->tkcredits[ attacker->s.number ], self->client->ps.stats[ STAT_MAX_HEALTH ] ) );
     trap_SendServerCommand( attacker - g_entities,
       va( "cp \"You killed ^1TEAMMATE^7 %s\"", self->client->pers.netname ) );
   }
@@ -1100,6 +1100,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   int     save;
   int     asave = 0;
   int     knockback;
+  int     takeNoOverkill;
   float damagemodifier=0.0;
 
   if( !targ->takedamage )
@@ -1393,8 +1394,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     }
 
     
-    //Do the damage
-    targ->health = targ->health - take;
+    takeNoOverkill = take;
+    if( takeNoOverkill > targ->health ) 
+    {
+      takeNoOverkill = targ->health;
+    }
+    
+    targ->health = targ->health - take;   // do the damage
 
     if( targ->client )
       targ->client->ps.stats[ STAT_HEALTH ] = targ->health;
@@ -1406,6 +1412,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       if( attacker != targ && !OnSameTeam( targ, attacker ) )
         targ->credits[ attacker->client->ps.clientNum ] += take;
+	  else if( attacker != targ && OnSameTeam( targ, attacker ) )
+        targ->client->tkcredits[ attacker->client->ps.clientNum ] += takeNoOverkill;
     }
 
     if( targ->health <= 0 )

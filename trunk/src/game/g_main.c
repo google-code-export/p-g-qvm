@@ -183,6 +183,11 @@ vmCvar_t  g_slapDamage;
 vmCvar_t  g_buyAll;
 vmCvar_t  g_multipleWeapons;
 
+vmCvar_t  g_banNotice;
+
+vmCvar_t  g_voteMinTime;
+vmCvar_t  g_mapvoteMaxTime;
+
 static cvarTable_t   gameCvarTable[ ] =
 {
   // don't override the cheat state set by the system
@@ -256,6 +261,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_voteLimit, "g_voteLimit", "5", CVAR_ARCHIVE, 0, qfalse },
+  { &g_voteMinTime, "g_voteMinTime", "120", CVAR_ARCHIVE, 0, qfalse },
+  { &g_mapvoteMaxTime, "g_mapvoteMaxTime", "240", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathVotePercent, "g_suddenDeathVotePercent", "75", CVAR_ARCHIVE, 0, qfalse },
   { &g_pollVotes, "g_pollVotes", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_extendVotesPercent, "g_extendVotesPercent", "75", CVAR_ARCHIVE, 0, qfalse },
@@ -351,7 +358,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_rankings, "g_rankings", "0", 0, 0, qfalse },
   { &g_allowShare, "g_allowShare", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
   { &g_allowActions, "g_allowActions", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_actionPrefix, "g_actionPrefix", "***", CVAR_ARCHIVE, 0, qfalse }
+  { &g_actionPrefix, "g_actionPrefix", "***", CVAR_ARCHIVE, 0, qfalse },
+  { &g_banNotice, "g_banNotice", "", CVAR_ARCHIVE, 0, qtrue  },
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );
@@ -2116,6 +2124,7 @@ void CheckExitRules( void )
       trap_SendServerCommand( -1, "print \"Timelimit hit\n\"" );
       trap_SetConfigstring( CS_WINNER, "Stalemate" );
       LogExit( "Timelimit hit." );
+      G_admin_maplog_result( "t" );
       return;
     }
     else if( level.time - level.startTime >= ( g_timelimit.integer - 5 ) * 60000 &&
@@ -2142,6 +2151,7 @@ void CheckExitRules( void )
     trap_SendServerCommand( -1, "print \"Humans win\n\"");
     trap_SetConfigstring( CS_WINNER, "Humans Win" );
     LogExit( "Humans win." );
+    G_admin_maplog_result( "h" );
   }
   else if( level.uncondAlienWin ||
            ( ( level.time > level.startTime + 1000 ) &&
@@ -2153,6 +2163,7 @@ void CheckExitRules( void )
     trap_SendServerCommand( -1, "print \"Aliens win\n\"");
     trap_SetConfigstring( CS_WINNER, "Aliens Win" );
     LogExit( "Aliens win." );
+    G_admin_maplog_result( "a" );
   }
 }
 
@@ -2180,6 +2191,15 @@ void CheckVote( void )
   if( level.voteExecuteTime && level.voteExecuteTime < level.time )
   {
     level.voteExecuteTime = 0;
+
+    if( !Q_stricmp( level.voteString, "map_restart" ) )
+    {
+      G_admin_maplog_result( "r" );
+    }
+    else if( !Q_stricmpn( level.voteString, "map", 3 ) )
+    {
+      G_admin_maplog_result( "m" );
+    }
 
     trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteString ) );
     if( !Q_stricmp( level.voteString, "map_restart" ) ||
@@ -2253,7 +2273,16 @@ void CheckTeamVote( int team )
 
   if( level.time - level.teamVoteTime[ cs_offset ] >= VOTE_TIME )
   {
-    trap_SendServerCommand( -1, "print \"Team vote failed\n\"" );
+    if( level.teamVoteYes[ cs_offset ] > level.teamVoteNo[ cs_offset ] && level.teamVoteYes[ cs_offset ] >= 2 )
+    {
+      // execute the command, then remove the vote
+      trap_SendServerCommand( -1, "print \"Team vote passed\n\"" );
+      trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.teamVoteString[ cs_offset ] ) );
+    }
+    else
+    {	    
+      trap_SendServerCommand( -1, "print \"Team vote failed\n\"" );
+    }
   }
   else
   {

@@ -1300,6 +1300,11 @@ char *ClientConnect( int clientNum, qboolean firstTime )
     G_InitSessionData( client, userinfo );
 
   G_ReadSessionData( client );
+  
+  if( firstTime )
+    client->pers.firstConnect = qtrue;
+  else
+    client->pers.firstConnect = qfalse;
 
   // get and distribute relevent paramters
   ClientUserinfoChanged( clientNum );
