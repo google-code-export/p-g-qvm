@@ -4255,7 +4255,7 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
   }
   if( G_SayArgc() != 2 + skiparg )
   {
-    ADMP( va( "^3!pause: ^7usage: ^7(^5name|slot|*^7)\n", cmd, cmd ) );
+    ADMP( va( "^3!%s: ^7usage: !%s ^7(^5name|slot|*^7)\n", cmd, cmd ) );
     return qfalse;
   }
 
@@ -4429,7 +4429,7 @@ qboolean G_admin_buildlog( gentity_t *ent, int skiparg )
   gentity_t *builder = NULL;
   int skip = 0, start = 0, lastID = -1, firstID = -1, i, len, matchlen = 0;
   pTeam_t team = PTE_NONE;
-  char startbuf[ 12 ], message[ MAX_STRING_CHARS ], *teamchar; 
+  char message[ MAX_STRING_CHARS ], *teamchar; 
   char *name, *action, *buildablename, markstring[ MAX_STRING_CHARS ]; 
   if( !g_buildLogMaxLength.integer )
   {
@@ -4457,7 +4457,7 @@ qboolean G_admin_buildlog( gentity_t *ent, int skiparg )
           break;
         case '-':
           {
-            int value;
+            //int value;
             //if( ( value = G_ClientNumbersFromString( argbuf + 1, pids, MAX_CLIENTS ) ) != 1 )
             if( G_ClientNumbersFromString( argbuf + 1, pids ) != 1 )
             {
@@ -4673,12 +4673,12 @@ qboolean G_admin_revert( gentity_t *ent, int skiparg )
         break;
       case '-':
         {
-          int value;
+          //int value;
           //if( ( value = G_ClientNumbersFromString( arg + 1, pids, MAX_CLIENTS ) ) != 1 )
           if( G_ClientNumbersFromString( arg + 1, pids ) != 1 )
           {
             //G_MatchOnePlayer( pids, value, err, sizeof( err ) );
-+		    G_MatchOnePlayer( pids, err, sizeof( err ) );
+            G_MatchOnePlayer( pids, err, sizeof( err ) );
             ADMP( va( "^3!revert: ^7%s\n", err ));
             return qfalse;
           }
@@ -5154,10 +5154,8 @@ qboolean G_admin_drop( gentity_t *ent, int skiparg )
   int pids[ MAX_CLIENTS ];
   char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   int minargc;
-  gentity_t *vic;
 
-
-    minargc = 2 + skiparg;
+  minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )
   {

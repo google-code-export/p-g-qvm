@@ -4286,7 +4286,7 @@ int G_CountBuildLog( void )
       ptr = ptr->next;
     else
     {
-      while( mark = ptr->next )
+      while( ( mark = ptr->next ) )
       {
         ptr->next = ptr->next->marked;
             G_Free( mark );

@@ -920,6 +920,7 @@ qboolean  G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, floa
                           gentity_t *ignore, int mod );
 qboolean  G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
                                    gentity_t *ignore, int mod, int team );
+void      G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
 void      body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void      AddScore( gentity_t *ent, int score );
 
@@ -1029,6 +1030,7 @@ qboolean  G_FilterPacket( char *from );
 void FireWeapon( gentity_t *ent );
 void FireWeapon2( gentity_t *ent );
 void FireWeapon3( gentity_t *ent );
+void Blow_up( gentity_t *ent );
 
 //
 // g_cmds.c

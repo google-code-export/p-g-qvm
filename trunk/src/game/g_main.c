@@ -1690,10 +1690,10 @@ void ExitLevel( void )
   
   buildHistory_t *tmp, *mark;
  
-  while( tmp = level.buildHistory )
+  while( ( tmp = level.buildHistory ) )
   {
     level.buildHistory = level.buildHistory->next;
-    while( mark = tmp )
+    while( ( mark = tmp ) )
     {
       tmp = tmp->marked;
       G_Free( mark );
