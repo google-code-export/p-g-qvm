@@ -1391,7 +1391,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   char  arg2[ MAX_STRING_TOKENS ];
   char  arg3[ MAX_STRING_TOKENS ];
   int   clientNum = -1;
-  char  name[ MAX_NETNAME ], name2[ MAX_NETNAME ];
+  char  name[ MAX_NETNAME ];
   char *arg2plus;
   char nullstring[] = "";
   char  message[ MAX_STRING_CHARS ];
