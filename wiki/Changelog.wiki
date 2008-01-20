@@ -1,5 +1,9 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
+=1.4.1=
+ * Added !adminlog
+ * Added percentage FF retribution
+ *Changed !immunity and !suspendban flags to I and J.
 =1.4=
  * Fixed !help comamnd listing, now alpahbetical
  * Added !maplog results
