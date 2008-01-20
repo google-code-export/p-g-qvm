@@ -1,5 +1,7 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
+=1.4.2=
+ * Fixed poll vote bug
 =1.4.1=
  * Added !adminlog
  * Added percentage FF retribution
