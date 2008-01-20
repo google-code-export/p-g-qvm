@@ -872,7 +872,16 @@ void ClientTimerActions( gentity_t *ent, int msec )
       if( ent->health > 0 && ent->health < client->ps.stats[ STAT_MAX_HEALTH ] &&
           ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time &&
           !level.paused )
+      {
         ent->health += BG_FindRegenRateForClass( client->ps.stats[ STAT_PCLASS ] ) * modifier;
+
+        //if completely healed, cancel retribution
+        if( ent->health >= client->ps.stats[ STAT_MAX_HEALTH ] )
+        {
+          for( i = 0; i < MAX_CLIENTS; i++ )
+            ent->client->tkcredits[ i ] = 0;
+        }
+      }
 
       if( ent->health > client->ps.stats[ STAT_MAX_HEALTH ] )
         ent->health = client->ps.stats[ STAT_MAX_HEALTH ];
