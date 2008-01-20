@@ -1713,20 +1713,14 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   // start the voting, the caller autoamtically votes yes
   level.voteTime = level.time;
+  level.voteYes = 1;
   level.voteNo = 0;
 
   for( i = 0 ; i < level.maxclients ; i++ )
     level.clients[i].ps.eFlags &= ~EF_VOTED;
+	
+	ent->client->ps.eFlags |= EF_VOTED;
 
-  if( !Q_stricmp( arg1, "poll" ) )
-  {
-    level.voteYes = 0;
-  }
-  else
-  {
-   level.voteYes = 1;
-   ent->client->ps.eFlags |= EF_VOTED;
-  }
 
   trap_SetConfigstring( CS_VOTE_TIME, va( "%i", level.voteTime ) );
   trap_SetConfigstring( CS_VOTE_STRING, level.voteDisplayString );
