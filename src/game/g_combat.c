@@ -357,7 +357,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     if ( self->client->ps.persistant[ PERS_CREDIT ] + totalPrice > max )
       totalPrice = max - self->client->ps.persistant[ PERS_CREDIT ];
 
-    if ( totalPrice )
+    if ( totalPrice > 0 )
     {
       totalTK += totalDamage;
       if( totalTK < self->client->ps.stats[ STAT_MAX_HEALTH ] )
