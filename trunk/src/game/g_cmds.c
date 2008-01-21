@@ -1718,9 +1718,8 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   for( i = 0 ; i < level.maxclients ; i++ )
     level.clients[i].ps.eFlags &= ~EF_VOTED;
-	
-	ent->client->ps.eFlags |= EF_VOTED;
 
+  ent->client->ps.eFlags |= EF_VOTED;
 
   trap_SetConfigstring( CS_VOTE_TIME, va( "%i", level.voteTime ) );
   trap_SetConfigstring( CS_VOTE_STRING, level.voteDisplayString );
