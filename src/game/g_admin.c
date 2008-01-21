@@ -134,7 +134,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5command^7)"
     },
 	
-	    {"immunity", G_admin_immunity, "I",
+	    {"immunity", G_admin_immunity, "b",
       "give a player ban immunity",
       "[^3+|-^7](^5slot#^7)"
     },
@@ -291,7 +291,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
 	
-	{"suspendban", G_admin_suspendban, "J",
+	{"suspendban", G_admin_suspendban, "b",
       "suspend a ban for a length of time. time is specified as numbers "
       "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
       " or seconds if no units are specified",
@@ -4267,7 +4267,7 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
   }
   if( G_SayArgc() != 2 + skiparg )
   {
-    ADMP( va( "^3!%s: ^7usage: !%s ^7(^5name|slot|*^7)\n", cmd, cmd ) );
+    ADMP( va( "^3!%s: ^7usage: !%s (^5name|slot^7)\n", cmd, cmd ) );
     return qfalse;
   }
 
@@ -5125,8 +5125,10 @@ qboolean G_admin_drug( gentity_t *ent, int skiparg )
   int pids[ MAX_CLIENTS ];
   char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   int minargc;
+  gentity_t *vic;
 
-  minargc = 2 + skiparg;
+
+    minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )
   {
