@@ -1921,7 +1921,7 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
       {
         Com_sprintf( message, sizeof( message ), "%s^7 attempted /callteamvote %s %s on immune admin %s^7",
           ent->client->pers.netname, arg1, arg2, g_entities[ clientNum ].client->pers.netname );
-
+      }
     }
     else
     {
@@ -2032,8 +2032,6 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
         sizeof( level.teamVoteDisplayString[ cs_offset ] ),
         "Remove designated builder status from '%s'", name );
   }
-  
-}
   else if( !Q_stricmp( arg1, "admitdefeat" ) )
   {
     Com_sprintf( level.teamVoteString[ cs_offset ],
