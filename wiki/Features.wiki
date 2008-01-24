@@ -16,7 +16,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!steal* (T): Lets you steal health from another player. Does health in increments of 5.
  * *!trade* (t): Lets you trade health with another player. They get yours and you get theirs. You cannot exceed your maximum health. Health is by number, and not percent, so if a full hp human trades with a dretch, the dretch will remain the same, but the human will only have 25 hp.
  * *!drug* (Q): Applies a poison effect to a player, like basilisk gas.
- * *!drop* (o): Drops a player from the server, without any log, any temporary ban, or any reason. Client sees server disconnected. Useful for ejecting laggers from server.
+ * *!drop* (o): Drops a player from the server, without any log, any temporary ban, or any reason. Client sees server disconnected. Useful for ejecting laggers from server. Specify a reason by adding reason after name.
  * *!cp* (Z): Center prints a message to all players. This works exactly like the cp console command, except that this does not support \n newlines.
  * *!customgrav* (Q): Sets the gravity for ONE player. Set gravity to normal to match server gravity.
  * *!explode* (Q): Causes a player to instantly explode, as if they blew up a grenade. Does same amount of damage as grenade, with same radius of splash. Affects structures or close players too.
@@ -24,8 +24,17 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!maplog* (j): Shows a list of the 5 most recently played maps.
  * *!immunity* (I): Gives a player immunity from an IP ban. Player must have GUID and be registered with the server. Does nothing against GUID bans. Uses same flag as !ban.
  * *!suspendban* (J): Suspends a ban in !showbans for up to 14 days.
+ * *!register* (R): Registers a player with the server. Supports advanced register features. !register 0 sets a player to level 0. !register [level] [pass] sets a player to a level, if the proper password is given.
+  * _g_adminRegisterLevel_: Level to which a normal register sets to. Default 1
+  * _g_adminRegisterAdminPass_: Password required to get to levels set by `g_adminRegisterAdminLevel`. Blank is default, and disabled
+  * _g_adminRegisterAdminLevel_: Level to which password registrations go. Default is 0.
+  * *WARNING: IF PASSWORDS ARE TYPED IN CHAT, AND `g_adminSayFilter` IS OFF, THEN PASSWORD WILL BE DISPLAYED IN CHAT. TO OVERCOME THIS, USE ESCAPED SYNTAX (/!register)
  
 =Other Features=
+ * Poll vote caller can vote no
+ * Players that fall out of map die instantly, and cannot mess up spawn cue
+ * Credit overflow
+ * Teamvotes much more fair now, and admitdefeat has percent control.
  * FF percent retribution
  * Newline for console cp. Use \n to insert line breaks in
  * Extend votes, controlled by cvars beginning with `g_extend`
@@ -42,6 +51,11 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * Vote connect time prevents players from connecting and calling a vote within g_voteMinTime, or call a map vote within g_mapvoteMinTime
 
 =Cvars=
+ * `g_admitDefeatVotePercent`: Sets the percentage at which admitdefeat teamvotes must have to pass *(Integer)*
+ * `g_creditOverflow`: Overflows the credits of full players to others. 0 disables, 1 gives to teammates in slot order, 2 gives to highest scoring teammates. *(Bitmask)*
+ * `g_adminRegisterLevel`: Level to which a normal register sets to. Default 1 *(Integer)*
+ * `g_adminRegisterAdminPass`: Password required to get to levels set by `g_adminRegisterAdminLevel`. Blank is default, and disabled *(String)*
+ * `g_adminRegisterAdminLevel`: Level to which password registrations go. Default is 0. *(Integer)*
  * `g_killerHP`: Shows a victim how much health their killer had. *(Boolean)*
  * `g_pollVotes`: Control if poll votes are enabled or disabled. *(Boolean)*
  * `g_extendVotePercent`: Percent for extend votes to pass. *(Float)*

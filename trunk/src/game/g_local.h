@@ -640,6 +640,7 @@ typedef struct
   // team voting state
   char              teamVoteString[ 2 ][ MAX_STRING_CHARS ];
   char              teamVoteDisplayString[ 2 ][ MAX_STRING_CHARS ];
+  int               teamVotePercentToPass[ 2 ];
   int               teamVoteTime[ 2 ];            // level.time vote was called
   int               teamVoteYes[ 2 ];
   int               teamVoteNo[ 2 ];
@@ -726,6 +727,9 @@ typedef struct
   float             pause_knockback;
   int               pause_ff;
   int               pause_ffb;
+
+  int               lastCreditedAlien;
+  int               lastCreditedHuman;
 
   int unlaggedIndex;
   int unlaggedTimes[ MAX_UNLAGGED_MARKERS ];
@@ -1250,6 +1254,7 @@ extern  vmCvar_t  g_extendVotesTime;
 extern  vmCvar_t  g_extendVotesCount;
 extern  vmCvar_t  g_mapVotesPercent;
 extern  vmCvar_t  g_designateVotes;
+extern  vmCvar_t  g_admitDefeatVotePercent;
 extern  vmCvar_t  g_teamAutoJoin;
 extern  vmCvar_t  g_teamForceBalance;
 extern  vmCvar_t  g_banIPs;
@@ -1260,6 +1265,7 @@ extern  vmCvar_t  pmove_fixed;
 extern  vmCvar_t  pmove_msec;
 extern  vmCvar_t  g_rankings;
 extern  vmCvar_t  g_allowShare;
+extern  vmCvar_t  g_creditOverflow;
 extern  vmCvar_t  g_enableDust;
 extern  vmCvar_t  g_enableBreath;
 extern  vmCvar_t  g_singlePlayer;
@@ -1309,6 +1315,9 @@ extern  vmCvar_t  g_adminSayFilter;
 extern  vmCvar_t  g_adminNameProtect;
 extern  vmCvar_t  g_adminTempBan;
 extern  vmCvar_t  g_adminMapLog;
+extern  vmCvar_t  g_adminRegisterLevel;
+extern  vmCvar_t  g_adminRegisterAdminPass;
+extern  vmCvar_t  g_adminRegisterAdminLevel;
 extern  vmCvar_t  g_minLevelToJoinTeam;
 extern  vmCvar_t  g_minLevelToSpecMM1;
 
