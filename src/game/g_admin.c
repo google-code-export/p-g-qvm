@@ -111,7 +111,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"drop", G_admin_drop, "o",
       "kick a client from the server without log",
-      "[^3name|slot#^7]"
+      "[^3name|slot#^7] [^3message^7]"
     },
 
     {"drug", G_admin_drug, "Q",
@@ -242,7 +242,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"register", G_admin_register, "R",
       "Registers your name to protect it from being used by others or updates your admin name to your current name.",
-      ""
+      "[^3level^7] [^3password^7]"
     },
 
     {"rename", G_admin_rename, "N",
@@ -3488,17 +3488,59 @@ qboolean G_admin_spec999( gentity_t *ent, int skiparg )
 
 qboolean G_admin_register(gentity_t *ent, int skiparg ){
   int level = 0;
+  int max = 0;
+  char buffer [ 64 ];
 
-  level = G_admin_level(ent);
-  
   if( !ent )
   {
     ADMP( "!register: sorry, but console isn't allowed to register.\n");
     return qfalse;
   }
-	
-  if( level == 0 )
-   level = 1;
+
+  level = G_admin_level(ent);
+
+  if( G_SayArgc() > 1 + skiparg )
+  {
+    G_SayArgv( 1 + skiparg, buffer, sizeof( buffer ) );
+    max = atoi( buffer );
+
+    if( G_SayArgc() > 2 + skiparg )
+    {
+      G_SayArgv( 2 + skiparg, buffer, sizeof( buffer ) );
+      if( g_adminRegisterAdminPass.string[ 0 ] && Q_stricmp( g_adminRegisterAdminPass.string, "none" ) &&
+        Q_stricmp( g_adminRegisterAdminPass.string, buffer) )
+      {
+        ADMP( "Invalid password.\n" );
+        return qfalse;
+      }
+      if (max > g_adminRegisterAdminLevel.integer)
+        max = g_adminRegisterAdminLevel.integer;
+      if( level <= g_adminRegisterAdminLevel.integer )
+        level = max;
+    }
+    else
+    {
+      if( max > g_adminRegisterLevel.integer )
+        max = g_adminRegisterLevel.integer;
+
+      if( level > 0 &&
+        level <= g_adminRegisterLevel.integer )
+      {
+        level = max;
+      }
+    }
+
+    if( max < -1 )
+      max = -1;
+  }
+  else
+  {
+    if( max == 0 )
+      max = 1;
+  }
+
+  if( level < max )
+    level = max;
   
   if( !Q_stricmp( ent->client->pers.guid, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ) )
   {
@@ -5166,12 +5208,13 @@ qboolean G_admin_drop( gentity_t *ent, int skiparg )
   int pids[ MAX_CLIENTS ];
   char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   int minargc;
+  char msg[ MAX_STRING_CHARS ];
 
   minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )
   {
-    ADMP( "^3!drop: ^7usage: !drop [name|slot#]\n" );
+    ADMP( "^3!drop: ^7usage: !drop [name|slot#] [message]\n" );
     return qfalse;
   }
   G_SayArgv( 1 + skiparg, name, sizeof( name ) );
@@ -5189,11 +5232,22 @@ qboolean G_admin_drop( gentity_t *ent, int skiparg )
         " level than you\n" );
     return qfalse;
   }
+  
+  minargc = 3 + skiparg;
+  G_SayArgv( 2 + skiparg, msg, sizeof( msg ) );
 
 //what they get
-trap_SendServerCommand( pids[ 0 ], va( "disconnect" ) );
+if( G_SayArgc() < minargc )
+  {
+   trap_SendServerCommand( pids[ 0 ], va( "disconnected" ) );
+  }
+else
+  {
+  trap_SendServerCommand( pids[ 0 ], va( "disconnected \"Disconnected.\n\n%s^7\n\"", msg ) );
+  }
+  
 //what people get
-trap_DropClient( pids[ 0 ], va( "disconnect" ) );
+trap_DropClient( pids[ 0 ], va( "disconnected" ) );
 
 
 

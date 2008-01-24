@@ -88,6 +88,7 @@ vmCvar_t  g_extendVotesTime;
 vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_mapVotesPercent;
 vmCvar_t  g_designateVotes;
+vmCvar_t  g_admitDefeatVotePercent;
 vmCvar_t  g_teamAutoJoin;
 vmCvar_t  g_teamForceBalance;
 vmCvar_t  g_banIPs;
@@ -149,6 +150,9 @@ vmCvar_t  g_adminSayFilter;
 vmCvar_t  g_adminNameProtect;
 vmCvar_t  g_adminTempBan;
 vmCvar_t  g_adminMapLog;
+vmCvar_t  g_adminRegisterLevel;
+vmCvar_t  g_adminRegisterAdminPass;
+vmCvar_t  g_adminRegisterAdminLevel;
 vmCvar_t  g_minLevelToJoinTeam;
 
 vmCvar_t  g_privateMessages;
@@ -173,6 +177,7 @@ vmCvar_t  g_allowActions;
 vmCvar_t  g_actionPrefix;
 
 vmCvar_t  g_allowShare;
+vmCvar_t  g_creditOverflow;
 
 vmCvar_t  g_devmapNoGod;
 vmCvar_t  g_devmapNoStructDmg;
@@ -270,6 +275,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_mapVotesPercent, "g_mapVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
   { &g_designateVotes, "g_designateVotes", "0", CVAR_ARCHIVE, 0, qfalse },
+  { &g_admitDefeatVotePercent, "g_admitDefeatVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
   
   { &g_listEntity, "g_listEntity", "0", 0, 0, qfalse },
   { &g_minCommandPeriod, "g_minCommandPeriod", "500", 0, 0, qfalse},
@@ -330,6 +336,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_adminTempBan, "g_adminTempBan", "120", CVAR_ARCHIVE, 0, qfalse  },
   { &g_minLevelToJoinTeam, "g_minLevelToJoinTeam", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminMapLog, "g_adminMapLog", "", CVAR_ROM, 0, qfalse  },
+  { &g_adminRegisterLevel, "g_adminRegisterLevel", "1", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_adminRegisterAdminPass, "g_adminRegisterAdminPass", "", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_adminRegisterAdminLevel, "g_adminRegisterAdminLevel", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_radiationDamage, "g_radiationDamage", "1", CVAR_ARCHIVE, 0, qfalse  },
@@ -357,6 +366,7 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_rankings, "g_rankings", "0", 0, 0, qfalse },
   { &g_allowShare, "g_allowShare", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
+  { &g_creditOverflow, "g_creditOverflow", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
   { &g_allowActions, "g_allowActions", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_actionPrefix, "g_actionPrefix", "***", CVAR_ARCHIVE, 0, qfalse },
   { &g_banNotice, "g_banNotice", "", CVAR_ARCHIVE, 0, qtrue  },
@@ -2187,7 +2197,8 @@ CheckVote
 void CheckVote( void )
 {
   int votePercentToPass=level.votePercentToPass;
-  int voteYesPercent;
+  int voteYesPercent = 0;
+  char *result = "";
 	
   if( level.voteExecuteTime && level.voteExecuteTime < level.time )
   {
@@ -2213,19 +2224,21 @@ void CheckVote( void )
   if( !level.voteTime )
     return;
 
-  voteYesPercent = (int)(100* (level.voteYes)/(level.voteYes + level.voteNo));
+  if( level.voteYes || level.voteNo )
+  {
+    voteYesPercent = (int)(100* (level.voteYes)/(level.voteYes + level.voteNo));
+  }
   if( level.time - level.voteTime >= VOTE_TIME || ( level.voteYes + level.voteNo == level.numConnectedClients ) )
   {
     if( voteYesPercent> votePercentToPass || level.voteNo == 0 )
     {
       // execute the command, then remove the vote
-      trap_SendServerCommand(-1, va("print \"Vote ^2passed^7 (^2Y:%d^7-^1N:%d^7) [%s]\n\"", level.voteYes, level.voteNo, level.voteDisplayString ));
+      result = "^2passed";
       level.voteExecuteTime = level.time + 3000;
     }
     else
     {
-      // same behavior as a timeout
-      trap_SendServerCommand(-1, va("print \"Vote ^1failed^7 (^4Y:%d^7-^1N:%d^7) [%s]\n\"", level.voteYes, level.voteNo, level.voteDisplayString ));
+      result = "^1failed";
     }
   }
   else
@@ -2233,13 +2246,13 @@ void CheckVote( void )
     if( level.voteYes > (int)((double)level.numConnectedClients * ((double)votePercentToPass/100.0)) )
     {
       // execute the command, then remove the vote
-      trap_SendServerCommand(-1, va("print \"Vote ^2passed^7 (^2Y:%d^7-^1N:%d^7) [%s]\n\"", level.voteYes, level.voteNo, level.voteDisplayString ));
+      result = "^2passed";
       level.voteExecuteTime = level.time + 3000;
     }
     else if( level.voteNo > (int)((double)level.numConnectedClients * ((double)(100.0-votePercentToPass)/100.0)) )
     {
       // same behavior as a timeout
-      trap_SendServerCommand(-1, va("print \"Vote ^1failed^7 (^2Y:%d^7-^1N:%d^7) [%s]\n\"", level.voteYes, level.voteNo, level.voteDisplayString ));
+      result = "^1failed";
     }
     else
     {
@@ -2247,6 +2260,9 @@ void CheckVote( void )
       return;
     }
   }
+
+  trap_SendServerCommand(-1, va("print \"Vote %s^7 (^2Y:%d^7-^1N:%d^7) [%s]\n\"",
+    result, level.voteYes, level.voteNo, level.voteDisplayString ) );
 
   level.voteTime = 0;
   trap_SetConfigstring( CS_VOTE_TIME, "" );
@@ -2261,6 +2277,9 @@ CheckTeamVote
 void CheckTeamVote( int team )
 {
   int cs_offset;
+  int votePercentToPass;
+  int voteYesPercent = 0;
+  char *result = "";
 
   if ( team == PTE_HUMANS )
     cs_offset = 0;
@@ -2272,32 +2291,39 @@ void CheckTeamVote( int team )
   if( !level.teamVoteTime[ cs_offset ] )
     return;
 
-  if( level.time - level.teamVoteTime[ cs_offset ] >= VOTE_TIME )
+  votePercentToPass = level.teamVotePercentToPass[ cs_offset ];
+  if( level.teamVoteYes[ cs_offset ] || level.teamVoteNo[ cs_offset ] )
   {
-    if( level.teamVoteYes[ cs_offset ] > level.teamVoteNo[ cs_offset ] && level.teamVoteYes[ cs_offset ] >= 2 )
+    voteYesPercent = (int)(100* (level.teamVoteYes[ cs_offset ])/(level.teamVoteYes[ cs_offset ] + level.teamVoteNo[ cs_offset ]));
+  }
+
+  if( level.time - level.teamVoteTime[ cs_offset ] >= VOTE_TIME ||
+    level.teamVoteYes[ cs_offset ] + level.teamVoteNo[ cs_offset ] == level.numteamVotingClients[ cs_offset ] )
+  {
+    if( voteYesPercent > votePercentToPass &&
+      level.teamVoteYes[ cs_offset ] + level.teamVoteNo[ cs_offset ] > level.numteamVotingClients[ cs_offset ] / 2 )
     {
       // execute the command, then remove the vote
-      trap_SendServerCommand( -1, "print \"Team vote passed\n\"" );
+      result = "^2passed";
       trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.teamVoteString[ cs_offset ] ) );
     }
     else
-    {	    
-      trap_SendServerCommand( -1, "print \"Team vote failed\n\"" );
+    {
+      result = "^1failed";
     }
   }
   else
   {
-    if( level.teamVoteYes[ cs_offset ] > level.numteamVotingClients[ cs_offset ] / 2 )
+    if( level.teamVoteYes[ cs_offset ] > (int)((double)level.numteamVotingClients[ cs_offset ] * ((double)votePercentToPass/100.0)) )
     {
       // execute the command, then remove the vote
-      trap_SendServerCommand( -1, "print \"Team vote passed\n\"" );
-      //
+      result = "^2passed";
       trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.teamVoteString[ cs_offset ] ) );
     }
-    else if( level.teamVoteNo[ cs_offset ] >= level.numteamVotingClients[ cs_offset ] / 2 )
+    else if( level.teamVoteNo[ cs_offset ] > (int)((double)level.numteamVotingClients[ cs_offset ] * ((double)(100.0-votePercentToPass)/100.0)) )
     {
       // same behavior as a timeout
-      trap_SendServerCommand( -1, "print \"Team vote failed\n\"" );
+      result = "^1Failed";
     }
     else
     {
@@ -2305,6 +2331,9 @@ void CheckTeamVote( int team )
       return;
     }
   }
+
+  trap_SendServerCommand( -1, va( "print \"Team vote %s^7 (^2Y:%d^7-^1N:%d^7)\n\"",
+    result, level.teamVoteYes[ cs_offset ], level.teamVoteNo[ cs_offset ] ) );
 
   level.teamVoteTime[ cs_offset ] = 0;
   trap_SetConfigstring( CS_TEAMVOTE_TIME + cs_offset, "" );

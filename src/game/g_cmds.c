@@ -1711,15 +1711,20 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   ent->client->pers.voteCount++;
 
-  // start the voting, the caller autoamtically votes yes
+  // start the voting
   level.voteTime = level.time;
-  level.voteYes = 1;
+  level.voteYes = 0;
   level.voteNo = 0;
 
   for( i = 0 ; i < level.maxclients ; i++ )
     level.clients[i].ps.eFlags &= ~EF_VOTED;
 
-  ent->client->ps.eFlags |= EF_VOTED;
+  // the caller always votes yes, except for polls
+  if( Q_stricmp( arg1, "poll" ) )
+  {
+    level.voteYes++;
+    ent->client->ps.eFlags |= EF_VOTED;
+  }
 
   trap_SetConfigstring( CS_VOTE_TIME, va( "%i", level.voteTime ) );
   trap_SetConfigstring( CS_VOTE_STRING, level.voteDisplayString );
@@ -1861,6 +1866,8 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
     trap_SendServerCommand( ent-g_entities, "print \"Invalid team vote string\n\"" );
     return;
   }
+
+  level.teamVotePercentToPass[ cs_offset ] = 50;
   
   // detect clientNum for partial name match votes
   if( !Q_stricmp( arg1, "kick" ) ||
@@ -2034,6 +2041,12 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
   }
   else if( !Q_stricmp( arg1, "admitdefeat" ) )
   {
+    if( !g_admitDefeatVotePercent.integer )
+    {
+      trap_SendServerCommand( ent-g_entities, "print \"admitdefeat votes are disabled\n\"" );
+      return;
+    }
+    level.teamVotePercentToPass[ cs_offset ] = g_admitDefeatVotePercent.integer;
     Com_sprintf( level.teamVoteString[ cs_offset ],
       sizeof( level.teamVoteString[ cs_offset ] ), "admitdefeat %i", team );
     Com_sprintf( level.teamVoteDisplayString[ cs_offset ],
@@ -2056,6 +2069,12 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
   }
   ent->client->pers.voteCount++;
 
+  if( level.teamVotePercentToPass[ cs_offset ] != 50 )
+  {
+    Q_strcat( level.teamVoteDisplayString[ cs_offset ], sizeof( level.teamVoteDisplayString[ cs_offset ] ),
+      va( " (Needs %d percent)", level.teamVotePercentToPass[ cs_offset ] ) );
+  }
+
   for( i = 0 ; i < level.maxclients ; i++ )
   {
     if( level.clients[ i ].pers.connected == CON_DISCONNECTED )
@@ -2066,9 +2085,9 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
             "called a team vote: %s \n\"", ent->client->pers.netname, level.teamVoteDisplayString[ cs_offset ] ) );
   }
 
-  // start the voting, the caller autoamtically votes yes
+  // start the voting
   level.teamVoteTime[ cs_offset ] = level.time;
-  level.teamVoteYes[ cs_offset ] = 1;
+  level.teamVoteYes[ cs_offset ] = 0;
   level.teamVoteNo[ cs_offset ] = 0;
 
   for( i = 0 ; i < level.maxclients ; i++ )
@@ -2077,7 +2096,12 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
       level.clients[ i ].ps.eFlags &= ~EF_TEAMVOTED;
   }
 
-  ent->client->ps.eFlags |= EF_TEAMVOTED;
+  // the caller always votes yes, except for polls
+  if( Q_stricmp( arg1, "poll" ) )
+  {
+    level.teamVoteYes[ cs_offset ]++;
+    ent->client->ps.eFlags |= EF_TEAMVOTED;
+  }
 
   trap_SetConfigstring( CS_TEAMVOTE_TIME + cs_offset, va( "%i", level.teamVoteTime[ cs_offset ] ) );
   trap_SetConfigstring( CS_TEAMVOTE_STRING + cs_offset, level.teamVoteDisplayString[ cs_offset ] );
