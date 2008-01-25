@@ -1,6 +1,9 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.4=
+==1.4.3.1==
+ * Fixed !drop, now supports spaces.
+ * Fixed !trade and !steal, players can no longer go above their own health max.
 ==1.4.3==
  * Poll votes now start with 0 yes and 0 no (and no divide by 0 error)
  * Teamvotes now only pass if 50% of team votes, and of that 50%, majority wins

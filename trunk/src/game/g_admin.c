@@ -5149,7 +5149,7 @@ ent->lastDamageTime = level.time;
 }
 
 //make sure they dont go over max health
-if( ent->health > ent->client->ps.stats[ STAT_MAX_HEALTH ] )
+if( vic->health > vic->client->ps.stats[ STAT_MAX_HEALTH ] )
 {
 vic->health = vic->client->ps.stats[ STAT_MAX_HEALTH ];
 vic->lastDamageTime = level.time;
@@ -5209,7 +5209,7 @@ qboolean G_admin_drop( gentity_t *ent, int skiparg )
   char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   int minargc;
   char msg[ MAX_STRING_CHARS ];
-
+  char *s;
   minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )
@@ -5234,16 +5234,19 @@ qboolean G_admin_drop( gentity_t *ent, int skiparg )
   }
   
   minargc = 3 + skiparg;
-  G_SayArgv( 2 + skiparg, msg, sizeof( msg ) );
-
+  
+  s = G_SayConcatArgs( 2 + skiparg );
+  
+  Q_strncpyz( msg, s, sizeof( msg ) );
+  
 //what they get
 if( G_SayArgc() < minargc )
   {
-   trap_SendServerCommand( pids[ 0 ], va( "disconnected" ) );
+   trap_SendServerCommand( pids[ 0 ], va( "disconnect" ) );
   }
 else
   {
-  trap_SendServerCommand( pids[ 0 ], va( "disconnected \"Disconnected.\n\n%s^7\n\"", msg ) );
+  trap_SendServerCommand( pids[ 0 ], va( "disconnect \"You have been dropped.\n\n%s^7\n\"", msg ) );
   }
   
 //what people get
