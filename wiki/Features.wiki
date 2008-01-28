@@ -18,7 +18,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!drug* (Q): Applies a poison effect to a player, like basilisk gas.
  * *!drop* (o): Drops a player from the server, without any log, any temporary ban, or any reason. Client sees server disconnected. Useful for ejecting laggers from server. Specify a reason by adding reason after name.
  * *!cp* (Z): Center prints a message to all players. This works exactly like the cp console command, except that this does not support \n newlines.
- * *!customgrav* (Q): Sets the gravity for ONE player. Set gravity to normal to match server gravity.
+ * *!customgrav* (Q): Sets the gravity for ONE player. Run without a gravity paramiter to match server gravity.
  * *!explode* (Q): Causes a player to instantly explode, as if they blew up a grenade. Does same amount of damage as grenade, with same radius of splash. Affects structures or close players too.
  * *!listmaps* (j): Displays a listing of ALL the maps on the server, by the name the server calls them.
  * *!maplog* (j): Shows a list of the 5 most recently played maps.
@@ -31,6 +31,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
   * *WARNING: IF PASSWORDS ARE TYPED IN CHAT, AND `g_adminSayFilter` IS OFF, THEN PASSWORD WILL BE DISPLAYED IN CHAT. TO OVERCOME THIS, USE ESCAPED SYNTAX (/!register)
  
 =Other Features=
+ * Decolor log files, controlled by `g_decolorLogfiles`
  * Poll vote caller can vote no
  * Players that fall out of map die instantly, and cannot mess up spawn cue
  * Credit overflow
@@ -51,6 +52,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * Vote connect time prevents players from connecting and calling a vote within g_voteMinTime, or call a map vote within g_mapvoteMinTime
 
 =Cvars=
+ * `g_decolorLogfiles`: Enables/disables removal of color tags from log files.
  * `g_admitDefeatVotePercent`: Sets the percentage at which admitdefeat teamvotes must have to pass *(Integer)*
  * `g_creditOverflow`: Overflows the credits of full players to others. 0 disables, 1 gives to teammates in slot order, 2 gives to highest scoring teammates. *(Bitmask)*
  * `g_adminRegisterLevel`: Level to which a normal register sets to. Default 1 *(Integer)*

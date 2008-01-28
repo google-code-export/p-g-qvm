@@ -164,6 +164,8 @@ vmCvar_t  g_antiSpawnBlock;
 
 vmCvar_t  g_KillerHP;
 
+vmCvar_t  g_decolorLogfiles;
+
 vmCvar_t  g_tag;
 
 vmCvar_t  g_radiationDamage;
@@ -355,6 +357,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_antiSpawnBlock, "g_antiSpawnBlock", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_KillerHP, "g_KillerHP", "0", CVAR_ARCHIVE, 0, qtrue  },
+  
+  { &g_decolorLogfiles, "g_decolorLogfiles", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_tag, "g_tag", "main", CVAR_INIT, 0, qfalse },
   
@@ -1783,6 +1787,49 @@ Print to the logfile with a time stamp if it is open
 =================
 */
 void QDECL G_LogPrintf( const char *fmt, ... )
+{
+  va_list argptr;
+  char    string[ 1024 ], decolored[ 1024 ];
+  int     min, tens, sec;
+
+  sec = level.time / 1000;
+
+  min = sec / 60;
+  sec -= min * 60;
+  tens = sec / 10;
+  sec -= tens * 10;
+
+  Com_sprintf( string, sizeof( string ), "%3i:%i%i ", min, tens, sec );
+
+  va_start( argptr, fmt );
+  vsprintf( string +7 , fmt,argptr );
+  va_end( argptr );
+
+  if( g_dedicated.integer )
+    G_Printf( "%s", string + 7 );
+
+  if( !level.logFile )
+    return;
+
+  if( g_decolorLogfiles.integer )
+  {
+    G_DecolorString( string, decolored );
+    trap_FS_Write( decolored, strlen( decolored ), level.logFile );
+  }
+  else
+  {
+    trap_FS_Write( string, strlen( string ), level.logFile );
+  }
+}
+
+/*
+=================
+G_LogPrintfColored
+
+Bypasses g_decolorLogfiles for events that need colors in the logs
+=================
+*/
+void QDECL G_LogPrintfColored( const char *fmt, ... )
 {
   va_list argptr;
   char    string[ 1024 ];

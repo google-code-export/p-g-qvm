@@ -1050,6 +1050,7 @@ void CalculateRanks( void );
 void FindIntermissionPoint( void );
 void G_RunThink( gentity_t *ent );
 void QDECL G_LogPrintf( const char *fmt, ... );
+void QDECL G_LogPrintfColored( const char *fmt, ... );
 void QDECL G_LogOnlyPrintf( const char *fmt, ... );
 void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... );
@@ -1322,6 +1323,8 @@ extern  vmCvar_t  g_minLevelToJoinTeam;
 extern  vmCvar_t  g_minLevelToSpecMM1;
 
 extern  vmCvar_t  g_KillerHP;
+
+extern  vmCvar_t  g_decolorLogfiles;
 
 extern  vmCvar_t  g_privateMessages;
 extern  vmCvar_t  g_buildLogMaxLength;

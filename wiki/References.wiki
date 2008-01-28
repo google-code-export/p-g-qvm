@@ -19,7 +19,7 @@
  * [http://code.google.com/p/p-g-qvm/issues/detail?id=12 Banned player connect admin warning flood protected]
  * [http://code.google.com/p/p-g-qvm/issues/detail?id=14 !denybuild granger fix]
  * [http://code.google.com/p/p-g-qvm/issues/detail?id=15 Mute prevents taunts]
-
+ (Note: Rezyn has since joined the project, and as such release quite a few features, so some of this will not be updated. A full list of all features can be found on the issue tracker)
 =Benmachine=
  * [http://www.bandstand.org.uk/~benm/coding/done.php#buildlog-revert !buildlog]
  * [http://www.mercenariesguild.net/patches/?getfile=263 console cp newlines]
@@ -30,8 +30,9 @@
 
 =Lakitu7=
  * [http://www.mercenariesguild.net/patches/?getfile=252 Lakitu7's 5.01 featureset]
- * [http://www.mercenariesguild.net/patches/?do=details&task_id=122 Team vote updates]
- * [http://www.mercenariesguild.net/patches/?do=details&task_id=122 Vote times (yes its by Rocinate, but i couldnt find a link)]
+  * Team vote updates
+  * Vote times
+  * LogFile decolor
  
 =Google=
  * Large number of commands unique to this qvm
