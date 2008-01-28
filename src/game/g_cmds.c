@@ -1048,15 +1048,15 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
     {
       default:
       case PTE_NONE:
-        prefix = "[S] ";
+        prefix = "[^3S^7] ";
         break;
 
       case PTE_ALIENS:
-        prefix = "[A] ";
+        prefix = "[^1A^7] ";
         break;
 
       case PTE_HUMANS:
-        prefix = "[H] ";
+        prefix = "[^4H^] ";
     }
   }
   else
@@ -1066,14 +1066,14 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
   {
     default:
     case SAY_ALL:
-      G_LogPrintf( "say: %s: %s\n", ent->client->pers.netname, chatText );
+      G_LogPrintf( "say: %s^7: %s^7\n", ent->client->pers.netname, chatText );
       Com_sprintf( name, sizeof( name ), "%s%s%c%c"EC": ", prefix,
                    ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
       color = COLOR_GREEN;
       break;
 
     case SAY_TEAM:
-      G_LogPrintf( "sayteam: %s: %s\n", ent->client->pers.netname, chatText );
+      G_LogPrintf( "sayteam: %s^7: %s^7\n", ent->client->pers.netname, chatText );
       if( Team_GetLocationMsg( ent, location, sizeof( location ) ) )
         Com_sprintf( name, sizeof( name ), EC"(%s%c%c"EC") (%s)"EC": ",
           ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, location );
@@ -1361,7 +1361,7 @@ static void Cmd_Tell_f( gentity_t *ent )
 
   p = ConcatArgs( 2 );
 
-  G_LogPrintf( "tell: %s to %s: %s\n", ent->client->pers.netname, target->client->pers.netname, p );
+  G_LogPrintf( "tell: %s^7 to %s^7: %s^7\n", ent->client->pers.netname, target->client->pers.netname, p );
   G_Say( ent, target, SAY_TELL, p );
   // don't tell to the player self if it was already directed to this player
   // also don't send the chat back to a bot
@@ -2650,7 +2650,7 @@ void Cmd_Destroy_f( gentity_t *ent )
                BG_FindHumanNameForBuildable( traceEnt->s.modelindex ), 
                ent->client->pers.netname ) );
 
-           G_LogPrintf( "Decon: %i %i 0: %s deconstructed %s\n",
+           G_LogPrintf( "Decon: %i %i 0: %s^7 deconstructed %s\n",
              ent->client->ps.clientNum,
              traceEnt->s.modelindex,
              ent->client->pers.netname, 
@@ -3818,6 +3818,13 @@ static void Cmd_Ignore_f( gentity_t *ent )
  
      return;
    }
+
+   if( g_floodMinTime.integer &&
+     G_Flood_Limited( ent ) )
+   {
+     trap_SendServerCommand( ent-g_entities, "print \"Your donations are flood-limited; wait before trying again\n\"" );
+     return;
+   }
  
    team = ent->client->pers.teamSelection;
  
@@ -4021,7 +4028,13 @@ static void Cmd_Ignore_f( gentity_t *ent )
  
      return;
    }
- 
+
+   if( g_floodMinTime.integer &&
+     G_Flood_Limited( ent ) )
+   {
+     trap_SendServerCommand( ent-g_entities, "print \"Your donations are flood-limited; wait before trying again\n\"" );
+     return;
+   }
  
    if( ent->client->pers.teamSelection == PTE_ALIENS )
      divisor = level.numAlienClients-1;
@@ -4496,7 +4509,7 @@ void G_PrivateMessage( gentity_t *ent )
 
     ADMP( va( "%s\n", str ) );
 
-    G_LogPrintf( "%s: %s: %s: %s\n",
+    G_LogPrintf( "%s: %s^7: %s^7: %s^7\n",
       ( teamonly ) ? "tprivmsg" : "privmsg",
       ( ent ) ? ent->client->pers.netname : "console",
       name, msg );

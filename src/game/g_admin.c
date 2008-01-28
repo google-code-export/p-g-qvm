@@ -91,7 +91,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"customgrav", G_admin_customgrav, "Q",
       "set the gravity for a specific player. Normal gives normal server gravity",
-      "[^3name|slot#^7] [^3#/normal^7]"
+      "[^3name|slot#^7] [^3#^7]"
     },
 
     {"denybuild", G_admin_denybuild, "d",
@@ -865,7 +865,7 @@ static void admin_log( gentity_t *admin, char *cmd, int skiparg )
 {
   fileHandle_t f;
   int len, i, j;
-  char string[ MAX_STRING_CHARS ];
+  char string[ MAX_STRING_CHARS ], decolored[ MAX_STRING_CHARS ];
   int min, tens, sec;
   g_admin_admin_t *a;
   g_admin_level_t *l;
@@ -956,7 +956,17 @@ static void admin_log( gentity_t *admin, char *cmd, int skiparg )
                  cmd,
                  G_SayConcatArgs( 1 + skiparg ) );
   }
-  trap_FS_Write( string, strlen( string ), f );
+
+  if( g_decolorLogfiles.integer )
+  {
+    G_DecolorString( string, decolored );
+    trap_FS_Write( decolored, strlen( decolored ), f );
+  }
+  else
+  {
+     trap_FS_Write( string, strlen( string ), f );
+  }
+  
   trap_FS_FCloseFile( f );
   
   if ( !Q_stricmp( cmd, "attempted" ) )
@@ -5292,17 +5302,12 @@ qboolean G_admin_customgrav( gentity_t *ent, int skiparg )
   int minargc;
   gentity_t *vic;
 
-  if( !ent )
-  {
-  ADMP( "^3!customgrav: ^7console cannot use this command\n" );
-    return qfalse;
-  }
 
-    minargc = 3 + skiparg;
+    minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )
   {
-    ADMP( "^3!customgrav: ^7usage: !customgrav [name|slot#] [gravity#|normal]\n" );
+    ADMP( "^3!customgrav: ^7usage: !customgrav [name|slot#] [gravity#]\n" );
     return qfalse;
   }
   
@@ -5326,15 +5331,17 @@ qboolean G_admin_customgrav( gentity_t *ent, int skiparg )
   
 G_SayArgv( 2 + skiparg, lvl, sizeof( lvl ) );
 
-if( !Q_stricmp( lvl, "normal" ) )
+minargc = 3 + skiparg;
+
+if( G_SayArgc() < minargc )
 {
 vic->client->pers.cusgrav = qfalse;
-ADMP( "^3!customgrav: ^7their custom gravity has been disabled\n" );
+ADMP( "^3!customgrav: ^7player's custom gravity has been disabled\n" );
 }
+
 else
 {
-
-ADMP( va( "^3!customgrav: ^7their gravity has been set to %s\n", ( atoi(lvl) == 0 ) ? "0" : lvl ) );
+ADMP( va( "^3!customgrav: ^7player's gravity has been set to %s\n", ( atoi(lvl) == 0 ) ? "0" : lvl ) );
 vic->client->pers.cusgrav = qtrue;
 vic->client->pers.cusgravlvl = atoi(lvl);
 }
@@ -5352,12 +5359,6 @@ qboolean G_admin_explode( gentity_t *ent, int skiparg )
   int minargc;
   gentity_t *vic;
 	
-  if( !ent )
-  {
-  ADMP( "^3!explode: ^7console cannot use this command\n" );
-    return qfalse;
-  }
-
   minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )

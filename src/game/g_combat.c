@@ -197,7 +197,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   else
     obit = modNames[ meansOfDeath ];
 
-  G_LogPrintf("Kill: %i %i %i: %s killed %s by %s\n",
+  G_LogPrintf("Kill: %i %i %i: %s^7 killed %s^7 by %s\n",
     killer, self->s.number, meansOfDeath, killerName,
     self->client->pers.netname, obit );
 

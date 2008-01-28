@@ -1200,9 +1200,29 @@ void ClientUserinfoChanged( int clientNum )
     if( strcmp( oldname, client->pers.netname ) )
     {
       trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE
-        " renamed to %s\n\"", oldname, client->pers.netname ) );
-      G_LogPrintf( "ClientRename: %i [%s] (%s) \"%s\" -> \"%s\"\n", clientNum,
+        " renamed to %s^7\n\"", oldname, client->pers.netname ) );
+      if( g_decolorLogfiles.integer)
+      {
+        char    decolored[ MAX_STRING_CHARS ] = "";   
+        if( g_decolorLogfiles.integer == 1 )
+	{
+	  Com_sprintf( decolored, sizeof(decolored), " (\"%s^7\" -> \"%s^7\")", oldname, client->pers.netname );
+	  G_DecolorString( decolored, decolored );
+          G_LogPrintfColored( "ClientRename: %i [%s] (%s) \"%s^7\" -> \"%s^7\"%s\n", clientNum,
+             client->pers.ip, client->pers.guid, oldname, client->pers.netname, decolored );
+	}
+	else
+	{
+          G_LogPrintf( "ClientRename: %i [%s] (%s) \"%s^7\" -> \"%s^7\"%s\n", clientNum,
+             client->pers.ip, client->pers.guid, oldname, client->pers.netname, decolored );
+	}
+
+      }
+      else
+      {
+      G_LogPrintf( "ClientRename: %i [%s] (%s) \"%s^7\" -> \"%s^7\"\n", clientNum,
          client->pers.ip, client->pers.guid, oldname, client->pers.netname );
+      }
       G_admin_namelog_update( client, qfalse );
     }
   }
@@ -1411,8 +1431,28 @@ char *ClientConnect( int clientNum, qboolean firstTime )
 
   // get and distribute relevent paramters
   ClientUserinfoChanged( clientNum );
-  G_LogPrintf( "ClientConnect: %i [%s] (%s) \"%s\"\n", clientNum,
+  
+  if( g_decolorLogfiles.integer )
+  {
+   char    decolored[ MAX_STRING_CHARS ] = "";   
+   if( g_decolorLogfiles.integer == 1 )
+   {
+     Com_sprintf( decolored, sizeof(decolored), " (\"%s^7\")", client->pers.netname );
+     G_DecolorString( decolored, decolored );
+     G_LogPrintfColored( "ClientConnect: %i [%s] (%s) \"%s^7\"%s\n", clientNum,
+        client->pers.ip, client->pers.guid, client->pers.netname, decolored );
+   }
+   else
+   {
+      G_LogPrintf( "ClientConnect: %i [%s] (%s) \"%s^7\"%s\n", clientNum,
+          client->pers.ip, client->pers.guid, client->pers.netname, decolored );
+   }
+  }
+  else
+  {
+  G_LogPrintf( "ClientConnect: %i [%s] (%s) \"%s^7\"\n", clientNum,
    client->pers.ip, client->pers.guid, client->pers.netname );
+  }
 
   // don't do the "xxx connected" messages if they were caried over from previous level
   if( firstTime )
@@ -1867,7 +1907,7 @@ void ClientDisconnect( int clientNum )
     tent->s.clientNum = ent->s.clientNum;
   }
 
-  G_LogPrintf( "ClientDisconnect: %i [%s] (%s) \"%s\"\n", clientNum,
+  G_LogPrintf( "ClientDisconnect: %i [%s] (%s) \"%s^7\"\n", clientNum,
    ent->client->pers.ip, ent->client->pers.guid, ent->client->pers.netname );
 
   trap_UnlinkEntity( ent );
