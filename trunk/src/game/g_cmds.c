@@ -1056,7 +1056,7 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
         break;
 
       case PTE_HUMANS:
-        prefix = "[^4H^] ";
+        prefix = "[^4H^7] ";
     }
   }
   else

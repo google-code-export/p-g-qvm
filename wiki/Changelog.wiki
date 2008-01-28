@@ -1,6 +1,8 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.4=
+==1.4.4.1==
+ * Fixed ugly bug with prefix.
 ==1.4.4==
  * Added color to chat team prefixes
  * Added Logfile decolor
