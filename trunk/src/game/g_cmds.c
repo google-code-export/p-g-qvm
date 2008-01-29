@@ -1706,6 +1706,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE
          " called a vote: %s\n\"", ent->client->pers.netname, level.voteDisplayString ) );
+  trap_SendServerCommand( -1, va( "cp \"A vote has been called\n^2F1: Yes^7, ^1F2: No^7\"" ) );
   
   Q_strcat( level.voteDisplayString, sizeof( level.voteDisplayString ), va( " Called by: %s^7", ent->client->pers.netname ) );
 
@@ -2081,8 +2082,12 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
       continue;
 
     if( level.clients[ i ].ps.stats[ STAT_PTEAM ] == team )
+	{
       trap_SendServerCommand( i, va("print \"%s " S_COLOR_WHITE
             "called a team vote: %s \n\"", ent->client->pers.netname, level.teamVoteDisplayString[ cs_offset ] ) );
+	  trap_SendServerCommand( i, "cp \"A teamvote has been called\n^2F1: Yes^7, ^1F2: No^7\"" );
+	}
+
   }
 
   // start the voting

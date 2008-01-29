@@ -2308,8 +2308,8 @@ void CheckVote( void )
     }
   }
 
-  trap_SendServerCommand(-1, va("print \"Vote %s^7 (^2Y:%d^7-^1N:%d^7) [%s]\n\"",
-    result, level.voteYes, level.voteNo, level.voteDisplayString ) );
+  trap_SendServerCommand(-1, va("print \"Vote %s^7 (^2Y:%d^7-^1N:%d^7, %d percent) (%s)\n\"",
+    result, level.voteYes, level.voteNo, voteYesPercent, level.voteDisplayString ) );
 
   level.voteTime = 0;
   trap_SetConfigstring( CS_VOTE_TIME, "" );
@@ -2379,8 +2379,8 @@ void CheckTeamVote( int team )
     }
   }
 
-  trap_SendServerCommand( -1, va( "print \"Team vote %s^7 (^2Y:%d^7-^1N:%d^7)\n\"",
-    result, level.teamVoteYes[ cs_offset ], level.teamVoteNo[ cs_offset ] ) );
+  trap_SendServerCommand( -1, va( "print \"Team vote %s^7 (^2Y:%d^7-^1N:%d^7, %d percent)\n\"",
+    result, level.teamVoteYes[ cs_offset ], level.teamVoteNo[ cs_offset ], voteYesPercent ) );
 
   level.teamVoteTime[ cs_offset ] = 0;
   trap_SetConfigstring( CS_TEAMVOTE_TIME + cs_offset, "" );
