@@ -73,7 +73,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#|IP^7] (^5time^7) (^5reason^7)"
     },
 	
-	{"buildlog", G_admin_buildlog, "U",
+    {"buildlog", G_admin_buildlog, "U",
       "display a list of recent builds and deconstructs, optionally specifying"
       " a team",
       "(^5xnum^7) (^5#skip^7) (^5-name|num^7) (^5a|h^7)",
@@ -87,6 +87,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"cp", G_admin_cp, "Z",
       "display a message to all users",
       "[^3message^7]"
+    },
+    
+    {"credits", G_admin_credits, "u",
+      "Add/subtract credits to/from a player",
+      "[^3name|slot#^7] [^3amount#^7]"
     },
     
     {"customgrav", G_admin_customgrav, "Q",
@@ -124,7 +129,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
 	
-	{"forcespec", G_admin_forcespec, "F",
+    {"forcespec", G_admin_forcespec, "F",
       "disable joining of teams for a player",
       "[^3name|slot#^7]"
     },
@@ -134,7 +139,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5command^7)"
     },
 	
-	    {"immunity", G_admin_immunity, "b",
+    {"immunity", G_admin_immunity, "b",
       "give a player ban immunity",
       "[^3+|-^7](^5slot#^7)"
     },
@@ -149,7 +154,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5reason^7)"
     },
 	
-	{"L0", G_admin_L0, "l",
+    {"L0", G_admin_L0, "l",
       "Sets a level 1 to level 0",
       "[^3name|slot#^7]"
     },
@@ -174,7 +179,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5mapname^7)"
     },
 	
-	{"listmaps", G_admin_listmaps, "j",
+    {"listmaps", G_admin_listmaps, "j",
       "display a list of available maps on the server",
       ""
     },
@@ -194,12 +199,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3mapname^7] (^5layout^7)"
     },
 	
-	{"maplog", G_admin_maplog, "j",
+    {"maplog", G_admin_maplog, "j",
       "show recently played maps",
       ""
     },
 	
-	{"mix", G_admin_mix, "X",
+    {"mix", G_admin_mix, "X",
       "mix another player into yourself",
       "[^3name|slot#^7]"
     },
@@ -224,7 +229,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 	
-	{"pause", G_admin_pause, "S",
+    {"pause", G_admin_pause, "S",
       "prevent a player from interacting with the game."
       "  * will pause all players, using no argument will pause game clock",
       "(^5name|slot|*^7)"
@@ -255,7 +260,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5layout^7) (^5keepteams|switchteams|keepteamslock|switchteamslock^7)"
     },
 	
-	{"revert", G_admin_revert, "U",
+    {"revert", G_admin_revert, "U",
       "revert one or more buildlog events, optionally of only one team",
       "(^5xnum^7) (^5#ID^7) (^5-name|num^7) (^5a|h^7)"
     },
@@ -270,7 +275,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5start at ban#^7|name|IP)"
     },
 	
-	{"slap", G_admin_slap, "x",
+    {"slap", G_admin_slap, "x",
       "Do damage to a player, and send them flying",
       "[^3name|slot^7] (damage)"
     },
@@ -286,19 +291,19 @@ g_admin_cmd_t g_admin_cmds[ ] =
 	""
     },
 	
-	{"steal", G_admin_steal, "T",
+    {"steal", G_admin_steal, "T",
       "steal health from another player",
       "[^3name|slot#^7]"
     },
 	
-	{"suspendban", G_admin_suspendban, "b",
+    {"suspendban", G_admin_suspendban, "b",
       "suspend a ban for a length of time. time is specified as numbers "
       "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
       " or seconds if no units are specified",
       "[^5ban #^7] [^5length^7]"
     },
 	
-	{"switch", G_admin_switch, "X",
+    {"switch", G_admin_switch, "X",
       "switch places with somenone",
       "[^3name|slot#^7]"
     },
@@ -307,7 +312,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "show the current local server time",
       ""},
 	  
-	{"trade", G_admin_trade, "t",
+    {"trade", G_admin_trade, "t",
       "trade health with another player",
       "[^3name|slot#^7]"
     },
@@ -327,7 +332,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
 	
-	{"unforcespec", G_admin_unforcespec, "F",
+    {"unforcespec", G_admin_unforcespec, "F",
       "enable joining of teams for a player",
       "[^3name|slot#^7]"
      },
@@ -337,7 +342,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
 	
-	{"unpause", G_admin_pause, "S",
+    {"unpause", G_admin_pause, "S",
       "allow a player to interact with the game."
       "  * will unpause all players, using no argument will unpause game clock",
       "(^5name|slot|*^7)"
@@ -6250,3 +6255,109 @@ ent->client->noclip = qfalse;
 
 } 
 
+qboolean G_admin_credits( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  int minargc;
+  gentity_t *vic;
+  int amnt;
+  char amnt_chr[11];
+  int max_creds;
+
+    minargc = 3 + skiparg;
+
+  if( G_SayArgc() < minargc )
+  {
+    ADMP( "^3!credits: ^7usage: !credits [name|slot#] [amount#]\n" );
+    return qfalse;
+  }
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!credits: ^7%s\n", err ) );
+    return qfalse;
+  }
+
+if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
+  {
+    ADMP( "^3!credits: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+
+  vic = &g_entities[ pids[ 0 ] ];
+  
+  G_SayArgv( 2 + skiparg, amnt_chr, sizeof( amnt_chr ) );
+  //convert the text into a int
+  amnt = atoi(amnt_chr + 1);
+   
+   //tell the players hes tryed to give himself some credits (what a cheater) heh
+   if (vic == ent)
+   {
+   AP( va( "print \"^3!credits: ^7%s^7 attempted to modify their own credits\n\"", ( ent ) ? ent->client->pers.netname : "console" ) );
+      return qfalse;
+   }
+   
+   switch(amnt_chr[0])
+   {
+   	case '+':
+	//check the players max credit limit
+	if (vic->client->pers.teamSelection == PTE_HUMANS )
+	{
+	 max_creds = HUMAN_MAX_CREDITS;
+	}
+	else
+	{
+	 max_creds = ALIEN_MAX_KILLS;
+	}
+	
+	//checks if the player can get anymore money
+	if( vic->client->ps.persistant[ PERS_CREDIT ] == max_creds )
+	{
+	 ADMP( "^3!credits: ^7sorry, but that player cannot receive anymore credits/evos\n" );
+	   return qfalse;
+	}
+	//makes sure it doesnt overflow
+	if( vic->client->ps.persistant[ PERS_CREDIT ] + amnt > max_creds )
+	{
+	 amnt = max_creds - vic->client->ps.persistant[ PERS_CREDIT ];
+	}
+	//sets their credits
+	vic->client->ps.persistant[ PERS_CREDIT ] += amnt;
+	
+	Com_sprintf( amnt_chr, sizeof(amnt_chr), "%i", amnt );
+	
+	AP( va( "print \"^3!credits: ^7%s^7 gave ^7%s^7 %s extra credits/evos\n\"", ( ent ) ? ent->client->pers.netname : "console", vic->client->pers.netname, amnt_chr ) );
+	break;
+	
+   	case '-':
+	
+	//check if player can lose anymore money
+	if( vic->client->ps.persistant[ PERS_CREDIT ] == 0 )
+	{
+	 ADMP( "^3!credits: ^7sorry, but that player cannot lose anymore credits/evos\n" );
+	   return qfalse;
+	}
+	
+	//makes sure it doesnt underflow
+	if( vic->client->ps.persistant[ PERS_CREDIT ] - amnt < 0 )
+	{
+	 amnt = vic->client->ps.persistant[ PERS_CREDIT ];
+	}
+	
+	vic->client->ps.persistant[ PERS_CREDIT ] -= amnt;
+	
+	Com_sprintf( amnt_chr, sizeof(amnt_chr), "%i", amnt );
+	
+	AP( va( "print \"^3!credits: ^7%s^7 subtracted %s credits/evos from ^7%s^7\n\"", ( ent ) ? ent->client->pers.netname : "console", amnt_chr, vic->client->pers.netname ) );
+   	break;
+   }
+   
+
+
+  return qtrue;
+
+} 

@@ -229,6 +229,7 @@ qboolean G_admin_trade( gentity_t *ent, int skiparg );
 qboolean G_admin_drug( gentity_t *ent, int skiparg ); 
 qboolean G_admin_drop( gentity_t *ent, int skiparg ); 
 qboolean G_admin_cp( gentity_t *ent, int skiparg ); 
+qboolean G_admin_credits( gentity_t *ent, int skiparg ); 
 qboolean G_admin_customgrav( gentity_t *ent, int skiparg ); 
 qboolean G_admin_explode( gentity_t *ent, int skiparg ); 
 

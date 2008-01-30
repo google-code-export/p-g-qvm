@@ -29,6 +29,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
   * _g_adminRegisterAdminPass_: Password required to get to levels set by `g_adminRegisterAdminLevel`. Blank is default, and disabled
   * _g_adminRegisterAdminLevel_: Level to which password registrations go. Default is 0.
   * *WARNING: IF PASSWORDS ARE TYPED IN CHAT, AND `g_adminSayFilter` IS OFF, THEN PASSWORD WILL BE DISPLAYED IN CHAT. TO OVERCOME THIS, USE ESCAPED SYNTAX (/!register)
+ * *!credits* (u): Add or remove credits from a player (good for paying back that poor sap who you just !explode'd). Anti-abuse prevents players from modifying their own credit amount.
  
 =Other Features=
  * Decolor log files, controlled by `g_decolorLogfiles`

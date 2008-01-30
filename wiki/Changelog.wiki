@@ -1,6 +1,9 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.4=
+==1.4.5==
+ * Long awaited `!credits` function finally here
+ * Indentation fixed for admin commands
 ==1.4.4.2==
  * Added Vote CP messages and percent notice on vote pass
 ==1.4.4.1==
