@@ -59,6 +59,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "restore a player's ability to build",
       "[^3name|slot#^7]"
     },
+
+    {"allowweapon", G_admin_denyweapon, "d",
+      "restore a player's ability to use a weapon or class",
+      "[^3name|slot#^7] [^3class|weapon|all^7]"
+    },
     
     {"allready", G_admin_allready, "y",
       "makes everyone ready in intermission",
@@ -102,6 +107,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"denybuild", G_admin_denybuild, "d",
       "take away a player's ability to build",
       "[^3name|slot#^7]"
+    },
+
+    {"denyweapon", G_admin_denyweapon, "d",
+      "take away a player's ability to use a weapon or class",
+      "[^3name|slot#^7] [^3class|weapon^7]"
     },
 
     {"designate", G_admin_designate, "g",
@@ -181,7 +191,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 	
     {"listmaps", G_admin_listmaps, "j",
       "display a list of available maps on the server",
-      ""
+      "(^5map name^7)"
     },
 
     {"listplayers", G_admin_listplayers, "i",
@@ -1304,13 +1314,13 @@ qboolean G_admin_cmd_check( gentity_t *ent, qboolean say )
     {
       trap_SendConsoleCommand( EXEC_APPEND, g_admin_commands[ i ]->exec );
       admin_log( ent, cmd, skip );
-      G_admin_adminlog_log( ent, cmd, skip, qtrue );
+      G_admin_adminlog_log( ent, cmd, NULL, skip, qtrue );
     }
     else
     {
       ADMP( va( "^3!%s: ^7permission denied\n", g_admin_commands[ i ]->command ) );
       admin_log( ent, "attempted", skip - 1 );
-      G_admin_adminlog_log( ent, cmd, skip, qfalse );
+      G_admin_adminlog_log( ent, cmd, NULL, skip, qfalse );
     }
     return qtrue;
   }
@@ -1324,13 +1334,13 @@ qboolean G_admin_cmd_check( gentity_t *ent, qboolean say )
     {
       g_admin_cmds[ i ].handler( ent, skip );
       admin_log( ent, cmd, skip );
-      G_admin_adminlog_log( ent, cmd, skip, qtrue );
+      G_admin_adminlog_log( ent, cmd, NULL, skip, qtrue );
     }
     else
     {
       ADMP( va( "^3!%s: ^7permission denied\n", g_admin_cmds[ i ].keyword ) );
       admin_log( ent, "attempted", skip - 1 );
-      G_admin_adminlog_log( ent, cmd, skip, qfalse );
+      G_admin_adminlog_log( ent, cmd, NULL, skip, qfalse );
     }
     return qtrue;
   }
@@ -2506,6 +2516,7 @@ qboolean G_admin_devmap( gentity_t *ent, int skiparg )
   AP( va( "print \"^3!devmap: ^7map '%s' started by %s^7 with cheats %s\n\"", map,
           ( ent ) ? ent->client->pers.netname : "console",
           ( layout[ 0 ] ) ? va( "(forcing layout '%s')", layout ) : "" ) );
+  G_admin_maplog_result( "D" );
   return qtrue;
 }
 
@@ -2653,6 +2664,183 @@ qboolean G_admin_denybuild( gentity_t *ent, int skiparg )
       ( ent ) ? ent->client->pers.netname : "console" ) );
   }
   ClientUserinfoChanged( pids[ 0 ] );
+  return qtrue;
+}
+
+qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  char command[ MAX_ADMIN_CMD_LEN ], *cmd;
+  char buffer[ 32 ];
+  int weapon = WP_NONE;
+  int class = PCL_NONE;
+  char *realname;
+  gentity_t *vic;
+  int flag;
+
+  G_SayArgv( skiparg, command, sizeof( command ) );
+  cmd = command;
+  if( cmd && *cmd == '!' )
+    cmd++;
+  if( G_SayArgc() < 3 + skiparg )
+  {
+    ADMP( va( "^3!%s: ^7usage: !%s [name|slot#] [class|weapon]\n", cmd, cmd ) );
+    return qfalse;
+  }
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!%s: ^7%s\n", cmd, err ) );
+    return qfalse;
+  }
+  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
+  {
+    ADMP( va( "^3!%s: ^7sorry, but your intended victim has a higher admin"
+              " level than you\n", cmd ) );
+    return qfalse;
+  }
+  vic = &g_entities[ pids[ 0 ] ];
+
+  G_SayArgv( 2 + skiparg, buffer, sizeof( buffer ) );
+
+  if( !Q_stricmp( buffer, "all" ) &&
+      !Q_stricmp( cmd, "allowweapon" ) )
+  {
+    if( vic->client->pers.denyHumanWeapons ||
+        vic->client->pers.denyAlienClasses )
+    {
+      vic->client->pers.denyHumanWeapons = 0;
+      vic->client->pers.denyAlienClasses = 0;
+
+      CPx( pids[ 0 ], "cp \"^1You've regained all weapon and class rights\"" );
+      AP( va( "print \"^3!%s: ^7all weapon and class rights for ^7%s^7 restored by %s\n\"",
+        cmd,
+        vic->client->pers.netname,
+        ( ent ) ? ent->client->pers.netname : "console" ) );
+    }
+    else
+    {
+      ADMP( va( "^3!%s: ^7player already has all rights\n", cmd ) );
+    }
+    return qtrue;
+  }
+
+  weapon = BG_FindWeaponNumForName( buffer );
+  if( weapon < WP_PAIN_SAW || weapon > WP_GRENADE )
+    class = BG_FindClassNumForName( buffer );
+  if( ( weapon < WP_PAIN_SAW || weapon > WP_GRENADE ) &&
+      ( class < PCL_ALIEN_LEVEL0 || class > PCL_ALIEN_LEVEL4 ) )
+  {
+    ADMP( va( "^3!%s: ^7unknown weapon or class\n", cmd ) );
+    return qfalse;
+  }
+
+  if( class == PCL_NONE )
+  {
+    realname = BG_FindHumanNameForWeapon( weapon );
+    flag = 1 << (weapon - WP_BLASTER);
+    if( !Q_stricmp( cmd, "denyweapon" ) )
+    {
+      if( ( vic->client->pers.denyHumanWeapons & flag ) )
+      {
+      ADMP( va( "^3!%s: ^7player already has no %s rights\n", cmd, realname ) );
+      return qtrue;
+      }
+      vic->client->pers.denyHumanWeapons |= flag;
+      if( vic->client->pers.teamSelection == PTE_HUMANS )
+      {
+        if( weapon == WP_GRENADE &&
+            BG_InventoryContainsUpgrade( UP_GRENADE, vic->client->ps.stats ) )
+        {
+          BG_RemoveUpgradeFromInventory( UP_GRENADE, vic->client->ps.stats );
+          G_AddCreditToClient( vic->client, (short)BG_FindPriceForUpgrade( UP_GRENADE ), qfalse );
+        }
+        else if( BG_InventoryContainsWeapon( weapon, vic->client->ps.stats ) )
+        {
+          int maxAmmo, maxClips;
+
+          BG_RemoveWeaponFromInventory( weapon, vic->client->ps.stats );
+          G_AddCreditToClient( vic->client, (short)BG_FindPriceForWeapon( weapon ), qfalse );
+
+          BG_AddWeaponToInventory( WP_MACHINEGUN, vic->client->ps.stats );
+          BG_FindAmmoForWeapon( WP_MACHINEGUN, &maxAmmo, &maxClips );
+          BG_PackAmmoArray( WP_MACHINEGUN, vic->client->ps.ammo, vic->client->ps.powerups,
+                            maxAmmo, maxClips );
+          G_ForceWeaponChange( vic, WP_MACHINEGUN );
+          vic->client->ps.stats[ STAT_MISC ] = 0;
+          ClientUserinfoChanged( pids[ 0 ] );
+        }
+      }
+    }
+    else
+    {
+      if( !( vic->client->pers.denyHumanWeapons & flag ) )
+      {
+      ADMP( va( "^3!%s: ^7player already has %s rights\n", cmd, realname ) );
+      return qtrue;
+      }
+      vic->client->pers.denyHumanWeapons &= ~flag;
+    }
+  }
+  else
+  {
+    realname = BG_FindHumanNameForClassNum( class );
+    flag = 1 << class;
+    if( !Q_stricmp( cmd, "denyweapon" ) )
+    {
+      if( ( vic->client->pers.denyAlienClasses & flag ) )
+      {
+      ADMP( va( "^3!%s: ^7player already has no %s rights\n", cmd, realname ) );
+      return qtrue;
+      }
+      vic->client->pers.denyAlienClasses |= flag;
+      if( vic->client->pers.teamSelection == PTE_ALIENS &&
+          ent->client->pers.classSelection == class )
+      {
+        vec3_t infestOrigin;
+        short cost;
+
+        G_RoomForClassChange( vic, PCL_ALIEN_LEVEL0, infestOrigin );
+
+        vic->client->pers.evolveHealthFraction = (float)vic->client->ps.stats[ STAT_HEALTH ] /
+            (float)BG_FindHealthForClass( class );
+        if( ent->client->pers.evolveHealthFraction < 0.0f )
+          ent->client->pers.evolveHealthFraction = 0.0f;
+        else if( ent->client->pers.evolveHealthFraction > 1.0f )
+          ent->client->pers.evolveHealthFraction = 1.0f;
+
+        ent->client->pers.classSelection = PCL_ALIEN_LEVEL0;
+        cost = BG_ClassCanEvolveFromTo( PCL_ALIEN_LEVEL0, class, 9, 0 );
+        if( cost < 0 ) cost = 0;
+        G_AddCreditToClient( vic->client, cost, qfalse );
+        ClientUserinfoChanged( pids[ 0 ] );
+        VectorCopy( infestOrigin, vic->s.pos.trBase );
+        ClientSpawn( vic, vic, vic->s.pos.trBase, vic->s.apos.trBase );
+      }
+    }
+    else
+    {
+      if( !( vic->client->pers.denyAlienClasses & flag ) )
+      {
+      ADMP( va( "^3!%s: ^7player already has %s rights\n", cmd, realname ) );
+      return qtrue;
+      }
+      vic->client->pers.denyAlienClasses &= ~flag;
+    }
+  }
+
+  CPx( pids[ 0 ], va( "cp \"^1You've %s your %s rights\"",
+    ( !Q_stricmp( cmd, "denyweapon" ) ) ? "lost" : "regained",
+    realname ) );
+  AP( va(
+    "print \"^3!%s: ^7%s rights for ^7%s^7 %s by %s\n\"",
+    cmd, realname,
+    vic->client->pers.netname,
+    ( !Q_stricmp( cmd, "denyweapon" ) ) ? "revoked" : "restored",
+    ( ent ) ? ent->client->pers.netname : "console" ) );
+  
   return qtrue;
 }
 
@@ -2862,6 +3050,10 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
     if( p->pers.denyBuild )
     {
       Q_strncpyz( denied, "B", sizeof( denied ) );
+    }
+    if( p->pers.denyHumanWeapons || p->pers.denyAlienClasses )
+    {
+      Q_strncpyz( denied, "W", sizeof( denied ) );
     }
 
     dbuilder[ 0 ] = '\0';
@@ -5280,8 +5472,7 @@ qboolean G_admin_cp( gentity_t *ent, int skiparg )
   int minargc;
   char *s;
 
-
-    minargc = 2 + skiparg;
+  minargc = 2 + skiparg;
 
   if( G_SayArgc() < minargc )
   {
@@ -5291,11 +5482,11 @@ qboolean G_admin_cp( gentity_t *ent, int skiparg )
 
   s = G_SayConcatArgs( 1 + skiparg );
   Q_strncpyz( msg, s, sizeof( msg ) );
+  G_ParseEscapedString( msg );
+  trap_SendServerCommand( -1, va( "cp \"%s\"", msg ) );
+  trap_SendServerCommand( -1, va( "print \"CP: %s\n\"", msg ) );
 
-trap_SendServerCommand( -1, va( "cp \"%s\"", msg ) );
-
-	return qtrue;
-
+  return qtrue;
 }
 
 qboolean G_admin_customgrav( gentity_t *ent, int skiparg )
@@ -5493,7 +5684,7 @@ void G_admin_adminlog_cleanup( void )
   admin_adminlog_index = 0;
 }
 
-void G_admin_adminlog_log( gentity_t *ent, char *command, int skiparg, qboolean success )
+void G_admin_adminlog_log( gentity_t *ent, char *command, char *args, int skiparg, qboolean success )
 {
   g_admin_adminlog_t *adminlog;
   int previous;
@@ -5531,7 +5722,11 @@ void G_admin_adminlog_log( gentity_t *ent, char *command, int skiparg, qboolean 
   adminlog->time = level.time - level.startTime;
   adminlog->success = success;
   Q_strncpyz( adminlog->command, command, sizeof( adminlog->command ) );
-  Q_strncpyz( adminlog->args, G_SayConcatArgs( 1 + skiparg ), sizeof( adminlog->args ) );
+
+  if ( args )
+    Q_strncpyz( adminlog->args, args, sizeof( adminlog->args ) );
+  else
+    Q_strncpyz( adminlog->args, G_SayConcatArgs( 1 + skiparg ), sizeof( adminlog->args ) );
 
   if( ent )
   {
@@ -5887,6 +6082,9 @@ qboolean G_admin_maplog( gentity_t *ent, int skiparg )
         case 'M':
           result = "^6admin changed map";
           break;
+        case 'D':
+          result = "^6admin loaded devmap";
+          break;
         default:
           result = "";
           break;
@@ -5939,12 +6137,18 @@ qboolean G_admin_listmaps( gentity_t *ent, int skiparg )
 {
   char fileList[ 4096 ] = {""};
   char *fileSort[ MAX_LISTMAPS_MAPS ];
+  char search[ 16 ] = {""};
   int numFiles;
   int i;
   int fileLen = 0;
   int  count = 0;
   char *filePtr;
   int rows;
+
+  if( G_SayArgc( ) > 1 + skiparg )
+  {
+    G_SayArgv( skiparg + 1, search, sizeof( search ) );
+  }
 
   numFiles = trap_FS_GetFileList( "maps/", ".bsp",
     fileList, sizeof( fileList ) );
@@ -5956,6 +6160,10 @@ qboolean G_admin_listmaps( gentity_t *ent, int skiparg )
       continue;
 
     filePtr[ fileLen - 4 ] = '\0';
+
+    if( search[ 0 ] && !strstr( filePtr, search ) )
+      continue;
+
     fileSort[ count ] = filePtr;
     count++;
   }
@@ -5973,7 +6181,11 @@ qboolean G_admin_listmaps( gentity_t *ent, int skiparg )
       ( rows + i < count ) ? fileSort[ rows + i ] : "",
       ( rows * 2 + i < count ) ? fileSort[ rows * 2 + i ] : "" ) );
   }
-  ADMBP( va( "^3!listmaps: ^7listing %d maps.\n", count ) );
+  if ( search[ 0 ] )
+    ADMBP( va( "^3!listmaps: ^7found %d maps matching '%s^7'.\n", count, search ) );
+  else
+    ADMBP( va( "^3!listmaps: ^7listing %d maps.\n", count ) );
+
   ADMBP_end();
 
   return qtrue;

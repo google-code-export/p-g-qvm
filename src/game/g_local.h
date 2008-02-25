@@ -381,6 +381,8 @@ typedef struct
   char                ip[ 16 ];
   qboolean            muted;
   qboolean            denyBuild;
+  int                 denyHumanWeapons;
+  int                 denyAlienClasses;
   qboolean            paused;
   int                 adminLevel;
   qboolean            specd;
@@ -738,6 +740,8 @@ typedef struct
   
   int               extend_vote_count;
 
+  int               lastMsgTime;
+
   pTeam_t           surrenderTeam;
   
   buildHistory_t    *buildHistory;
@@ -790,6 +794,7 @@ int       G_SayArgc( void );
 qboolean  G_SayArgv( int n, char *buffer, int bufferLength );
 char      *G_SayConcatArgs( int start );
 void      G_DecolorString( char *in, char *out );
+void      G_ParseEscapedString( char *buffer );
 void      G_LeaveTeam( gentity_t *self );
 void      G_ChangeTeam( gentity_t *ent, pTeam_t newTeam );
 void      G_SanitiseName( char *in, char *out );
@@ -798,6 +803,7 @@ void      Cmd_TeamVote_f( gentity_t *ent );
 char      *G_statsString( statsCounters_t *sc, pTeam_t *pt );
 void      Cmd_Share_f( gentity_t *ent );
 void      Cmd_Donate_f( gentity_t *ent );
+qboolean  G_RoomForClassChange( gentity_t *ent, pClass_t class, vec3_t newOrigin );
 
 //
 // g_physics.c
@@ -1245,6 +1251,7 @@ extern  vmCvar_t  g_synchronousClients;
 extern  vmCvar_t  g_motd;
 extern  vmCvar_t  g_warmup;
 extern  vmCvar_t  g_doWarmup;
+extern  vmCvar_t  g_proximityMines;
 extern  vmCvar_t  g_blood;
 extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
@@ -1332,6 +1339,8 @@ extern  vmCvar_t  g_publicSayadmins;
 extern  vmCvar_t  g_myStats;
 extern  vmCvar_t  g_antiSpawnBlock;
 
+extern  vmCvar_t  g_sayAreaLocations;
+
 extern  vmCvar_t  g_dretchPunt;
 
 extern  vmCvar_t  g_allowActions;
@@ -1346,14 +1355,20 @@ extern  vmCvar_t  g_radiationCreditsCount;
 
 extern  vmCvar_t  g_buyAll;
 extern  vmCvar_t  g_multipleWeapons;
+extern  vmCvar_t  g_devmapVotes;
 
 extern vmCvar_t  g_slapKnockback;
 extern vmCvar_t  g_slapDamage;
+
+extern  vmCvar_t  g_msg;
+extern  vmCvar_t  g_msgTime;
 
 extern  vmCvar_t  g_banNotice;
 
 extern  vmCvar_t  g_voteMinTime;
 extern  vmCvar_t  g_mapvoteMaxTime;
+
+extern  vmCvar_t  g_specAspec;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );
