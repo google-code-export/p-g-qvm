@@ -1178,7 +1178,8 @@ static void Cmd_SayArea_f( gentity_t *ent )
   vec3_t mins, maxs;
   char   *msg = ConcatArgs( 1 );
   char   name[ 64 ];
-  
+  char        location[ 64 ];
+    
     if( g_floodMinTime.integer )
     if ( G_Flood_Limited( ent ) )
     {
@@ -1208,8 +1209,13 @@ static void Cmd_SayArea_f( gentity_t *ent )
     prefix = "";
 
   G_LogPrintf( "sayarea: %s %s: %s\n", prefix, ent->client->pers.netname, msg );
-  Com_sprintf( name, sizeof( name ), EC"%s <%s%c%c"EC"> ",
-    prefix, ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
+  
+      if( g_sayAreaLocations.integer && Team_GetLocationMsg( ent, location, sizeof( location ) ) )
+        Com_sprintf( name, sizeof( name ), EC"%s<%s%c%c"EC"> (%s)"EC" ",
+          prefix, ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, location );
+      else
+        Com_sprintf( name, sizeof( name ), EC"%s<%s%c%c"EC"> ",
+          prefix, ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 
   VectorAdd( ent->s.origin, range, maxs );
   VectorSubtract( ent->s.origin, range, mins );
@@ -1218,7 +1224,6 @@ static void Cmd_SayArea_f( gentity_t *ent )
   for( i = 0; i < num; i++ )
     G_SayTo( ent, &g_entities[ entityList[ i ] ], SAY_TEAM, color, name, msg, prefix );
 }
-
 
 /*
 ==================
@@ -1453,6 +1458,15 @@ void Cmd_CallVote_f( gentity_t *ent )
   // if there is still a vote to be executed
   if( level.voteExecuteTime )
   {
+    if( !Q_stricmp( level.voteString, "map_restart" ) )
+    {
+      G_admin_maplog_result( "r" );
+    }
+    else if( !Q_stricmpn( level.voteString, "map", 3 ) )
+    {
+      G_admin_maplog_result( "m" );
+    }
+
     level.voteExecuteTime = 0;
     trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteString ) );
   }
@@ -1533,6 +1547,7 @@ void Cmd_CallVote_f( gentity_t *ent )
       trap_SendServerCommand( ent-g_entities,
         "print \"callvote: admin is immune from vote kick\n\"" );
       G_AdminsPrintf("%s\n",message);
+      G_admin_adminlog_log( ent, "vote", NULL, 0, qfalse );
       return;
     }
     
@@ -1558,6 +1573,7 @@ void Cmd_CallVote_f( gentity_t *ent )
       trap_SendServerCommand( ent-g_entities,
         "print \"callvote: admin is immune from vote mute\n\"" );
       G_AdminsPrintf("%s\n",message);
+      G_admin_adminlog_log( ent, "vote", NULL, 0, qfalse );
       return;
     }
     
@@ -1589,6 +1605,7 @@ void Cmd_CallVote_f( gentity_t *ent )
        trap_SendServerCommand( ent-g_entities, va(
          "print \"You cannot call for a restart after %d seconds\n\"",
          g_mapvoteMaxTime.integer ) );
+       G_admin_adminlog_log( ent, "vote", NULL, 0, qfalse );
        return;
     }
     Com_sprintf( level.voteString, sizeof( level.voteString ), "%s", arg1 );
@@ -1606,6 +1623,7 @@ void Cmd_CallVote_f( gentity_t *ent )
        trap_SendServerCommand( ent-g_entities, va(
          "print \"You cannot call for a mapchange after %d seconds\n\"",
          g_mapvoteMaxTime.integer ) );
+       G_admin_adminlog_log( ent, "vote", NULL, 0, qfalse );
        return;
     }
   
@@ -1615,8 +1633,16 @@ void Cmd_CallVote_f( gentity_t *ent )
         "'maps/%s.bsp' could not be found on the server\n\"", arg2 ) );
       return;
     }
-
-    Com_sprintf( level.voteString, sizeof( level.voteString ), "%s %s", arg1, arg2 );
+    
+    if (!g_devmapVotes.integer)
+    {
+    Com_sprintf( level.voteString, sizeof( level.voteString ), "map %s", arg2 );
+    }
+    else
+    {
+    Com_sprintf( level.voteString, sizeof( level.voteString ), "devmap %s", arg2 );
+    }
+    
     Com_sprintf( level.voteDisplayString,
         sizeof( level.voteDisplayString ), "Change to map '%s'", arg2 );
     level.votePercentToPass = g_mapVotesPercent.integer;
@@ -1702,7 +1728,8 @@ void Cmd_CallVote_f( gentity_t *ent )
   {
     Q_strcat( level.voteDisplayString, sizeof( level.voteDisplayString ), va( " (Needs %d percent)", level.votePercentToPass ) );
   }
-  
+
+  G_admin_adminlog_log( ent, "vote", NULL, 0, qtrue );
 
   trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE
          " called a vote: %s\n\"", ent->client->pers.netname, level.voteDisplayString ) );
@@ -1946,6 +1973,7 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
       trap_SendServerCommand( ent-g_entities,
         "print \"callteamvote: admin is immune from vote kick\n\"" );
 	G_AdminsPrintf("%s\n",message);
+      G_admin_adminlog_log( ent, "teamvote", NULL, 0, qfalse );
       return;
     }
 
@@ -1973,6 +2001,7 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
       trap_SendServerCommand( ent-g_entities,
         "print \"callteamvote: admin is immune from denybuild\n\"" );
 	G_AdminsPrintf("%s\n",message);
+        G_admin_adminlog_log( ent, "teamvote", NULL, 0, qfalse );
       return;
     }
 
@@ -2069,6 +2098,8 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
     return;
   }
   ent->client->pers.voteCount++;
+
+  G_admin_adminlog_log( ent, "teamvote", arg1, 0, qtrue );
 
   if( level.teamVotePercentToPass[ cs_offset ] != 50 )
   {
@@ -2195,8 +2226,7 @@ void Cmd_SetViewpos_f( gentity_t *ent )
 
 #define AS_OVER_RT3         ((ALIENSENSE_RANGE*0.5f)/M_ROOT3)
 
-static qboolean G_RoomForClassChange( gentity_t *ent, pClass_t class,
-  vec3_t newOrigin )
+qboolean G_RoomForClassChange( gentity_t *ent, pClass_t class, vec3_t newOrigin )
 {
   vec3_t    fromMins, fromMaxs;
   vec3_t    toMins, toMaxs;
@@ -2351,6 +2381,13 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
+      // denyweapons
+      if( newClass >= PCL_ALIEN_LEVEL1 && newClass <= PCL_ALIEN_LEVEL4 &&
+        ent->client->pers.denyAlienClasses & ( 1 << newClass ) )
+      {
+        trap_SendServerCommand( ent-g_entities, va( "print \"You are denied from using this class\n\"" ) );
+        return;
+      }
 
       //guard against selling the HBUILD weapons exploit
       if( ( currentClass == PCL_ALIEN_BUILDER0 ||
@@ -2790,7 +2827,10 @@ void Cmd_Buy_f( gentity_t *ent )
   int       maxAmmo, maxClips;
   qboolean  buyingEnergyAmmo = qfalse;
   qboolean  hasEnergyWeapon = qfalse;
-
+  
+  BG_UpdateWeaponData(g_proximityMines.integer);
+  BG_UpdateUpgradeData(g_proximityMines.integer);
+  
   for( i = UP_NONE; i < UP_NUM_UPGRADES; i++ )
   {
     if( BG_InventoryContainsUpgrade( i, ent->client->ps.stats ) )
@@ -2811,6 +2851,13 @@ void Cmd_Buy_f( gentity_t *ent )
 
   weapon = BG_FindWeaponNumForName( s );
   upgrade = BG_FindUpgradeNumForName( s );
+
+  if ( ent->client->ps.pm_flags&PMF_DUCKED && upgrade == UP_BATTLESUIT )
+  {
+  trap_SendServerCommand( ent-g_entities, va(
+        "print \"Cannot buy a battlesuit while crouching\n\"" ) );
+  return;
+  }
 
   //special case to keep norf happy
   if( weapon == WP_NONE && upgrade == UP_AMMO )
@@ -2849,7 +2896,14 @@ void Cmd_Buy_f( gentity_t *ent )
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_ITEMHELD );
       return;
     }
-    
+
+    // denyweapons
+    if( weapon >= WP_PAIN_SAW && weapon <= WP_GRENADE &&
+        ent->client->pers.denyHumanWeapons & ( 1 << (weapon - WP_BLASTER) ) )
+    {
+      trap_SendServerCommand( ent-g_entities, va( "print \"You are denied from buying this weapon\n\"" ) );
+      return;
+    }
 
     //can afford this?
     if( BG_FindPriceForWeapon( weapon ) > (short)ent->client->ps.persistant[ PERS_CREDIT ] )
@@ -2919,6 +2973,14 @@ void Cmd_Buy_f( gentity_t *ent )
     if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_ITEMHELD );
+      return;
+    }
+
+    // denyweapons
+    if( upgrade == UP_GRENADE &&
+        ent->client->pers.denyHumanWeapons & ( 1 << (WP_GRENADE - WP_BLASTER) ) )
+    {
+      trap_SendServerCommand( ent-g_entities, va( "print \"You are denied from buying this upgrade\n\"" ) );
       return;
     }
 
@@ -3539,7 +3601,7 @@ qboolean G_FollowNewClient( gentity_t *ent, int dir )
       continue;
 
     // can't follow another spectator
-    if( level.clients[ clientnum ].pers.teamSelection == PTE_NONE )
+    if( level.clients[ clientnum ].pers.teamSelection == PTE_NONE && !g_specAspec.integer )
       continue;
 
     // this is good, we can use it
@@ -3605,7 +3667,7 @@ void Cmd_Follow_f( gentity_t *ent )
       return;
 
     // can't follow another spectator
-    if( level.clients[ i ].pers.teamSelection == PTE_NONE )
+    if( level.clients[ i ].pers.teamSelection == PTE_NONE && !g_specAspec.integer  )
       return;
 
     ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
@@ -4387,6 +4449,36 @@ void G_DecolorString( char *in, char *out )
     *out++ = *in++;
   }
   *out = '\0';
+}
+
+void G_ParseEscapedString( char *buffer )
+{
+  int i = 0;
+  int j = 0;
+
+  while( buffer[i] )
+  {
+    if(!buffer[i]) break;
+
+    if(buffer[i] == '\\')
+    {
+      if(buffer[i + 1] == '\\')
+        buffer[j] = buffer[++i];
+      else if(buffer[i + 1] == 'n')
+      {
+        buffer[j] = '\n';
+        i++;
+      }
+      else
+        buffer[j] = buffer[i];
+    }
+    else
+      buffer[j] = buffer[i];
+
+    i++;
+    j++;
+  }
+  buffer[j] = 0;
 }
 
 void G_PrivateMessage( gentity_t *ent )

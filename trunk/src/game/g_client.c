@@ -935,10 +935,14 @@ static void ClientCleanName( const char *in, char *out, int outSize )
       if( !*in )
         break;
 
-      // don't allow black in a name, period
-      if( ColorIndex( *in ) == 0 )
+      // two escapes in a row, skip this one
+      if( *in == Q_COLOR_ESCAPE )
       {
-        in++;
+        if( len > outSize - 1 )
+          break;
+
+        *out++ = ch;
+        len++;
         continue;
       }
 
@@ -947,7 +951,12 @@ static void ClientCleanName( const char *in, char *out, int outSize )
         break;
 
       *out++ = ch;
-      *out++ = *in++;
+      // don't allow black in a name, use white
+      if( ColorIndex( *in ) == 0 )
+        *out++ = '7';
+      else
+        *out++ = *in;
+      in++;
       len += 2;
       continue;
     }

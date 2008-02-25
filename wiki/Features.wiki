@@ -4,6 +4,7 @@ The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exh
 
 =Admin Commands=
 QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
+ * *!denyweapon* (d): Allows you to deny or allow a weapon for someone to use. If they are holding that weapon, it removes it from them, and repays them. Works with alien classes too
  * *!adminlog:* (A): Shows a log of reciently run admin commands.
  * !*forcespec/!unforcespec* (F): Disable the ability of a player to join any team. If the player is playing the game, they are removed and forced to spectator.
  * *!pause/!unpause* (S): Freeze a player where they are currently positioned. The freezed player cannot take any damage, give any damage, die, or move. They may rotate their view though. Works on spectators. _Note: Pause whole game feature removed due to [http://code.google.com/p/p-g-qvm/issues/detail?id=1 Bug 1]_
@@ -32,6 +33,14 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!credits* (u): Add or remove credits from a player (good for paying back that poor sap who you just !explode'd). Anti-abuse prevents players from modifying their own credit amount.
  
 =Other Features=
+ * Force mapvotes to be devmapvotes `g_devmapVotes`
+ * CP messages logged to console
+ * Repeating messages, `g_msg` and `g_msgTime`
+ * Players cant crouch as bsuit, or buy a bsuit while crouching
+ * NO BLACK IN NAMES, PERIOD
+ * !listmaps search
+ * Votes logged in !adminlog
+ * !Maplog shows devmap
  * Decolor log files, controlled by `g_decolorLogfiles`
  * Poll vote caller can vote no
  * Players that fall out of map die instantly, and cannot mess up spawn cue
@@ -54,6 +63,12 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
 
 =Cvars=
  * `g_decolorLogfiles`: Enables/disables removal of color tags from log files.
+ * `g_devmapVotes`: Forces mapvotes to be devmapvotes
+ * `g_specASpec`: Allows speccing of other spectators
+ * `g_proximityMines`: Turns grenades into mines
+ * `g_msg`: Sets message to be repeated
+ * `g_msgTime`: Sets message repeat rate
+ * `g_sayAreaLocations`: Adds location data to say_area
  * `g_admitDefeatVotePercent`: Sets the percentage at which admitdefeat teamvotes must have to pass *(Integer)*
  * `g_creditOverflow`: Overflows the credits of full players to others. 0 disables, 1 gives to teammates in slot order, 2 gives to highest scoring teammates. *(Bitmask)*
  * `g_adminRegisterLevel`: Level to which a normal register sets to. Default 1 *(Integer)*

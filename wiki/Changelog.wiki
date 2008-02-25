@@ -1,6 +1,21 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
-=1.4=
+=1.5x=
+==1.5==
+ * Prevented purchase of bsuit when crouched, prevents bsuit crouch glitch
+ * Added cvar `g_devmapVotes`, switches map votes to devmap votes
+ * Added proxemity mines (grenades), `g_proximityMines`
+ * Added !denyweapons/!alloweapons
+ * Added search to !listmaps
+ * Added maplog fixes, adds devmap info
+ * Improved black name filter
+ * Added timed messages, `g_msg` controls the message, `g_msgtime` controls the repeat rate
+ * Added feature to echo cp to player consoles
+ * Added newline support to !cp
+ * Added vote logging to !adminlog
+ * Added location data to say_area, `g_sayAreaLocations`
+ * Added `g_specASpec`, allows spectators to follow other spectators
+=1.4x=
 ==1.4.5==
  * Long awaited `!credits` function finally here
  * Indentation fixed for admin commands

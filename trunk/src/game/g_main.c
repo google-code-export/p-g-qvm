@@ -72,6 +72,7 @@ vmCvar_t  g_motd;
 vmCvar_t  g_synchronousClients;
 vmCvar_t  g_warmup;
 vmCvar_t  g_doWarmup;
+vmCvar_t  g_proximityMines;
 vmCvar_t  g_restarted;
 vmCvar_t  g_lockTeamsAtStart;
 vmCvar_t  g_logFile;
@@ -168,6 +169,8 @@ vmCvar_t  g_decolorLogfiles;
 
 vmCvar_t  g_tag;
 
+vmCvar_t  g_sayAreaLocations;
+
 vmCvar_t  g_radiationDamage;
 vmCvar_t  g_radiationTime;
 vmCvar_t  g_radiationCredits;
@@ -187,13 +190,19 @@ vmCvar_t  g_devmapNoStructDmg;
 vmCvar_t  g_slapKnockback;
 vmCvar_t  g_slapDamage;
 
+vmCvar_t  g_msg;
+vmCvar_t  g_msgTime;
+
 vmCvar_t  g_buyAll;
 vmCvar_t  g_multipleWeapons;
+vmCvar_t  g_devmapVotes;
 
 vmCvar_t  g_banNotice;
 
 vmCvar_t  g_voteMinTime;
 vmCvar_t  g_mapvoteMaxTime;
+
+vmCvar_t  g_specAspec;
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -222,6 +231,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
+  { &g_sayAreaLocations, "g_sayAreaLocations", "0", CVAR_ARCHIVE, 0, qtrue  },
+
   { &g_friendlyFire, "g_friendlyFire", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue  },
   { &g_friendlyFireAliens, "g_friendlyFireAliens", "0", CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyFireHumans, "g_friendlyFireHumans", "0", CVAR_ARCHIVE, 0, qtrue  },
@@ -230,10 +241,15 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_friendlyFireMovementAttacks, "g_friendlyFireMovementAttacks", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_devmapNoGod, "g_devmapNoGod", "0", CVAR_ARCHIVE, 0, qtrue  },
   { &g_devmapNoStructDmg, "g_devmapNoStructDmg", "0", CVAR_ARCHIVE, 0, qtrue  },
-
+  
+  { &g_specAspec, "g_specAspec", "0", CVAR_ARCHIVE, 0, qtrue  },
+  
+  { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
   { &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE  },
   { &g_teamForceBalance, "g_teamForceBalance", "1", CVAR_ARCHIVE  },
   { &g_buyAll, "g_buyAll", "0", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_devmapVotes, "g_devmapVotes", "0", CVAR_ARCHIVE, 0, qtrue  },
+
   { &g_multipleWeapons, "g_multipleWeapons", "0", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmup, "g_warmup", "10", CVAR_ARCHIVE, 0, qtrue  },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
@@ -367,6 +383,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_slapKnockback, "g_slapKnockback", "200", CVAR_ARCHIVE, 0, qfalse},
   { &g_slapDamage, "g_slapDamage", "5", CVAR_ARCHIVE, 0, qfalse},
 
+  { &g_msg, "g_msg", "", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_msgTime, "g_msgTime", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_rankings, "g_rankings", "0", 0, 0, qfalse },
   { &g_allowShare, "g_allowShare", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
@@ -2311,6 +2329,11 @@ void CheckVote( void )
   trap_SendServerCommand(-1, va("print \"Vote %s^7 (^2Y:%d^7-^1N:%d^7, %d percent) (%s)\n\"",
     result, level.voteYes, level.voteNo, voteYesPercent, level.voteDisplayString ) );
 
+  G_admin_adminlog_log( NULL, "vote",
+    va( "%s^7 (^2Y:%d^7-^1N:%d^7, %d percent)",
+      result, level.voteYes, level.voteNo, voteYesPercent ),
+    0, ( level.voteExecuteTime ) );
+
   level.voteTime = 0;
   trap_SetConfigstring( CS_VOTE_TIME, "" );
 }
@@ -2382,10 +2405,44 @@ void CheckTeamVote( int team )
   trap_SendServerCommand( -1, va( "print \"Team vote %s^7 (^2Y:%d^7-^1N:%d^7, %d percent)\n\"",
     result, level.teamVoteYes[ cs_offset ], level.teamVoteNo[ cs_offset ], voteYesPercent ) );
 
+  G_admin_adminlog_log( NULL, "teamvote",
+    va( "%s^7 (^2Y:%d^7-^1N:%d^7, %d percent)",
+      result, level.teamVoteYes[ cs_offset ], level.teamVoteNo[ cs_offset ], voteYesPercent ),
+    0, ( strstr( result, "pass" ) != NULL ) );
+
   level.teamVoteTime[ cs_offset ] = 0;
   trap_SetConfigstring( CS_TEAMVOTE_TIME + cs_offset, "" );
 }
 
+/*
+==================
+CheckMsgTimer
+==================
+*/
+void CheckMsgTimer( void )
+{
+  if( !g_msgTime.integer )
+    return;
+
+  if( level.time - level.lastMsgTime < abs( g_msgTime.integer ) * 60000 )
+    return;
+
+  // negative settings only print once per map
+  if( ( level.lastMsgTime ) && g_msgTime.integer < 0 )
+    return;
+
+  level.lastMsgTime = level.time;
+
+  if( g_msg.string[0] )
+  {
+    char buffer[ MAX_STRING_CHARS ];
+
+    Q_strncpyz( buffer, g_msg.string, sizeof( buffer ) );
+    G_ParseEscapedString( buffer );
+    trap_SendServerCommand( -1, va( "cp \"%s\"", buffer ) );
+    trap_SendServerCommand( -1, va( "print \"%s\n\"", buffer ) );
+  }
+}
 
 /*
 ==================
@@ -2507,6 +2564,8 @@ void G_RunFrame( int levelTime )
       trap_SendConsoleCommand( EXEC_APPEND, "!unpause" );
     }
   }
+
+  CheckMsgTimer( );
 
   level.framenum++;
   level.previousTime = level.time;
