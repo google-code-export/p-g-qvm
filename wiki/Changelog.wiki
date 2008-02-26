@@ -1,6 +1,8 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.5x=
+==1.5.0.1==
+ * Added fixes for !denyweapon
 ==1.5==
  * Prevented purchase of bsuit when crouched, prevents bsuit crouch glitch
  * Added cvar `g_devmapVotes`, switches map votes to devmap votes
