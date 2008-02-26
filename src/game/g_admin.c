@@ -2731,7 +2731,7 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
   if( weapon < WP_PAIN_SAW || weapon > WP_GRENADE )
     class = BG_FindClassNumForName( buffer );
   if( ( weapon < WP_PAIN_SAW || weapon > WP_GRENADE ) &&
-      ( class < PCL_ALIEN_LEVEL0 || class > PCL_ALIEN_LEVEL4 ) )
+      ( class < PCL_ALIEN_LEVEL1 || class > PCL_ALIEN_LEVEL4 ) )
   {
     ADMP( va( "^3!%s: ^7unknown weapon or class\n", cmd ) );
     return qfalse;
@@ -2797,7 +2797,7 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
       }
       vic->client->pers.denyAlienClasses |= flag;
       if( vic->client->pers.teamSelection == PTE_ALIENS &&
-          ent->client->pers.classSelection == class )
+          vic->client->pers.classSelection == class )
       {
         vec3_t infestOrigin;
         short cost;
@@ -2806,12 +2806,12 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
 
         vic->client->pers.evolveHealthFraction = (float)vic->client->ps.stats[ STAT_HEALTH ] /
             (float)BG_FindHealthForClass( class );
-        if( ent->client->pers.evolveHealthFraction < 0.0f )
-          ent->client->pers.evolveHealthFraction = 0.0f;
-        else if( ent->client->pers.evolveHealthFraction > 1.0f )
-          ent->client->pers.evolveHealthFraction = 1.0f;
+        if( vic->client->pers.evolveHealthFraction < 0.0f )
+          vic->client->pers.evolveHealthFraction = 0.0f;
+        else if( vic->client->pers.evolveHealthFraction > 1.0f )
+          vic->client->pers.evolveHealthFraction = 1.0f;
 
-        ent->client->pers.classSelection = PCL_ALIEN_LEVEL0;
+        vic->client->pers.classSelection = PCL_ALIEN_LEVEL0;
         cost = BG_ClassCanEvolveFromTo( PCL_ALIEN_LEVEL0, class, 9, 0 );
         if( cost < 0 ) cost = 0;
         G_AddCreditToClient( vic->client, cost, qfalse );
