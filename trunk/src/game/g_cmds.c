@@ -3385,6 +3385,39 @@ void Cmd_Protect_f( gentity_t *ent )
   }
 }
 
+/*
+=================
+Cmd_Builder_f
+=================
+*/
+void Cmd_Builder_f( gentity_t *ent )
+{
+  vec3_t      forward, end;
+  trace_t     tr;
+  gentity_t   *traceEnt;
+  char bdnumbchr[21];
+
+  if( !G_admin_permission( ent, ADMF_BUILDCHECK ) )
+	return;
+	
+  AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
+  VectorMA( ent->client->ps.origin, 100, forward, end );
+
+  trap_Trace( &tr, ent->client->ps.origin, NULL, NULL, end, ent->s.number,
+    MASK_PLAYERSOLID );
+  traceEnt = &g_entities[ tr.entityNum ];
+
+  Com_sprintf( bdnumbchr, sizeof(bdnumbchr), "%i", traceEnt->bdnumb );
+  
+  if( tr.fraction < 1.0f && ( traceEnt->s.eType == ET_BUILDABLE ) &&
+      ( traceEnt->biteam == ent->client->pers.teamSelection ) )
+  {
+	
+      trap_SendServerCommand( ent-g_entities, va(
+        "print \"Building was built by: %s^7, buildlog number: %s^7\n\"", traceEnt->madeby, (traceEnt->bdnumb != -1) ? bdnumbchr : "none" ) );
+  }
+}
+
  /*
  =================
  Cmd_Resign_f
@@ -4239,7 +4272,8 @@ commands_t cmds[ ] = {
   { "share", CMD_TEAM, Cmd_Share_f },
   { "donate", CMD_TEAM, Cmd_Donate_f },
   { "protect", CMD_TEAM|CMD_LIVING, Cmd_Protect_f },
-  { "resign", CMD_TEAM, Cmd_Resign_f }
+  { "resign", CMD_TEAM, Cmd_Resign_f },
+  { "builder", CMD_TEAM, Cmd_Builder_f }
 };
 static int numCmds = sizeof( cmds ) / sizeof( cmds[ 0 ] );
 

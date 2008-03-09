@@ -3516,6 +3516,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable, vec3_t ori
       BG_FindNameForBuildable( built->s.modelindex ) );
   }
   
+
   // ok we're all done building, so what we log here should be the final values
   if( builder && builder->client ) // log ingame building only
   {
@@ -3530,6 +3531,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable, vec3_t ori
     VectorCopy( built->s.angles2, new->angles2 );
     new->fate = BF_BUILT;
   }
+  
+   built->madeby = ( builder->client ) ? builder->client->pers.netname : "<world>";
+   if( !builder->client )
+   built->bdnumb = -1;
+   else
+   built->bdnumb = new->ID ;
 
   return built;
 }

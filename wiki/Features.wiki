@@ -34,6 +34,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!credits* (u): Add or remove credits from a player (good for paying back that poor sap who you just !explode'd). Anti-abuse prevents players from modifying their own credit amount.
  
 =Other Features=
+ * /builder (+): shows the builder of a structure and its buildlog number.
  * Force mapvotes to be devmapvotes `g_devmapVotes`
  * CP messages logged to console
  * Repeating messages, `g_msg` and `g_msgTime`
