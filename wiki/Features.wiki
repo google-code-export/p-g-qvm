@@ -4,6 +4,7 @@ The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exh
 
 =Admin Commands=
 QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
+ * *!demo* (W): Allows admins to toggle sending of admin warnings to themselves. Designed for demo recording
  * *!denyweapon* (d): Allows you to deny or allow a weapon for someone to use. If they are holding that weapon, it removes it from them, and repays them. Works with alien classes too
  * *!adminlog:* (A): Shows a log of reciently run admin commands.
  * !*forcespec/!unforcespec* (F): Disable the ability of a player to join any team. If the player is playing the game, they are removed and forced to spectator.

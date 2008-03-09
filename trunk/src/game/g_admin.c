@@ -104,6 +104,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7] [^3#^7]"
     },
 
+    {"demo", G_admin_demo, "W",
+      "turn admin chat warnings off so they do not appear in demos. "
+      "this is a toggle use !demo again to turn warnings back on",
+      ""
+    },
+
     {"denybuild", G_admin_denybuild, "d",
       "take away a player's ability to build",
       "[^3name|slot#^7]"
@@ -6397,6 +6403,15 @@ qboolean G_admin_suspendban( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
+qboolean G_admin_demo( gentity_t *ent, int skiparg )
+{
+  ent->client->pers.ignoreAdminWarnings = !( ent->client->pers.ignoreAdminWarnings );
+
+  ADMP( va( "^3!demo: ^7your admin chat warnings are now %s\n",
+    ( ent->client->pers.ignoreAdminWarnings ) ? "^1disabled" : "^2enabled" ) );
+
+  return qtrue;
+}
 
 qboolean G_admin_mix( gentity_t *ent, int skiparg )
 {

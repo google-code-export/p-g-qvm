@@ -216,6 +216,7 @@ qboolean G_admin_L0( gentity_t *ent, int skiparg );
 qboolean G_admin_listmaps( gentity_t *ent, int skiparg );
 qboolean G_admin_immunity( gentity_t *ent, int skiparg );
 qboolean G_admin_suspendban( gentity_t *ent, int skiparg );
+qboolean G_admin_demo( gentity_t *ent, int skiparg );
 qboolean G_admin_adminlog( gentity_t *ent, int skiparg );
 void G_admin_adminlog_cleanup( void );
 void G_admin_adminlog_log( gentity_t *ent, char *command, char *args, int skiparg, qboolean success );
