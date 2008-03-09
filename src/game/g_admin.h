@@ -38,8 +38,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_ADMIN_NAMELOG_NAMES 5
 #define MAX_ADMIN_ADMINLOGS 128
 #define MAX_ADMIN_ADMINLOG_ARGS 50
-#define MAX_ADMIN_FLAGS 64
-#define MAX_ADMIN_COMMANDS 64
+#define MAX_ADMIN_FLAGS 128
+#define MAX_ADMIN_COMMANDS 128
 #define MAX_ADMIN_CMD_LEN 20
 #define MAX_ADMIN_BAN_REASON 50
 
@@ -79,6 +79,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ADMF_SEESFULLLISTPLAYERS '$'
 #define ADMF_DBUILDER '#'
 #define ADMF_ADMINCHAT '?'
+#define ADMF_BUILDCHECK '+'
 
 #define ADMF_BANIMMUNITY '&'
 
