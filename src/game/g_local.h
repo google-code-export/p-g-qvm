@@ -391,6 +391,7 @@ typedef struct
   statsCounters_t statscounters;	
   qboolean            cusgrav;
   int                 cusgravlvl;
+  qboolean            ignoreAdminWarnings;
 
   qboolean            firstConnect;
 } clientPersistant_t;
