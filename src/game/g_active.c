@@ -531,6 +531,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
   usercmd_t *ucmd;
   int       aForward, aRight;
   int foundTurrets = 0;
+  int staminaLarmour = STAMINA_LARMOUR_TAKE;
+  int staminaSprint = STAMINA_SPRINT_TAKE;
   
   ucmd = &ent->client->pers.cmd;
 
@@ -541,6 +543,13 @@ void ClientTimerActions( gentity_t *ent, int msec )
   client->time100 += msec;
   client->time1000 += msec;
   client->time10000 += msec;
+
+  if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST ) &&
+    g_modHumanStamina.integer > 0 )
+    {
+    staminaLarmour = staminaLarmour * 100 / g_modHumanStamina.integer;
+    staminaSprint = staminaSprint * 100 / g_modHumanStamina.integer;
+    }
 
   while ( client->time100 >= 100 )
   {
@@ -557,9 +566,9 @@ void ClientTimerActions( gentity_t *ent, int msec )
     {
       //subtract stamina
       if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, client->ps.stats ) )
-        client->ps.stats[ STAT_STAMINA ] -= STAMINA_LARMOUR_TAKE;
+        client->ps.stats[ STAT_STAMINA ] -= staminaLarmour;
       else
-        client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
+        client->ps.stats[ STAT_STAMINA ] -= staminaSprint;
 
       if( client->ps.stats[ STAT_STAMINA ] < -MAX_STAMINA )
         client->ps.stats[ STAT_STAMINA ] = -MAX_STAMINA;

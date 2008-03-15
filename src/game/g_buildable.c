@@ -3532,11 +3532,10 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable, vec3_t ori
     new->fate = BF_BUILT;
   }
   
-   built->madeby = ( builder->client ) ? builder->client->pers.netname : "<world>";
-   if( !builder->client )
-   built->bdnumb = -1;
+   if( builder && builder->client )
+     built->bdnumb = new->ID;
    else
-   built->bdnumb = new->ID ;
+     built->bdnumb = -1;
 
   return built;
 }
@@ -4312,3 +4311,25 @@ int G_CountBuildLog( void )
   }
   return i;
 }
+
+char *G_FindBuildLogName( int id )
+{
+  buildHistory_t *ptr;
+
+  for( ptr = level.buildHistory; ptr && ptr->ID != id; ptr = ptr->next );
+  if( ptr )
+  {
+    if( ptr->ent )
+    {
+      if( ptr->ent->client )
+        return ptr->ent->client->pers.netname;
+    }
+    else if( ptr->name[ 0 ] )
+    {
+      return ptr->name;
+    }
+  }
+
+  return "<world>";
+}
+

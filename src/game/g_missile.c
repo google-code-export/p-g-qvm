@@ -684,6 +684,12 @@ gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->clipmask = MASK_SHOT;
   bolt->target_ent = self->target_ent;
 
+  if( g_modBuildableSpeed.integer > 0)
+  {
+    bolt->nextthink = level.time + HIVE_DIR_CHANGE_PERIOD * 100 / g_modBuildableSpeed.integer;
+    bolt->damage = bolt->damage * g_modBuildableSpeed.integer / 100;
+  }
+
   bolt->s.pos.trType = TR_LINEAR;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
@@ -846,6 +852,9 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
   /*bolt->s.eFlags |= EF_BOUNCE;*/
+
+  if( g_modAlienRate.integer > 0 )
+    bolt->damage = bolt->damage * g_modAlienRate.integer / 100;
 
   return bolt;
 }

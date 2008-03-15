@@ -1332,3 +1332,21 @@ void BG_ClientListParse( clientList_t *list, const char *s );
 #define FFF_ALIENS         2
 #define FFF_BUILDABLES     4
 
+// value mods equal to g_mod cvars on server
+typedef enum
+{
+  MOD_BG_BUILDABLE_HEALTH,  // Buildable health
+  MOD_BG_BUILDABLE_SPEED,   // Buildable fire rate
+  MOD_BG_HUMAN_STAMINA,     // Human stamina
+  MOD_BG_HUMAN_HEALTH,      // Human health
+  MOD_BG_ALIEN_HEALTH,      // Alien health
+  MOD_BG_HUMAN_RATE,        // Human fire rate
+  MOD_BG_ALIEN_RATE,        // Alien fire rate
+  MOD_BG_WEAPON_AMMO,       // Weapon ammo per clip
+  MOD_BG_WEAPON_RELOAD,     // Weapon reload time
+  MOD_BG_COUNT              // number of entries
+} modExtremeType_t;
+
+void BG_MOD_set( modExtremeType_t entry, int value );
+void BG_MOD_update( void );
+

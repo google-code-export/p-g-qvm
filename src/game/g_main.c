@@ -204,6 +204,16 @@ vmCvar_t  g_mapvoteMaxTime;
 
 vmCvar_t  g_specAspec;
 
+vmCvar_t  g_modBuildableHealth;
+vmCvar_t  g_modBuildableSpeed;
+vmCvar_t  g_modHumanStamina;
+vmCvar_t  g_modHumanHealth;
+vmCvar_t  g_modAlienHealth;
+vmCvar_t  g_modHumanRate;
+vmCvar_t  g_modAlienRate;
+vmCvar_t  g_modWeaponAmmo;
+vmCvar_t  g_modWeaponReload;
+
 static cvarTable_t   gameCvarTable[ ] =
 {
   // don't override the cheat state set by the system
@@ -243,6 +253,16 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_devmapNoStructDmg, "g_devmapNoStructDmg", "0", CVAR_ARCHIVE, 0, qtrue  },
   
   { &g_specAspec, "g_specAspec", "0", CVAR_ARCHIVE, 0, qtrue  },
+
+  { &g_modBuildableHealth, "g_modBuildableHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modBuildableSpeed, "g_modBuildableSpeed", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modHumanStamina, "g_modHumanStamina", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modHumanHealth, "g_modHumanHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modAlienHealth, "g_modAlienHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modHumanRate, "g_modHumanRate", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modAlienRate, "g_modAlienRate", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modWeaponAmmo, "g_modWeaponAmmo", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_modWeaponReload, "g_modWeaponReload", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
   { &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE  },
@@ -624,6 +644,21 @@ void G_UpdateCvars( void )
     G_RemapTeamShaders( );
 }
 
+static void G_InitModCvars( void )
+{
+  BG_MOD_set( MOD_BG_BUILDABLE_HEALTH, g_modBuildableHealth.integer );
+  BG_MOD_set( MOD_BG_BUILDABLE_SPEED, g_modBuildableSpeed.integer );
+  BG_MOD_set( MOD_BG_HUMAN_STAMINA, g_modHumanStamina.integer );
+  BG_MOD_set( MOD_BG_HUMAN_HEALTH, g_modHumanHealth.integer );
+  BG_MOD_set( MOD_BG_ALIEN_HEALTH, g_modAlienHealth.integer );
+  BG_MOD_set( MOD_BG_HUMAN_RATE, g_modHumanRate.integer );
+  BG_MOD_set( MOD_BG_ALIEN_RATE, g_modAlienRate.integer );
+  BG_MOD_set( MOD_BG_WEAPON_AMMO, g_modWeaponAmmo.integer );
+  BG_MOD_set( MOD_BG_WEAPON_RELOAD, g_modWeaponReload.integer );
+
+  BG_MOD_update( );
+}
+
 /*
 =================
 G_MapConfigs
@@ -761,6 +796,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   // the map might disable some things
   BG_InitAllowedGameElements( );
+
+  // syncronize mod cvars
+  G_InitModCvars( );
 
   // general initialization
   G_FindTeams( );
