@@ -241,8 +241,7 @@ struct gentity_s
 
   int               lastDamageTime;
   
-  char              *madeby;
-  int              bdnumb;
+  int               bdnumb;		// buildlog entry ID
 };
 
 typedef enum
@@ -876,6 +875,7 @@ void              G_CommitRevertedBuildable( gentity_t *ent );
 qboolean          G_RevertCanFit( buildHistory_t *bh );
 int               G_LogBuild( buildHistory_t *new );
 int               G_CountBuildLog( void );
+char             *G_FindBuildLogName( int id );
 
 //
 // g_utils.c
@@ -1373,6 +1373,16 @@ extern  vmCvar_t  g_voteMinTime;
 extern  vmCvar_t  g_mapvoteMaxTime;
 
 extern  vmCvar_t  g_specAspec;
+
+extern  vmCvar_t  g_modBuildableHealth;  // Buildable health
+extern  vmCvar_t  g_modBuildableSpeed;   // Buildable fire rate
+extern  vmCvar_t  g_modHumanStamina;     // Human stamina
+extern  vmCvar_t  g_modHumanHealth;      // Human health
+extern  vmCvar_t  g_modAlienHealth;      // Alien health
+extern  vmCvar_t  g_modHumanRate;        // Human fire rate
+extern  vmCvar_t  g_modAlienRate;        // Alien fire rate
+extern  vmCvar_t  g_modWeaponAmmo;       // Weapon ammo per clip
+extern  vmCvar_t  g_modWeaponReload;     // Weapon reload time
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

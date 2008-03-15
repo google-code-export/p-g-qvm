@@ -64,6 +64,15 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * Vote connect time prevents players from connecting and calling a vote within g_voteMinTime, or call a map vote within g_mapvoteMinTime
 
 =Cvars=
+ * `g_modBuildableHealth`: Buildable health *(Percent)*
+ * `g_modBuildableSpeed`: Buildable fire rate *(Percent)*
+ * `g_modHumanStamina`: Human stamina *(Percent)*
+ * `g_modHumanHealth`: Human health *(Percent)*
+ * `g_modAlienHealth`: Alien health *(Percent)*
+ * `g_modHumanRate`: Human fire rate *(Percent)*
+ * `g_modAlienRate`: Alien fire rate *(Percent)*
+ * `g_modWeaponAmmo`: Weapon ammo per clip *(Percent)*
+ * `g_modWeaponReload`: Adjust's Weapon reload time *(Percent)*
  * `g_decolorLogfiles`: Enables/disables removal of color tags from log files.
  * `g_devmapVotes`: Forces mapvotes to be devmapvotes
  * `g_specASpec`: Allows speccing of other spectators

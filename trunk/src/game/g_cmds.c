@@ -3392,29 +3392,33 @@ Cmd_Builder_f
 */
 void Cmd_Builder_f( gentity_t *ent )
 {
-  vec3_t      forward, end;
+  vec3_t      forward, right, up;
+  vec3_t      start, end;
   trace_t     tr;
   gentity_t   *traceEnt;
   char bdnumbchr[21];
 
   if( !G_admin_permission( ent, ADMF_BUILDCHECK ) )
-	return;
+    return;
 	
-  AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
-  VectorMA( ent->client->ps.origin, 100, forward, end );
+  AngleVectors( ent->client->ps.viewangles, forward, right, up );
+  if( ent->client->pers.teamSelection != PTE_NONE )
+    CalcMuzzlePoint( ent, forward, right, up, start );
+  else
+    VectorCopy( ent->client->ps.origin, start );
+  VectorMA( start, 1000, forward, end );
 
-  trap_Trace( &tr, ent->client->ps.origin, NULL, NULL, end, ent->s.number,
-    MASK_PLAYERSOLID );
+  trap_Trace( &tr, start, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
   traceEnt = &g_entities[ tr.entityNum ];
 
   Com_sprintf( bdnumbchr, sizeof(bdnumbchr), "%i", traceEnt->bdnumb );
-  
-  if( tr.fraction < 1.0f && ( traceEnt->s.eType == ET_BUILDABLE ) &&
-      ( traceEnt->biteam == ent->client->pers.teamSelection ) )
+
+  if( tr.fraction < 1.0f && ( traceEnt->s.eType == ET_BUILDABLE ) )
   {
-	
-      trap_SendServerCommand( ent-g_entities, va(
-        "print \"Building was built by: %s^7, buildlog number: %s^7\n\"", traceEnt->madeby, (traceEnt->bdnumb != -1) ? bdnumbchr : "none" ) );
+    trap_SendServerCommand( ent-g_entities, va(
+      "print \"Building was built by: %s^7, buildlog number: %s^7\n\"",
+      G_FindBuildLogName( traceEnt->bdnumb ),
+      (traceEnt->bdnumb != -1) ? bdnumbchr : "none" ) );
   }
 }
 
@@ -4273,7 +4277,7 @@ commands_t cmds[ ] = {
   { "donate", CMD_TEAM, Cmd_Donate_f },
   { "protect", CMD_TEAM|CMD_LIVING, Cmd_Protect_f },
   { "resign", CMD_TEAM, Cmd_Resign_f },
-  { "builder", CMD_TEAM, Cmd_Builder_f }
+  { "builder", 0, Cmd_Builder_f }
 };
 static int numCmds = sizeof( cmds ) / sizeof( cmds[ 0 ] );
 

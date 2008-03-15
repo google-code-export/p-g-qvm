@@ -1,6 +1,18 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.5x=
+==1.5.0.4==
+ * Added bugfixes for builder, now much more useful command. (See Issue 64)
+ * Added extreme mod
+  * `g_modBuildableHealth`: Buildable health *(Percent)*
+  * `g_modBuildableSpeed`: Buildable fire rate *(Percent)*
+  * `g_modHumanStamina`: Human stamina *(Percent)*
+  * `g_modHumanHealth`: Human health *(Percent)*
+  * `g_modAlienHealth`: Alien health *(Percent)*
+  * `g_modHumanRate`: Human fire rate *(Percent)*
+  * `g_modAlienRate`: Alien fire rate *(Percent)*
+  * `g_modWeaponAmmo`: Weapon ammo per clip *(Percent)*
+  * `g_modWeaponReload`: Adjust's Weapon reload time *(Percent)*
 ==1.5.0.3==
  * Added /builder command, flag +. Shows the builder of a building.
  * Increased amount of flags and commands to 128

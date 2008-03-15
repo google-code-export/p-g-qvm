@@ -1131,6 +1131,8 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
       zap->used = qtrue;
 
       zap->timeToLive = LEVEL2_AREAZAP_TIME;
+      if( g_modAlienRate.integer > 0 )
+        zap->timeToLive = zap->timeToLive * g_modAlienRate.integer / 100;
       zap->damageUsed = 0;
 
       zap->creator = creator;
@@ -1224,6 +1226,8 @@ void G_UpdateZaps( int msec )
           {
             G_Damage( target, source, zap->creator, forward, target->s.origin,
                     damage, DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, MOD_LEVEL2_ZAP );
+            if( g_modAlienRate.integer > 0 )
+              damage = damage * 100 / g_modAlienRate.integer;
             zap->damageUsed += damage;
           }
         }
