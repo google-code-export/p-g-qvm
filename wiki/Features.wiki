@@ -34,6 +34,8 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!credits* (u): Add or remove credits from a player (good for paying back that poor sap who you just !explode'd). Anti-abuse prevents players from modifying their own credit amount.
  
 =Other Features=
+ * /mark: When `g_markDeconstruct` is set to `2`, allows use of `/mark` command, marking or unmarking a building for deconstruction.
+ * Layout votes: adds new vote type `layout`. Called by `/callvote layout LAYOUTNAME`. Subject to same restrictions as all other map votes.
  * /builder (+): shows the builder of a structure and its buildlog number.
  * Force mapvotes to be devmapvotes `g_devmapVotes`
  * CP messages logged to console
@@ -64,6 +66,8 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * Vote connect time prevents players from connecting and calling a vote within g_voteMinTime, or call a map vote within g_mapvoteMinTime
 
 =Cvars=
+ * `g_markDeconstruct`: Added mode 2, allows use of `/mark` command. *(Bitmask)*
+ * `g_adminMaxBan`: Allows the maximum ban length of admins without `8` flag to be limited. Cvar is in days. *(Number)*
  * `g_modBuildableHealth`: Buildable health *(Percent)*
  * `g_modBuildableSpeed`: Buildable fire rate *(Percent)*
  * `g_modHumanStamina`: Human stamina *(Percent)*
@@ -73,13 +77,13 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * `g_modAlienRate`: Alien fire rate *(Percent)*
  * `g_modWeaponAmmo`: Weapon ammo per clip *(Percent)*
  * `g_modWeaponReload`: Adjust's Weapon reload time *(Percent)*
- * `g_decolorLogfiles`: Enables/disables removal of color tags from log files.
- * `g_devmapVotes`: Forces mapvotes to be devmapvotes
- * `g_specASpec`: Allows speccing of other spectators
- * `g_proximityMines`: Turns grenades into mines
- * `g_msg`: Sets message to be repeated
- * `g_msgTime`: Sets message repeat rate
- * `g_sayAreaLocations`: Adds location data to say_area
+ * `g_decolorLogfiles`: Enables/disables removal of color tags from log files. *(Boolean)*
+ * `g_devmapVotes`: Forces mapvotes to be devmapvotes *(Boolean)*
+ * `g_specASpec`: Allows speccing of other spectators *(Boolean)*
+ * `g_proximityMines`: Turns grenades into mines *(Boolean)*
+ * `g_msg`: Sets message to be repeated *(String)*
+ * `g_msgTime`: Sets message repeat rate in minutes *(Integer)*
+ * `g_sayAreaLocations`: Adds location data to say_area *(Boolean)*
  * `g_admitDefeatVotePercent`: Sets the percentage at which admitdefeat teamvotes must have to pass *(Integer)*
  * `g_creditOverflow`: Overflows the credits of full players to others. 0 disables, 1 gives to teammates in slot order, 2 gives to highest scoring teammates. *(Bitmask)*
  * `g_adminRegisterLevel`: Level to which a normal register sets to. Default 1 *(Integer)*

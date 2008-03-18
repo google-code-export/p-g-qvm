@@ -150,6 +150,7 @@ vmCvar_t  g_adminParseSay;
 vmCvar_t  g_adminSayFilter;
 vmCvar_t  g_adminNameProtect;
 vmCvar_t  g_adminTempBan;
+vmCvar_t  g_adminMaxBan;
 vmCvar_t  g_adminMapLog;
 vmCvar_t  g_adminRegisterLevel;
 vmCvar_t  g_adminRegisterAdminPass;
@@ -372,6 +373,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_adminSayFilter, "g_adminSayFilter", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminNameProtect, "g_adminNameProtect", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminTempBan, "g_adminTempBan", "120", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_adminMaxBan, "g_adminMaxBan", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_minLevelToJoinTeam, "g_minLevelToJoinTeam", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminMapLog, "g_adminMapLog", "", CVAR_ROM, 0, qfalse  },
   { &g_adminRegisterLevel, "g_adminRegisterLevel", "1", CVAR_ARCHIVE, 0, qfalse  },
@@ -2315,6 +2317,10 @@ void CheckVote( void )
     else if( !Q_stricmpn( level.voteString, "map", 3 ) )
     {
       G_admin_maplog_result( "m" );
+    }
+    else if( !Q_stricmpn( level.voteString, "!map", 4 ) )
+    {
+      G_admin_maplog_result( "l" );
     }
 
     trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteString ) );

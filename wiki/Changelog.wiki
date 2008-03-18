@@ -1,7 +1,14 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.5x=
-==1.5.0.4==
+==1.5.1x
+===1.5.1===
+ * Added improved mark deconstruct, adds a second mode (2) to `g_markDeconstruct`, allowing use of regular decon as well as `/mark` command. (Issue 61)
+ * Added `g_adminMaxBan`, when set, only allows admins to ban up to a certan number of days. If !ban is run without a duration, it matches `g_adminMaxBans`. Admins with flag `8` are immune. (Issue 65)
+ * Added layout votes. Can be called with `/callvote layout layoutname`. Follows same restrictions as map votes (Issue 66)
+ * `!listlayouts` flag changed to `j`, as with `!listmaps` (Issue 66)
+==1.5.0x==
+===1.5.0.4===
  * Added bugfixes for builder, now much more useful command. (See Issue 64)
  * Added extreme mod
   * `g_modBuildableHealth`: Buildable health *(Percent)*
@@ -13,14 +20,14 @@
   * `g_modAlienRate`: Alien fire rate *(Percent)*
   * `g_modWeaponAmmo`: Weapon ammo per clip *(Percent)*
   * `g_modWeaponReload`: Adjust's Weapon reload time *(Percent)*
-==1.5.0.3==
+===1.5.0.3===
  * Added /builder command, flag +. Shows the builder of a building.
  * Increased amount of flags and commands to 128
-==1.5.0.2==
+===1.5.0.2===
  * Added !demo command
-==1.5.0.1==
+===1.5.0.1===
  * Added fixes for !denyweapon
-==1.5==
+===1.5===
  * Prevented purchase of bsuit when crouched, prevents bsuit crouch glitch
  * Added cvar `g_devmapVotes`, switches map votes to devmap votes
  * Added proxemity mines (grenades), `g_proximityMines`
