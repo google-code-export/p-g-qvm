@@ -1466,6 +1466,10 @@ void Cmd_CallVote_f( gentity_t *ent )
     {
       G_admin_maplog_result( "m" );
     }
+    else if( !Q_stricmpn( level.voteString, "!map", 4 ) )
+    {
+      G_admin_maplog_result( "l" );
+    }
 
     level.voteExecuteTime = 0;
     trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteString ) );
@@ -1647,6 +1651,36 @@ void Cmd_CallVote_f( gentity_t *ent )
         sizeof( level.voteDisplayString ), "Change to map '%s'", arg2 );
     level.votePercentToPass = g_mapVotesPercent.integer;
   }
+  else if( !Q_stricmp( arg1, "layout" ) )
+  {
+    char map[ 64 ];
+
+    if( g_mapvoteMaxTime.integer 
+      && level.time >= g_mapvoteMaxTime.integer * 1000 
+      && !G_admin_permission( ent, ADMF_NO_VOTE_LIMIT ) 
+      && (level.numPlayingClients > 0 && level.numConnectedClients>1) )
+    {
+       trap_SendServerCommand( ent-g_entities, va(
+         "print \"You cannot call for a mapchange after %d seconds\n\"",
+         g_mapvoteMaxTime.integer ) );
+       G_admin_adminlog_log( ent, "vote", NULL, 0, qfalse );
+       return;
+    }
+  
+    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+    if( Q_stricmp( arg2, "*BUILTIN*" ) &&
+        !trap_FS_FOpenFile( va( "layouts/%s/%s.dat", map, arg2 ), NULL, FS_READ ) )
+    {
+      trap_SendServerCommand( ent - g_entities, va( "print \"callvote: "
+        "layout '%s' could not be found on the server\n\"", arg2 ) );
+      return;
+    }
+    
+    Com_sprintf( level.voteString, sizeof( level.voteString ), "!map %s %s", map, arg2 );
+    Com_sprintf( level.voteDisplayString,
+        sizeof( level.voteDisplayString ), "Change to map layout '%s'", arg2 );
+    level.votePercentToPass = g_mapVotesPercent.integer;
+  }
   else if( !Q_stricmp( arg1, "draw" ) )
   {
     Com_sprintf( level.voteString, sizeof( level.voteString ), "evacuation" );
@@ -1720,7 +1754,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands are: "
-      "map, map_restart, draw, extend, kick, mute, unmute, poll, and sudden_death\n" );
+      "map, map_restart, layout, draw, extend, kick, mute, unmute, poll, and sudden_death\n" );
     return;
   }
   
@@ -2601,7 +2635,7 @@ void Cmd_Destroy_f( gentity_t *ent )
           ( ent->client->ps.weapon <= WP_HBUILD ) ) )
     {
       // Cancel deconstruction
-      if( g_markDeconstruct.integer && traceEnt->deconstruct )
+      if( g_markDeconstruct.integer == 1 && traceEnt->deconstruct )
       {
         traceEnt->deconstruct = qfalse;
         return;
@@ -2618,7 +2652,7 @@ void Cmd_Destroy_f( gentity_t *ent )
  
 
       // Prevent destruction of the last spawn
-      if( !g_markDeconstruct.integer )
+      if( g_markDeconstruct.integer != 1 )
       {
         if( ent->client->pers.teamSelection == PTE_ALIENS &&
             traceEnt->s.modelindex == BA_A_SPAWN )
@@ -2660,7 +2694,7 @@ void Cmd_Destroy_f( gentity_t *ent )
 
       if( traceEnt->health > 0 || g_deconDead.integer )
       {
-        if( g_markDeconstruct.integer )
+        if( g_markDeconstruct.integer == 1 )
         {
           traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
           traceEnt->deconstructTime = level.time;
@@ -2708,6 +2742,97 @@ void Cmd_Destroy_f( gentity_t *ent )
             ent->client->ps.stats[ STAT_MISC ] +=
               BG_FindBuildDelayForWeapon( ent->s.weapon ) >> 2;
         }
+      }
+    }
+  }
+}
+
+void Cmd_Mark_f( gentity_t *ent )
+{
+  vec3_t      forward, end;
+  trace_t     tr;
+  gentity_t   *traceEnt;
+
+  if( g_markDeconstruct.integer != 2 )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      "print \"Mark is disabled\n\"" );
+    return;
+  }
+
+  if( ent->client->pers.paused )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      "print \"You may not mark while paused\n\"" );
+    return;
+  }
+
+  if( ent->client->pers.denyBuild )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      "print \"Your building rights have been revoked\n\"" );
+    return;
+  }
+
+  // can't mark when in hovel
+  if( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+    return;
+
+  if( !( ent->client->ps.stats[ STAT_STATE ] & SS_INFESTING ) )
+  {
+    AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
+    VectorMA( ent->client->ps.origin, 100, forward, end );
+
+    trap_Trace( &tr, ent->client->ps.origin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
+    traceEnt = &g_entities[ tr.entityNum ];
+
+    if( tr.fraction < 1.0f &&
+        ( traceEnt->s.eType == ET_BUILDABLE ) &&
+        ( traceEnt->biteam == ent->client->pers.teamSelection ) &&
+        ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
+          ( ent->client->ps.weapon <= WP_HBUILD ) ) )
+    {
+      if( ( traceEnt->s.eFlags & EF_DBUILDER ) &&
+        !ent->client->pers.designatedBuilder )
+      {
+        trap_SendServerCommand( ent-g_entities,
+          "print \"this structure is protected by a designated builder\n\"" );
+        return;
+      }
+
+      // Cancel deconstruction
+      if( traceEnt->deconstruct )
+      {
+        traceEnt->deconstruct = qfalse;
+
+        trap_SendServerCommand( ent-g_entities,
+          va( "print \"%s no longer marked for deconstruction\n\"",
+          BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
+        return;
+      }
+
+      // Don't allow marking of buildables that cannot be rebuilt
+      if(g_suddenDeath.integer && traceEnt->health > 0 &&
+          ( ( g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+              !BG_FindReplaceableTestForBuildable( traceEnt->s.modelindex ) ) ||
+            ( g_suddenDeathMode.integer == SDMODE_BP &&
+              BG_FindBuildPointsForBuildable( traceEnt->s.modelindex ) ) ||
+            g_suddenDeathMode.integer == SDMODE_NO_BUILD ) )
+      {
+        trap_SendServerCommand( ent-g_entities,
+          "print \"During Sudden Death you can only mark buildings that "
+          "can be rebuilt\n\"" );
+        return;
+      }
+
+      if( traceEnt->health > 0 )
+      {
+        traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
+        traceEnt->deconstructTime = level.time;
+
+        trap_SendServerCommand( ent-g_entities,
+          va( "print \"%s marked for deconstruction\n\"",
+          BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
       }
     }
   }
@@ -3381,6 +3506,9 @@ void Cmd_Protect_f( gentity_t *ent )
       trap_SendServerCommand( ent-g_entities, 
         "print \"Structure protection applied\n\"" );
       traceEnt->s.eFlags |= EF_DBUILDER;
+
+      // adding protection turns off deconstruction mark
+      traceEnt->deconstruct = qfalse;
     }
   }
 }
@@ -4265,6 +4393,7 @@ commands_t cmds[ ] = {
 
   { "build", CMD_TEAM|CMD_LIVING, Cmd_Build_f },
   { "deconstruct", CMD_TEAM|CMD_LIVING, Cmd_Destroy_f },
+  { "mark", CMD_TEAM|CMD_LIVING, Cmd_Mark_f },
 
   { "buy", CMD_HUMAN|CMD_LIVING, Cmd_Buy_f },
   { "sell", CMD_HUMAN|CMD_LIVING, Cmd_Sell_f },

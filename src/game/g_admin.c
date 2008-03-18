@@ -190,7 +190,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5name|start admin#^7) (^5minimum level to display^7)"
     },
     
-    {"listlayouts", G_admin_listlayouts, "L",
+    {"listlayouts", G_admin_listlayouts, "j",
       "display a list of all available layouts for a map",
       "(^5mapname^7)"
     },
@@ -2141,7 +2141,13 @@ qboolean G_admin_ban( gentity_t *ent, int skiparg )
   seconds = G_admin_parse_time( secs );
   if( seconds <= 0 )
   {
-    if( G_admin_permission( ent, ADMF_CAN_PERM_BAN ) )
+    if( g_adminMaxBan.integer )
+    {
+      ADMP( va( "^3!ban: ^7using default ban length of %d days\n",
+        g_adminMaxBan.integer ) );
+      seconds = g_adminMaxBan.integer * 60 * 60 * 24;
+    }
+    else if( G_admin_permission( ent, ADMF_CAN_PERM_BAN ) )
     {
       seconds = 0;
     }
@@ -2155,6 +2161,15 @@ qboolean G_admin_ban( gentity_t *ent, int skiparg )
   else
   {
     reason = G_SayConcatArgs( 3 + skiparg );
+
+    if( g_adminMaxBan.integer &&
+        seconds > g_adminMaxBan.integer * 60 * 60 * 24 &&
+        !G_admin_permission( ent, ADMF_CAN_PERM_BAN ) )
+    {
+      seconds = g_adminMaxBan.integer * 60 * 60 * 24;
+      ADMP( va( "^3!ban: ^7ban length limited to %d days for your admin level\n",
+        g_adminMaxBan.integer ) );
+    }
   }
 
   for( i = 0; i < MAX_ADMIN_NAMELOGS && g_admin_namelog[ i ]; i++ )
@@ -2327,10 +2342,27 @@ qboolean G_admin_adjustban( gentity_t *ent, int skiparg )
     if( length )
     {
       qtime_t qt;
+
+      if( g_adminMaxBan.integer &&
+          !G_admin_permission( ent, ADMF_CAN_PERM_BAN ) &&
+          length > g_adminMaxBan.integer * 60 * 60 * 24 )
+      {
+        ADMP( va( "^3!adjustban: ^7ban length is limited to %d days for your admin level\n",
+          g_adminMaxBan.integer ) );
+        return qfalse;
+      }
+
       expires = trap_RealTime( &qt ) + length;
     }
     else
+    {
+      if( !G_admin_permission( ent, ADMF_CAN_PERM_BAN ) )
+      {
+        ADMP( "^3adjustban: ^7permanent bans disabled for your admin level\n" );
+        return qfalse;
+      }
       expires = 0;
+    }
 
     if( g_admin_bans[ bnum - 1 ]->expires == expires )
     {
@@ -5991,11 +6023,18 @@ void G_admin_maplog_update( void )
 
 void G_admin_maplog_result( char *flag )
 {
+  static int lastTime = 0;
   char maplog[ MAX_CVAR_VALUE_STRING ];
   int t;
 
   if( !flag )
     return;
+
+  // avoid race when called in same frame
+  if( level.time == lastTime )
+    return;
+
+  lastTime = level.time;
 
   if( g_adminMapLog.string[ 0 ] &&
     g_adminMapLog.string[ 1 ] == ';' )
@@ -6084,6 +6123,9 @@ qboolean G_admin_maplog( gentity_t *ent, int skiparg )
           break;
         case 'm':
           result = "^2map vote";
+          break;
+        case 'l':
+          result = "^2layout vote";
           break;
         case 'M':
           result = "^6admin changed map";
