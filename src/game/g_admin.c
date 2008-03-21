@@ -38,7 +38,7 @@ static char g_bfb[ 32000 ];
 // note: list ordered alphabetically
 g_admin_cmd_t g_admin_cmds[ ] = 
   {
-    {"adjustban", G_admin_adjustban, "b",
+    {"adjustban", G_admin_adjustban, "B",
       "change the length or reason of a ban.  time is specified as numbers "
       "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
       " or seconds if no units are specified",
@@ -155,7 +155,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5command^7)"
     },
 	
-    {"immunity", G_admin_immunity, "b",
+    {"immunity", G_admin_immunity, "B",
       "give a player ban immunity",
       "[^3+|-^7](^5slot#^7)"
     },
@@ -170,7 +170,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5reason^7)"
     },
 	
-    {"L0", G_admin_L0, "l",
+    {"L0", G_admin_L0, "E",
       "Sets a level 1 to level 0",
       "[^3name|slot#^7]"
     },
@@ -286,7 +286,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#|admin#^7] [^3level^7]"
     },
 
-    {"showbans", G_admin_showbans, "B",
+    {"showbans", G_admin_showbans, "b",
       "display a (partial) list of active bans.",
       "(^5start at ban#^7|name|IP)"
     },
@@ -312,7 +312,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
 	
-    {"suspendban", G_admin_suspendban, "b",
+    {"suspendban", G_admin_suspendban, "B",
       "suspend a ban for a length of time. time is specified as numbers "
       "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
       " or seconds if no units are specified",
