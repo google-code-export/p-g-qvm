@@ -73,6 +73,7 @@ vmCvar_t  g_synchronousClients;
 vmCvar_t  g_warmup;
 vmCvar_t  g_doWarmup;
 vmCvar_t  g_proximityMines;
+vmCvar_t  g_proximityMinesPrice;
 vmCvar_t  g_restarted;
 vmCvar_t  g_lockTeamsAtStart;
 vmCvar_t  g_logFile;
@@ -88,6 +89,7 @@ vmCvar_t  g_extendVotesPercent;
 vmCvar_t  g_extendVotesTime;
 vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_mapVotesPercent;
+vmCvar_t  g_layoutVotePercent;
 vmCvar_t  g_designateVotes;
 vmCvar_t  g_admitDefeatVotePercent;
 vmCvar_t  g_teamAutoJoin;
@@ -266,6 +268,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_modWeaponReload, "g_modWeaponReload", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
+  { &g_proximityMinesPrice, "g_proximityMinesPrice", "800", 0, 0, qtrue  },
   { &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE  },
   { &g_teamForceBalance, "g_teamForceBalance", "1", CVAR_ARCHIVE  },
   { &g_buyAll, "g_buyAll", "0", CVAR_ARCHIVE, 0, qtrue  },
@@ -313,6 +316,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
   { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_mapVotesPercent, "g_mapVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
+  { &g_layoutVotePercent, "g_layoutVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
   { &g_designateVotes, "g_designateVotes", "0", CVAR_ARCHIVE, 0, qfalse },
   { &g_admitDefeatVotePercent, "g_admitDefeatVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
   
@@ -2318,7 +2322,7 @@ void CheckVote( void )
     {
       G_admin_maplog_result( "m" );
     }
-    else if( !Q_stricmpn( level.voteString, "!map", 4 ) )
+    else if( !Q_stricmpn( level.voteString, "!restart", 8 ) )
     {
       G_admin_maplog_result( "l" );
     }
