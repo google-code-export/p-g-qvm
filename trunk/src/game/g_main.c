@@ -74,6 +74,7 @@ vmCvar_t  g_warmup;
 vmCvar_t  g_doWarmup;
 vmCvar_t  g_proximityMines;
 vmCvar_t  g_proximityMinesPrice;
+vmCvar_t  g_proximityMinesLiveTime;
 vmCvar_t  g_restarted;
 vmCvar_t  g_lockTeamsAtStart;
 vmCvar_t  g_logFile;
@@ -269,6 +270,7 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
   { &g_proximityMinesPrice, "g_proximityMinesPrice", "800", 0, 0, qtrue  },
+  { &g_proximityMinesLiveTime, "g_proximityMinesLiveTime", "60000", 0, 0, qtrue  },
   { &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE  },
   { &g_teamForceBalance, "g_teamForceBalance", "1", CVAR_ARCHIVE  },
   { &g_buyAll, "g_buyAll", "0", CVAR_ARCHIVE, 0, qtrue  },
