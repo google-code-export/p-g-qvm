@@ -1466,7 +1466,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     {
       G_admin_maplog_result( "m" );
     }
-    else if( !Q_stricmpn( level.voteString, "!map", 4 ) )
+    else if( !Q_stricmpn( level.voteString, "!restart", 8 ) )
     {
       G_admin_maplog_result( "l" );
     }
@@ -1661,7 +1661,7 @@ void Cmd_CallVote_f( gentity_t *ent )
       && (level.numPlayingClients > 0 && level.numConnectedClients>1) )
     {
        trap_SendServerCommand( ent-g_entities, va(
-         "print \"You cannot call for a mapchange after %d seconds\n\"",
+         "print \"You cannot call for a layout change after %d seconds\n\"",
          g_mapvoteMaxTime.integer ) );
        G_admin_adminlog_log( ent, "vote", NULL, 0, qfalse );
        return;
@@ -1676,10 +1676,10 @@ void Cmd_CallVote_f( gentity_t *ent )
       return;
     }
     
-    Com_sprintf( level.voteString, sizeof( level.voteString ), "!map %s %s", map, arg2 );
+    Com_sprintf( level.voteString, sizeof( level.voteString ), "!restart %s", arg2 );
     Com_sprintf( level.voteDisplayString,
-        sizeof( level.voteDisplayString ), "Change to map layout '%s'", arg2 );
-    level.votePercentToPass = g_mapVotesPercent.integer;
+        sizeof( level.voteDisplayString ), "Change to layout '%s'", arg2 );
+    level.votePercentToPass = g_layoutVotePercent.integer;
   }
   else if( !Q_stricmp( arg1, "draw" ) )
   {
@@ -2953,8 +2953,8 @@ void Cmd_Buy_f( gentity_t *ent )
   qboolean  buyingEnergyAmmo = qfalse;
   qboolean  hasEnergyWeapon = qfalse;
   
-  BG_UpdateWeaponData(g_proximityMines.integer);
-  BG_UpdateUpgradeData(g_proximityMines.integer);
+  BG_UpdateWeaponData(g_proximityMines.integer, g_proximityMinesPrice.integer);
+  BG_UpdateUpgradeData(g_proximityMines.integer, g_proximityMinesPrice.integer);
   
   for( i = UP_NONE; i < UP_NUM_UPGRADES; i++ )
   {

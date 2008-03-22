@@ -3754,13 +3754,13 @@ int   bg_numWeapons = sizeof( bg_weapons ) / sizeof( bg_weapons[ 0 ] );
 BG_UpdateWeaponData
 ==============
 */
-void BG_UpdateWeaponData(int proximityMine) {
+void BG_UpdateWeaponData(int proximityMine, int price) {
 	int i;
 	
 	for(i=0; i<bg_numWeapons; i++) {
 		if(bg_weapons[i].weaponNum == WP_GRENADE) {
 			if(proximityMine) {
-				bg_weapons[i].price = PROXIMITY_PRICE;
+				bg_weapons[i].price = price;
 			} else {
 				bg_weapons[i].price = GRENADE_PRICE;
 			}
@@ -4317,13 +4317,13 @@ int   bg_numUpgrades = sizeof( bg_upgrades ) / sizeof( bg_upgrades[ 0 ] );
 BG_UpdateUpgradeData
 ==============
 */
-void BG_UpdateUpgradeData(int proximityMine) {
+void BG_UpdateUpgradeData(int proximityMine, int price) {
 	int i;
 	
 	for(i=0; i<bg_numUpgrades; i++) {
 		if(bg_upgrades[i].upgradeNum == UP_GRENADE) {
 			if(proximityMine) {
-				bg_upgrades[i].price = PROXIMITY_PRICE;
+				bg_upgrades[i].price = price;
 			} else {
 				bg_upgrades[i].price = GRENADE_PRICE;
 			}
