@@ -242,6 +242,7 @@ struct gentity_s
   int               lastDamageTime;
   
   int               bdnumb;		// buildlog entry ID
+  int               livetime;
 };
 
 typedef enum
@@ -1257,6 +1258,7 @@ extern  vmCvar_t  g_warmup;
 extern  vmCvar_t  g_doWarmup;
 extern  vmCvar_t  g_proximityMines;
 extern  vmCvar_t  g_proximityMinesPrice;
+extern  vmCvar_t  g_proximityMinesLiveTime;
 extern  vmCvar_t  g_blood;
 extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
