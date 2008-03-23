@@ -116,7 +116,16 @@ void G_ProcessProximityMine(gentity_t *ent) {
 	// Set the next time to run this check (can be overwritten below)
 	ent->nextthink = level.time + PROXIMITY_CHECK_FREQUENCY;
 	
-        if( g_proximityMinesLiveTime.integer != -1 && ent->livetime + PROXIMITY_CHECK_FREQUENCY == level.time )
+	//To prevent nades that last forever(when they arnt meant to)
+	if( g_proximityMinesLiveTime.integer != -1 && g_proximityMinesLiveTime.integer <= 100 )
+	 {
+	  trap_Cvar_Set( "g_proximityMinesLiveTime", "100" );
+	  ent->nextthink = level.time;
+	  ent->think = G_ExplodeMissile;
+	  return;
+	 }
+	
+        if( g_proximityMinesLiveTime.integer != -1 && ent->livetime == level.time )
 	 {
 	  ent->nextthink = level.time;
 	  ent->think = G_ExplodeMissile;
@@ -539,7 +548,7 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   if(g_proximityMines.integer) {
 	  bolt->nextthink = level.time + PROXIMITY_INIT_TIME;
 	  bolt->think = G_ProcessProximityMine;
-	  bolt->livetime = level.time + g_proximityMinesLiveTime.integer;
+	  bolt->livetime = level.time  + g_proximityMinesLiveTime.integer + PROXIMITY_INIT_TIME;
   } else {
 	  bolt->nextthink = level.time + 5000;
 	  bolt->think = G_ExplodeMissile;

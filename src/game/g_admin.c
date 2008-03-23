@@ -105,7 +105,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
 
     {"demo", G_admin_demo, "W",
-      "turn admin chat warnings off so they do not appear in demos. "
+      "turn admin chat off for the caller so it does not appear in demos. "
       "this is a toggle use !demo again to turn warnings back on",
       ""
     },
@@ -993,7 +993,7 @@ static void admin_log( gentity_t *admin, char *cmd, int skiparg )
   if ( !Q_stricmp( cmd, "attempted" ) )
   {
     Com_sprintf( string, sizeof( string ),
-                 "%s (%i) %s: %s",
+                 "%s^7 (%i) %s: %s",
                  ( admin ) ? admin->client->pers.netname : "console",
                  ( admin ) ? admin->s.clientNum : -1,
                  cmd,
@@ -2716,6 +2716,7 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
   char *realname;
   gentity_t *vic;
   int flag;
+  qboolean all = qfalse;
 
   G_SayArgv( skiparg, command, sizeof( command ) );
   cmd = command;
@@ -2765,14 +2766,49 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
     return qtrue;
   }
 
-  weapon = BG_FindWeaponNumForName( buffer );
-  if( weapon < WP_PAIN_SAW || weapon > WP_GRENADE )
-    class = BG_FindClassNumForName( buffer );
-  if( ( weapon < WP_PAIN_SAW || weapon > WP_GRENADE ) &&
-      ( class < PCL_ALIEN_LEVEL1 || class > PCL_ALIEN_LEVEL4 ) )
+  if( !Q_stricmp( buffer, "all" ) &&
+      !Q_stricmp( cmd, "denyweapon" ) )
   {
-    ADMP( va( "^3!%s: ^7unknown weapon or class\n", cmd ) );
-    return qfalse;
+    all = qtrue;
+    weapon = WP_NONE;
+    class = PCL_NONE;
+
+    if( vic->client->pers.denyHumanWeapons == 0xFFFFFF &&
+        vic->client->pers.denyAlienClasses == 0xFFFFFF )
+    {
+      ADMP( va( "^3!%s: ^7player already has no weapon or class rights\n", cmd ) );
+      return qtrue;
+    }
+
+    if( vic->client->pers.teamSelection == PTE_HUMANS )
+    {
+      weapon = vic->client->ps.weapon;
+      if( weapon < WP_PAIN_SAW || weapon > WP_GRENADE )
+        weapon = WP_NONE;
+    }
+    if( vic->client->pers.teamSelection == PTE_ALIENS )
+    {
+      class = vic->client->pers.classSelection;
+      if( class < PCL_ALIEN_LEVEL1 || class > PCL_ALIEN_LEVEL4 )
+        class = PCL_NONE;
+    }
+
+    vic->client->pers.denyHumanWeapons = 0xFFFFFF;
+    vic->client->pers.denyAlienClasses = 0xFFFFFF;
+  }
+  else
+  {
+    weapon = BG_FindWeaponNumForName( buffer );
+    if( weapon < WP_PAIN_SAW || weapon > WP_GRENADE )
+      class = BG_FindClassNumForName( buffer );
+    if( ( weapon < WP_PAIN_SAW || weapon > WP_GRENADE ) &&
+        ( class < PCL_ALIEN_LEVEL1 || class > PCL_ALIEN_LEVEL4 ) )
+    {
+      {
+        ADMP( va( "^3!%s: ^7unknown weapon or class\n", cmd ) );
+        return qfalse;
+      }
+    }
   }
 
   if( class == PCL_NONE )
@@ -2781,21 +2817,21 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
     flag = 1 << (weapon - WP_BLASTER);
     if( !Q_stricmp( cmd, "denyweapon" ) )
     {
-      if( ( vic->client->pers.denyHumanWeapons & flag ) )
+      if( ( vic->client->pers.denyHumanWeapons & flag ) && !all )
       {
-      ADMP( va( "^3!%s: ^7player already has no %s rights\n", cmd, realname ) );
-      return qtrue;
+        ADMP( va( "^3!%s: ^7player already has no %s rights\n", cmd, realname ) );
+        return qtrue;
       }
       vic->client->pers.denyHumanWeapons |= flag;
       if( vic->client->pers.teamSelection == PTE_HUMANS )
       {
-        if( weapon == WP_GRENADE &&
+        if( ( weapon == WP_GRENADE || all ) &&
             BG_InventoryContainsUpgrade( UP_GRENADE, vic->client->ps.stats ) )
         {
           BG_RemoveUpgradeFromInventory( UP_GRENADE, vic->client->ps.stats );
           G_AddCreditToClient( vic->client, (short)BG_FindPriceForUpgrade( UP_GRENADE ), qfalse );
         }
-        else if( BG_InventoryContainsWeapon( weapon, vic->client->ps.stats ) )
+        if( BG_InventoryContainsWeapon( weapon, vic->client->ps.stats ) )
         {
           int maxAmmo, maxClips;
 
@@ -2816,8 +2852,8 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
     {
       if( !( vic->client->pers.denyHumanWeapons & flag ) )
       {
-      ADMP( va( "^3!%s: ^7player already has %s rights\n", cmd, realname ) );
-      return qtrue;
+        ADMP( va( "^3!%s: ^7player already has %s rights\n", cmd, realname ) );
+        return qtrue;
       }
       vic->client->pers.denyHumanWeapons &= ~flag;
     }
@@ -2828,10 +2864,10 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
     flag = 1 << class;
     if( !Q_stricmp( cmd, "denyweapon" ) )
     {
-      if( ( vic->client->pers.denyAlienClasses & flag ) )
+      if( ( vic->client->pers.denyAlienClasses & flag ) && !all )
       {
-      ADMP( va( "^3!%s: ^7player already has no %s rights\n", cmd, realname ) );
-      return qtrue;
+        ADMP( va( "^3!%s: ^7player already has no %s rights\n", cmd, realname ) );
+        return qtrue;
       }
       vic->client->pers.denyAlienClasses |= flag;
       if( vic->client->pers.teamSelection == PTE_ALIENS &&
@@ -2862,12 +2898,15 @@ qboolean G_admin_denyweapon( gentity_t *ent, int skiparg )
     {
       if( !( vic->client->pers.denyAlienClasses & flag ) )
       {
-      ADMP( va( "^3!%s: ^7player already has %s rights\n", cmd, realname ) );
-      return qtrue;
+        ADMP( va( "^3!%s: ^7player already has %s rights\n", cmd, realname ) );
+        return qtrue;
       }
       vic->client->pers.denyAlienClasses &= ~flag;
     }
   }
+
+  if( all )
+    realname = "weapon and class";
 
   CPx( pids[ 0 ], va( "cp \"^1You've %s your %s rights\"",
     ( !Q_stricmp( cmd, "denyweapon" ) ) ? "lost" : "regained",
@@ -6449,7 +6488,7 @@ qboolean G_admin_demo( gentity_t *ent, int skiparg )
 {
   ent->client->pers.ignoreAdminWarnings = !( ent->client->pers.ignoreAdminWarnings );
 
-  ADMP( va( "^3!demo: ^7your admin chat warnings are now %s\n",
+  ADMP( va( "^3!demo: ^7your visibility of admin chat is now %s\n",
     ( ent->client->pers.ignoreAdminWarnings ) ? "^1disabled" : "^2enabled" ) );
 
   return qtrue;
