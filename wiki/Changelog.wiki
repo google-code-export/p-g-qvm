@@ -1,7 +1,18 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.5x=
-==1.5.1x
+==1.5.2x==
+===1.5.2===
+ * Changed !demo flag to ~ (to match adminchat flag.)
+ * Fixed box characters that occasionally appear with line endings in !info
+ * Added Chat channels, see [[Chat]] for more information
+ * Added console check to !demo
+ * Added `g_deconTime` to prevent deconning at beginning of match
+ * Added !flag command, see [[!flag]] for more information
+ * Added Killing/Feeding spree. Kill a lot, and the price on your head goes up. Feed a lot, and you wait before spawning.
+  * `g_killingSpree` is amount of kills to be considered a spree. 0 disables
+  * `g_feedingSpree` is amount of feeds. 0 disables
+==1.5.1x==
 ===1.5.1===
  * Added improved mark deconstruct, adds a second mode (2) to `g_markDeconstruct`, allowing use of regular decon as well as `/mark` command. (Issue 61)
  * Added `g_adminMaxBan`, when set, only allows admins to ban up to a certan number of days. If !ban is run without a duration, it matches `g_adminMaxBans`. Admins with flag `8` are immune. (Issue 65)

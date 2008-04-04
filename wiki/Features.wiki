@@ -4,7 +4,9 @@ The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exh
 
 =Admin Commands=
 QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
- * *!demo* (W): Allows admins to toggle sending of admin warnings to themselves. Designed for demo recording
+ * *!flag and !unflag* (f): Adjust per-user flags on the fly. Very powerful command, see [[!flag]] for information
+ * *!seen* (D): Shows the last time a (registered) player was on the server. Prints out 10 name matches. (Saved in chat.dat)
+ * *!demo* (~): Allows admins to toggle sending of admin warnings to themselves. Designed for demo recording
  * *!denyweapon* (d): Allows you to deny or allow a weapon for someone to use. If they are holding that weapon, it removes it from them, and repays them. Works with alien classes too
  * *!adminlog:* (A): Shows a log of reciently run admin commands.
  * !*forcespec/!unforcespec* (F): Disable the ability of a player to join any team. If the player is playing the game, they are removed and forced to spectator.
@@ -34,6 +36,7 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * *!credits* (u): Add or remove credits from a player (good for paying back that poor sap who you just !explode'd). Anti-abuse prevents players from modifying their own credit amount.
  
 =Other Features=
+ * Chat channels: Multiple chat channels in tremulous! This is a huge feature, so see [[Chat Channels]] for information.
  * /mark: When `g_markDeconstruct` is set to `2`, allows use of `/mark` command, marking or unmarking a building for deconstruction.
  * Layout votes: adds new vote type `layout`. Called by `/callvote layout LAYOUTNAME`. Subject to same restrictions as all other map votes.
  * /builder (+): shows the builder of a structure and its buildlog number.
@@ -66,6 +69,10 @@ QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
  * Vote connect time prevents players from connecting and calling a vote within g_voteMinTime, or call a map vote within g_mapvoteMinTime
 
 =Cvars=
+ * `g_killingSpree`: Amount of kills considered a spree. When a user gets a spree, the price on their head goes up, awarding the killer more. 0 disables. *(Integer)*
+ * `g_feedingSpree`: Amount of feeds before player is made to wait longer to spawn. 0 disables. *(Integer)*
+ * `g_chat`: Chat.dat file, controlling the chat user channel information *(String ending in .dat)*
+ * `g_deconTime`: Time in which a player must wait to decon reactor/overmind at start of map. -1 makes it so 2/3 of all players must be connected, otherwise it is amount of seconds. *(Seconds Integer or -1)*
  * `g_markDeconstruct`: Added mode 2, allows use of `/mark` command. *(Bitmask)*
  * `g_adminMaxBan`: Allows the maximum ban length of admins without `8` flag to be limited. Cvar is in days. *(Number)*
  * `g_modBuildableHealth`: Buildable health *(Percent)*

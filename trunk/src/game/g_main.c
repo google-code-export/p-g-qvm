@@ -159,6 +159,7 @@ vmCvar_t  g_adminRegisterLevel;
 vmCvar_t  g_adminRegisterAdminPass;
 vmCvar_t  g_adminRegisterAdminLevel;
 vmCvar_t  g_minLevelToJoinTeam;
+vmCvar_t  g_chat;
 
 vmCvar_t  g_privateMessages;
 vmCvar_t  g_buildLogMaxLength;
@@ -166,6 +167,9 @@ vmCvar_t  g_minLevelToSpecMM1;
 vmCvar_t  g_publicSayadmins;
 vmCvar_t  g_myStats;
 vmCvar_t  g_antiSpawnBlock;
+
+vmCvar_t  g_killingSpree;
+vmCvar_t  g_feedingSpree;
 
 vmCvar_t  g_KillerHP;
 
@@ -205,6 +209,8 @@ vmCvar_t  g_banNotice;
 
 vmCvar_t  g_voteMinTime;
 vmCvar_t  g_mapvoteMaxTime;
+
+vmCvar_t  g_deconTime;
 
 vmCvar_t  g_specAspec;
 
@@ -386,19 +392,24 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_adminRegisterAdminPass, "g_adminRegisterAdminPass", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminRegisterAdminLevel, "g_adminRegisterAdminLevel", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_chat, "g_chat", "chat.dat", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_radiationDamage, "g_radiationDamage", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_radiationTime, "g_radiationTime", "60", CVAR_ARCHIVE, 0, qfalse  },
   { &g_radiationCredits, "g_radiationCredits", "1000", CVAR_ARCHIVE, 0, qfalse  },
   { &g_radiationCreditsCount, "g_radiationCreditsCount", "2", CVAR_ARCHIVE, 0, qfalse  },
-  
-  
+
+  { &g_deconTime, "g_deconTime", "0", CVAR_ARCHIVE, 0, qfalse  },
+
   { &g_buildLogMaxLength, "g_buildLogMaxLength", "25", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_myStats, "g_myStats", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_publicSayadmins, "g_publicSayadmins", "1", CVAR_ARCHIVE, 0, qfalse  },    
   { &g_minLevelToSpecMM1, "g_minLevelToSpecMM1", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_antiSpawnBlock, "g_antiSpawnBlock", "0", CVAR_ARCHIVE, 0, qfalse  },
+
+  { &g_killingSpree, "g_killingSpree", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_feedingSpree, "g_feedingSpree", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_KillerHP, "g_KillerHP", "0", CVAR_ARCHIVE, 0, qtrue  },
   
@@ -884,6 +895,8 @@ void G_ShutdownGame( int restart )
 
   // write all the client session data so we can get it back
   G_WriteSessionData( );
+
+  G_admin_chat_writeconfig();
 
   G_admin_cleanup( );
   G_admin_namelog_cleanup( );

@@ -1532,6 +1532,9 @@ void ClientBegin( int clientNum )
   // name can change between ClientConnect() and ClientBegin()
   G_admin_namelog_update( client, qfalse );
 
+  // rejoin any saved chat channels
+  G_admin_chat_sync( ent );
+
   // request the clients PTR code
   trap_SendServerCommand( ent - g_entities, "ptrcrequest" );
 

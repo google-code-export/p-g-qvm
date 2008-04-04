@@ -337,6 +337,8 @@ typedef struct
   int headshots;
   int hits;
   int hitslocational;
+  int spreekills;
+  int spreefeeds;
   int teamkills;
   int dretchbasytime;
   int jetpackusewallwalkusetime;
@@ -394,6 +396,7 @@ typedef struct
   statsCounters_t statscounters;	
   qboolean            cusgrav;
   int                 cusgravlvl;
+  char                chat[ CHAT_MAXCHAN ][ CHAT_MAXPASS ];
   qboolean            ignoreAdminWarnings;
 
   qboolean            firstConnect;
@@ -1337,6 +1340,7 @@ extern  vmCvar_t  g_adminRegisterAdminPass;
 extern  vmCvar_t  g_adminRegisterAdminLevel;
 extern  vmCvar_t  g_minLevelToJoinTeam;
 extern  vmCvar_t  g_minLevelToSpecMM1;
+extern  vmCvar_t  g_chat;
 
 extern  vmCvar_t  g_KillerHP;
 
@@ -1347,6 +1351,9 @@ extern  vmCvar_t  g_buildLogMaxLength;
 extern  vmCvar_t  g_publicSayadmins;
 extern  vmCvar_t  g_myStats;
 extern  vmCvar_t  g_antiSpawnBlock;
+
+extern  vmCvar_t  g_killingSpree;
+extern  vmCvar_t  g_feedingSpree;
 
 extern  vmCvar_t  g_sayAreaLocations;
 
@@ -1376,6 +1383,8 @@ extern  vmCvar_t  g_banNotice;
 
 extern  vmCvar_t  g_voteMinTime;
 extern  vmCvar_t  g_mapvoteMaxTime;
+
+extern  vmCvar_t  g_deconTime;
 
 extern  vmCvar_t  g_specAspec;
 
