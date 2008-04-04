@@ -45,6 +45,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define MAX_ADMIN_BANSUSPEND_DAYS 14
 
+#define CHAT_MAXCHAN 10
+#define CHAT_MAXPASS 12
+
 /*
  * 1 - cannot be vote kicked, vote muted
  * 2 - cannot be censored or flood protected TODO
@@ -114,6 +117,8 @@ typedef struct g_admin_admin
   char name[ MAX_NAME_LENGTH ];
   int level;
   char flags[ MAX_ADMIN_FLAGS ];
+  int seen;
+  char chat[ CHAT_MAXCHAN ][ CHAT_MAXPASS ];
 }
 g_admin_admin_t;
 
@@ -214,7 +219,10 @@ qboolean G_admin_buildlog( gentity_t *ent, int skiparg );
 qboolean G_admin_revert( gentity_t *ent, int skiparg );
 qboolean G_admin_slap( gentity_t *ent, int skiparg );
 qboolean G_admin_L0( gentity_t *ent, int skiparg );
+qboolean G_admin_seen(gentity_t *ent, int skiparg );
+void G_admin_seen_update( char *guid );
 qboolean G_admin_listmaps( gentity_t *ent, int skiparg );
+qboolean G_admin_flag( gentity_t *ent, int skiparg );
 qboolean G_admin_immunity( gentity_t *ent, int skiparg );
 qboolean G_admin_suspendban( gentity_t *ent, int skiparg );
 qboolean G_admin_demo( gentity_t *ent, int skiparg );
@@ -224,6 +232,12 @@ void G_admin_adminlog_log( gentity_t *ent, char *command, char *args, int skipar
 qboolean G_admin_maplog( gentity_t *ent, int skiparg );
 void G_admin_maplog_update( void );
 void G_admin_maplog_result( char *flag );
+
+void G_admin_chat_writeconfig( void );
+qboolean G_admin_chat_readconfig( gentity_t *ent );
+void G_admin_chat_sync( gentity_t *ent );
+void G_admin_chat_update( gentity_t *ent, int chan );
+
 //all of my commands WEEEEEEEEEE
 qboolean G_admin_switch( gentity_t *ent, int skiparg ); 
 qboolean G_admin_mix( gentity_t *ent, int skiparg ); 

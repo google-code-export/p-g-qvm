@@ -935,6 +935,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
 	}
       }
     }
+
+    // spree decay
+    if( ent->client->pers.statscounters.spreefeeds > 1 )
+      ent->client->pers.statscounters.spreefeeds -= 2;
+    if( ent->client->pers.statscounters.spreekills > 1 )
+      ent->client->pers.statscounters.spreekills -= 2;
    
     // turn off life support when a team admits defeat 
     if( client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS &&

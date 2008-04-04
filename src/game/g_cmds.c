@@ -1375,6 +1375,223 @@ static void Cmd_Tell_f( gentity_t *ent )
     G_Say( ent, ent, SAY_TELL, p );
 }
 
+void Cmd_Join_f( gentity_t *ent )
+{
+  char pass[CHAT_MAXPASS];
+  char arg[MAX_TOKEN_CHARS];
+  int  chan;
+  int  i;
+  gentity_t *target;
+
+  if( g_floodMinTime.integer &&
+      G_Flood_Limited( ent ) )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      "print \"Your chat is flood-limited; wait before chatting again\n\"" );
+    return;
+  }
+
+  if( trap_Argc( ) < 2 )
+  {
+    char message[ 64 ];
+    int n;
+    
+    n = 0;
+    for( i = 0; i < CHAT_MAXCHAN && n < 64 - 3; i++ )
+    {
+      if( ent->client->pers.chat[i][0] )
+      {
+        message[ n ] = ' '; n++;
+        message[ n ] = '0' + i; n++;
+      }
+    }
+    if( n == 0)
+      Com_sprintf( message, sizeof( message ), " no channels, use: /join [0-%d] (password)", CHAT_MAXCHAN - 1 );
+    else
+      message[ n ] = '\0';
+
+    trap_SendServerCommand( ent-g_entities, va( "print \"joined in:%s\n\"", message ) );
+    return;
+  }
+
+  trap_Argv( 1, arg, sizeof( arg ) );
+  chan = atoi( arg );
+  if( chan < 0 || chan >= CHAT_MAXCHAN )
+  {
+    trap_SendServerCommand( ent-g_entities,
+     va( "print \"^3/join^7: invalid channel, usage: /join [0-%d] (password)\n\"", CHAT_MAXCHAN - 1 ) );
+    return;
+  }
+
+  trap_Argv( 2, pass, sizeof( pass ) );
+  if( pass[0] == '\0' )
+    Q_strncpyz( pass, "default", sizeof( pass ) );
+
+  if( !Q_stricmp( ent->client->pers.chat[chan], pass ) )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"^3/join^7: already join to channel %d\n\"", chan ) );
+    return;
+  }
+
+  G_LogPrintf( "join: channel %d %s^7\n", chan, ent->client->pers.netname );
+  Q_strncpyz( ent->client->pers.chat[chan], pass, sizeof( ent->client->pers.chat[chan] ) );
+  G_admin_chat_update( ent, chan );
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    target = &g_entities[ i ];
+    if( target && target->client &&
+        target->client->pers.connected == CON_CONNECTED &&
+        !Q_stricmp( target->client->pers.chat[ chan ], pass ) )
+    {
+      trap_SendServerCommand( i, va( "print \"join: %s^7 has joined channel #%d\n\"",
+        ent->client->pers.netname, chan ) );
+    }
+  }
+}
+
+void Cmd_Part_f( gentity_t *ent )
+{
+  char arg[MAX_TOKEN_CHARS];
+  int  chan;
+  int  i;
+  gentity_t *target;
+
+  if( trap_Argc( ) < 2 )
+  {
+    trap_SendServerCommand( ent-g_entities, va( "print \"^3/part^7 usage: /part [0-%d]\n\"", CHAT_MAXCHAN - 1 ) );
+    return;
+  }
+
+  if( g_floodMinTime.integer &&
+      G_Flood_Limited( ent ) )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"Your chat is flood-limited; wait before chatting again\n\"" );
+    return;
+  }
+
+  trap_Argv( 1, arg, sizeof( arg ) );
+  chan = atoi( arg );
+  if( chan < 0 || chan >= CHAT_MAXCHAN )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"^3/part^7: invalid channel, available channels are 0 to %d\n\"", CHAT_MAXCHAN - 1 ) );
+    return;
+  }
+
+  if( ent->client->pers.chat[chan][0] == '\0' )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      "print \"^3/part^7: not in that channel\n\"" );
+    return;
+  }
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    target = &g_entities[ i ];
+    if( target && target->client &&
+        target->client->pers.connected == CON_CONNECTED &&
+        !Q_stricmp( target->client->pers.chat[ chan ], ent->client->pers.chat[ chan ] ) )
+    {
+      trap_SendServerCommand( i, va( "print \"part: %s^7 has left channel #%d\n\"",
+        ent->client->pers.netname, chan ) );
+    }
+  }
+
+  G_LogPrintf( "part: channel %d %s^7\n", chan, ent->client->pers.netname );
+  Q_strncpyz( ent->client->pers.chat[chan], "", sizeof( ent->client->pers.chat[chan] ) );
+  G_admin_chat_update( ent, chan );
+}
+
+void Cmd_Channel_f( gentity_t *ent )
+{
+  char arg[MAX_TOKEN_CHARS];
+  char str[MAX_STRING_CHARS];
+  char *p;
+  char location[ 64 ];
+  char escaped[ 64 ];
+  int  chan;
+  int  i;
+  int  num = 0;
+  qboolean who = qfalse;
+  gentity_t *target;
+
+  if( g_floodMinTime.integer &&
+      G_Flood_Limited( ent ) )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"Your chat is flood-limited; wait before chatting again\n\"" );
+    return;
+  }
+
+  trap_Argv( 0, arg, sizeof( arg ) );
+  chan = atoi( arg );
+  if( chan < 0 || chan >= CHAT_MAXCHAN ||
+      ent->client->pers.chat[chan][0] == '\0' )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"^3/%s^7: you are not joined to that channel, use /join\n\"", arg ) );
+    return;
+  }
+
+  p = ConcatArgs( 1 );
+  if( !p || p[0] == '\0' )
+    who = qtrue;
+
+  if( Team_GetLocationMsg( ent, location, sizeof( location ) ) )
+  {
+    Com_sprintf( escaped, sizeof( escaped ), " (^4%s^7)", location );
+  }
+  else
+  {
+    escaped[ 0 ] = '\0';
+  }
+
+  str[ 0 ] = '\0';
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    target = &g_entities[ i ];
+    if( target && target->client &&
+        target->client->pers.connected == CON_CONNECTED &&
+        !Q_stricmp( target->client->pers.chat[ chan ], ent->client->pers.chat[ chan ] ) )
+    {
+      if( num > 0 )
+        Q_strcat( str, sizeof( str ), "^7, " );
+      Q_strcat( str, sizeof( str ), target->client->pers.netname );
+      num++;
+    }
+  }
+
+  if( who )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"channel ^3%d^7 has %s%s and contains %d player%s%s%s\n\"",
+      chan,
+      ( !Q_stricmp( ent->client->pers.chat[ chan ], "default" ) ) ? "no password" : "password ",
+      ( !Q_stricmp( ent->client->pers.chat[ chan ], "default" ) ) ? "" : ent->client->pers.chat[ chan ],
+      num,
+      ( num == 1 ) ? "" : "s",
+      ( num ) ? ": " : "",
+      str ) );
+    return;
+  }
+
+  G_LogPrintf( "channel%d: %s^7 %s\n", chan, ent->client->pers.netname, p );
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    target = &g_entities[ i ];
+    if( target && target->client &&
+        target->client->pers.connected == CON_CONNECTED &&
+        !Q_stricmp( target->client->pers.chat[ chan ], ent->client->pers.chat[ chan ] ) )
+    {
+      trap_SendServerCommand( i, va( "print \"(^1#%d^7 %d) [%s^7]%s: ^1%s^7\n\"",
+        chan, num, ent->client->pers.netname,
+        ( OnSameTeam( target, ent ) ) ? escaped : "",
+        p ) );
+    }
+  }
+}
+ 
 /*
 ==================
 Cmd_Where_f
@@ -2650,7 +2867,39 @@ void Cmd_Destroy_f( gentity_t *ent )
           BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
         return;
       }
- 
+
+      // Prevent destruction of critical buildables (per g_deconTime)
+      if( g_deconTime.integer &&
+        ( traceEnt->s.modelindex == BA_A_OVERMIND || traceEnt->s.modelindex == BA_H_REACTOR ) )
+      {
+        if( g_deconTime.integer > 0 &&
+          level.time - level.startTime < g_deconTime.integer * 1000 )
+        {
+          trap_SendServerCommand( ent-g_entities,
+            va( "print \"%s can't be moved until %d:%02d into the game\n\"",
+            BG_FindHumanNameForBuildable( traceEnt->s.modelindex ),
+            g_deconTime.integer / 60, g_deconTime.integer % 60 ) );
+          return;
+        }
+        if( g_deconTime.integer  < 0 &&
+          level.time - level.startTime < 60 * 1000 && level.numConnectedClients )
+        {
+          int numTeammates;
+
+          if( ent->client->pers.teamSelection == PTE_HUMANS )
+            numTeammates = level.numHumanClients;
+          else
+            numTeammates = level.numAlienClients;
+
+          if( numTeammates * 100 / level.numConnectedClients < 33 )
+          {
+            trap_SendServerCommand( ent-g_entities,
+              va( "print \"%s can't be moved until more players join, or after 1:00\n\"",
+              BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
+            return;
+          }
+        }
+      }
 
       // Prevent destruction of the last spawn
       if( g_markDeconstruct.integer != 1 )
@@ -2810,6 +3059,39 @@ void Cmd_Mark_f( gentity_t *ent )
           va( "print \"%s no longer marked for deconstruction\n\"",
           BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
         return;
+      }
+
+      // Prevent marking of critical buildables (per g_deconTime)
+      if( g_deconTime.integer &&
+        ( traceEnt->s.modelindex == BA_A_OVERMIND || traceEnt->s.modelindex == BA_H_REACTOR ) )
+      {
+        if( g_deconTime.integer > 0 &&
+            level.time - level.startTime < g_deconTime.integer * 1000 )
+        {
+          trap_SendServerCommand( ent-g_entities,
+            va( "print \"%s can't be moved until %d:%02d into the game\n\"",
+            BG_FindHumanNameForBuildable( traceEnt->s.modelindex ),
+            g_deconTime.integer / 60, g_deconTime.integer % 60 ) );
+          return;
+        }
+        if( g_deconTime.integer  < 0 &&
+          level.time - level.startTime < 60 * 1000 && level.numConnectedClients )
+        {
+          int numTeammates;
+
+          if( ent->client->pers.teamSelection == PTE_HUMANS )
+            numTeammates = level.numHumanClients;
+          else
+            numTeammates = level.numAlienClients;
+
+          if( numTeammates * 100 / level.numConnectedClients < 33 )
+          {
+            trap_SendServerCommand( ent-g_entities,
+              va( "print \"%s can't be moved until more players join, or after 1:00\n\"",
+              BG_FindHumanNameForBuildable( traceEnt->s.modelindex ) ) );
+            return;
+          }
+        }
       }
 
       // Don't allow marking of buildables that cannot be rebuilt
@@ -4365,6 +4647,20 @@ commands_t cmds[ ] = {
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, G_PrivateMessage },
   { "me", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
   { "me_team", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
+
+  // channel chat
+  { "join", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Join_f },
+  { "part", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Part_f },
+  { "0", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "1", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "2", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "3", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "4", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "5", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "6", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "7", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "8", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
+  { "9", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Channel_f },
 
   { "score", CMD_INTERMISSION, ScoreboardMessage },
   { "mystats", CMD_TEAM|CMD_INTERMISSION, Cmd_MyStats_f },
