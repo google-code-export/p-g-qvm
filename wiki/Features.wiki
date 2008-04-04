@@ -4,7 +4,7 @@ The p-g-qvm has the largest featureset of any qvm, and as such, can be quite exh
 
 =Admin Commands=
 QVM uses lakitu7's patch, and therefore has all admin and Lakitu7 commands.
- * *!flag and !unflag* (f): Adjust per-user flags on the fly. Very powerful command, see [[!flag]] for information
+ * *!flag and !unflag* (f): Adjust per-user flags on the fly. Very powerful command, see [[flag]] for information
  * *!seen* (D): Shows the last time a (registered) player was on the server. Prints out 10 name matches. (Saved in chat.dat)
  * *!demo* (~): Allows admins to toggle sending of admin warnings to themselves. Designed for demo recording
  * *!denyweapon* (d): Allows you to deny or allow a weapon for someone to use. If they are holding that weapon, it removes it from them, and repays them. Works with alien classes too

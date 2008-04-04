@@ -8,7 +8,7 @@
  * Added Chat channels, see [[Chat]] for more information
  * Added console check to !demo
  * Added `g_deconTime` to prevent deconning at beginning of match
- * Added !flag command, see [[!flag]] for more information
+ * Added !flag command, see [[flag]] for more information
  * Added Killing/Feeding spree. Kill a lot, and the price on your head goes up. Feed a lot, and you wait before spawning.
   * `g_killingSpree` is amount of kills to be considered a spree. 0 disables
   * `g_feedingSpree` is amount of feeds. 0 disables
