@@ -104,7 +104,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7] [^3#^7]"
     },
 
-    {"demo", G_admin_demo, "?",
+    {"demo", G_admin_demo, "~",
       "turn admin chat off for the caller so it does not appear in demos. "
       "this is a toggle use !demo again to turn warnings back on",
       ""
