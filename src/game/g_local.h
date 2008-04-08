@@ -396,6 +396,7 @@ typedef struct
   statsCounters_t statscounters;	
   qboolean            cusgrav;
   int                 cusgravlvl;
+  qboolean            healing;
   char                chat[ CHAT_MAXCHAN ][ CHAT_MAXPASS ];
   qboolean            ignoreAdminWarnings;
 
@@ -1388,6 +1389,8 @@ extern  vmCvar_t  g_deconTime;
 
 extern  vmCvar_t  g_specAspec;
 
+extern  vmCvar_t  g_healShove;
+
 extern  vmCvar_t  g_modBuildableHealth;  // Buildable health
 extern  vmCvar_t  g_modBuildableSpeed;   // Buildable fire rate
 extern  vmCvar_t  g_modHumanStamina;     // Human stamina
@@ -1397,6 +1400,7 @@ extern  vmCvar_t  g_modHumanRate;        // Human fire rate
 extern  vmCvar_t  g_modAlienRate;        // Alien fire rate
 extern  vmCvar_t  g_modWeaponAmmo;       // Weapon ammo per clip
 extern  vmCvar_t  g_modWeaponReload;     // Weapon reload time
+extern  vmCvar_t  g_modTurretAngle;      // Allow high turret build angles
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

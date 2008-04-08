@@ -1868,6 +1868,7 @@ void HMedistat_Think( gentity_t *self )
   int       i, num;
   gentity_t *player;
   qboolean  occupied = qfalse;
+  gentity_t *vic;
 
   self->nextthink = level.time + BG_FindNextThinkForBuildable( self->s.modelindex );
 
@@ -1948,6 +1949,14 @@ void HMedistat_Think( gentity_t *self )
     //nothing left to heal so go back to idling
     if( !self->enemy && self->active )
     {
+       int i;
+	
+       for( i = 0; i < level.maxclients; i++ )
+        {
+         vic = &g_entities[ i ];
+         vic->client->pers.healing = qfalse;
+	}
+    
       G_SetBuildableAnim( self, BANIM_CONSTRUCT2, qtrue );
       G_SetIdleBuildableAnim( self, BANIM_IDLE1 );
 
@@ -1962,6 +1971,7 @@ void HMedistat_Think( gentity_t *self )
         self->enemy->client->ps.stats[ STAT_STATE ] &= ~SS_MEDKIT_ACTIVE;
 
       self->enemy->health++;
+      self->enemy->client->pers.healing = qtrue;
 
       //if they're completely healed, give them a medkit
       if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] &&
