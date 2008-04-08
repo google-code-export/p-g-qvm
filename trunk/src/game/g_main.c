@@ -214,8 +214,6 @@ vmCvar_t  g_deconTime;
 
 vmCvar_t  g_specAspec;
 
-vmCvar_t  g_healShove;
-
 vmCvar_t  g_modBuildableHealth;
 vmCvar_t  g_modBuildableSpeed;
 vmCvar_t  g_modHumanStamina;
@@ -225,7 +223,6 @@ vmCvar_t  g_modHumanRate;
 vmCvar_t  g_modAlienRate;
 vmCvar_t  g_modWeaponAmmo;
 vmCvar_t  g_modWeaponReload;
-vmCvar_t  g_modTurretAngle;
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -267,8 +264,6 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_specAspec, "g_specAspec", "0", CVAR_ARCHIVE, 0, qtrue  },
 
-  { &g_healShove, "g_healShove", "0", CVAR_ARCHIVE, 0, qtrue  },
-
   { &g_modBuildableHealth, "g_modBuildableHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modBuildableSpeed, "g_modBuildableSpeed", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modHumanStamina, "g_modHumanStamina", "0", CVAR_ARCHIVE, 0, qfalse  },
@@ -278,7 +273,6 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_modAlienRate, "g_modAlienRate", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modWeaponAmmo, "g_modWeaponAmmo", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modWeaponReload, "g_modWeaponReload", "0", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_modTurretAngle, "g_modTurretAngle", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
   { &g_proximityMinesPrice, "g_proximityMinesPrice", "800", 0, 0, qtrue  },
@@ -680,7 +674,6 @@ static void G_InitModCvars( void )
   BG_MOD_set( MOD_BG_ALIEN_RATE, g_modAlienRate.integer );
   BG_MOD_set( MOD_BG_WEAPON_AMMO, g_modWeaponAmmo.integer );
   BG_MOD_set( MOD_BG_WEAPON_RELOAD, g_modWeaponReload.integer );
-  BG_MOD_set( MOD_BG_TURRET_ANGLE, g_modTurretAngle.integer );
 
   BG_MOD_update( );
 }

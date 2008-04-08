@@ -1344,11 +1344,9 @@ typedef enum
   MOD_BG_ALIEN_RATE,        // Alien fire rate
   MOD_BG_WEAPON_AMMO,       // Weapon ammo per clip
   MOD_BG_WEAPON_RELOAD,     // Weapon reload time
-  MOD_BG_TURRET_ANGLE,      // Allow high turret build angles
   MOD_BG_COUNT              // number of entries
 } modExtremeType_t;
 
 void BG_MOD_set( modExtremeType_t entry, int value );
-int  BG_MOD_get( modExtremeType_t entry);
 void BG_MOD_update( void );
 

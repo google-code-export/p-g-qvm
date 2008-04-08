@@ -3863,14 +3863,7 @@ Cmd_Reload_f
 */
 void Cmd_Reload_f( gentity_t *ent )
 {
-  if( !ent->client->pers.designatedBuilder && ( ent->client->ps.weapon >= WP_ABUILD ) &&
-    ( ent->client->ps.weapon <= WP_HBUILD ) )
-  {
-  
-   Cmd_Mark_f( ent );
-   return;
-  }
-  else if( ( ent->client->ps.weapon >= WP_ABUILD ) &&
+  if( ( ent->client->ps.weapon >= WP_ABUILD ) &&
     ( ent->client->ps.weapon <= WP_HBUILD ) )
   {
     Cmd_Protect_f( ent );
@@ -4704,7 +4697,7 @@ commands_t cmds[ ] = {
   { "itemact", CMD_HUMAN|CMD_LIVING, Cmd_ActivateItem_f },
   { "itemdeact", CMD_HUMAN|CMD_LIVING, Cmd_DeActivateItem_f },
   { "itemtoggle", CMD_HUMAN|CMD_LIVING, Cmd_ToggleItem_f },
-  { "reload", CMD_TEAM|CMD_LIVING, Cmd_Reload_f },
+  { "reload", CMD_HUMAN|CMD_LIVING, Cmd_Reload_f },
   { "boost", 0, Cmd_Boost_f },
   { "share", CMD_TEAM, Cmd_Share_f },
   { "donate", CMD_TEAM, Cmd_Donate_f },

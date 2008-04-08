@@ -199,9 +199,6 @@ static void G_ClientShove( gentity_t *ent, gentity_t *victim )
   // shoving enemies changes gameplay too much
   if( !OnSameTeam( ent, victim ) )
     return;
-    
-  if( victim->client->pers.healing && !g_healShove.integer )
-  return;
 
   if ( ( victim->client->ps.weapon >= WP_ABUILD ) &&
        ( victim->client->ps.weapon <= WP_HBUILD ) &&
