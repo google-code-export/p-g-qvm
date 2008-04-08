@@ -5780,6 +5780,14 @@ void BG_MOD_set( modExtremeType_t entry, int value )
   }
 }
 
+int BG_MOD_get( modExtremeType_t entry)
+{
+  if( entry >= 0 && entry < MOD_BG_COUNT )
+    return modEntry[ entry ];
+
+  return 0;
+}
+
 void BG_MOD_update( void )
 {
   static qboolean updated = qfalse;
@@ -5800,6 +5808,13 @@ void BG_MOD_update( void )
     {
       bg_buildableList[ i ].turretFireSpeed =
         bg_buildableList[ i ].turretFireSpeed * 100 / modEntry[ MOD_BG_BUILDABLE_SPEED ];
+    }
+
+    if( modEntry[ MOD_BG_TURRET_ANGLE ] &&
+      ( bg_buildableList[ i ].buildNum == BA_H_MGTURRET ||
+        bg_buildableList[ i ].buildNum == BA_H_TESLAGEN ) )
+    {
+      bg_buildableList[ i ].minNormal = 0.0f;
     }
   }
 
