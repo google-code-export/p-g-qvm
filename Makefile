@@ -21,11 +21,11 @@ else
   COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/x86/)
 endif
 
-BUILD_CLIENT     =0
-BUILD_CLIENT_SMP =0
-BUILD_SERVER     =0
-BUILD_GAME_SO    =0
-BUILD_GAME_QVM   =1
+BUILD_CLIENT     = 0
+BUILD_CLIENT_SMP = 0
+BUILD_SERVER     = 0
+BUILD_GAME_SO    = 0
+BUILD_GAME_QVM   = 1
 
 #############################################################################
 #
@@ -115,10 +115,6 @@ ifndef USE_LOCAL_HEADERS
 USE_LOCAL_HEADERS=1
 endif
 
-ifndef BUILD_MASTER_SERVER
-BUILD_MASTER_SERVER=0
-endif
-
 #############################################################################
 
 BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
@@ -137,7 +133,6 @@ JPDIR=$(MOUNT_DIR)/jpeg-6
 TOOLSDIR=$(MOUNT_DIR)/tools
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
-MASTERDIR=$(MOUNT_DIR)/master
 
 # extract version info
 VERSION=$(shell grep "\#define VERSION_NUMBER" $(CMDIR)/q_shared.h | \
@@ -712,17 +707,13 @@ endif
 
 ifneq ($(BUILD_GAME_SO),0)
   TARGETS += \
-    $(B)/base/cgame$(ARCH).$(SHLIBEXT) \
-    $(B)/base/game$(ARCH).$(SHLIBEXT) \
-    $(B)/base/ui$(ARCH).$(SHLIBEXT)
+    $(B)/base/game$(ARCH).$(SHLIBEXT)
 endif
 
 ifneq ($(BUILD_GAME_QVM),0)
   ifneq ($(CROSS_COMPILING),1)
     TARGETS += \
-      $(B)/base/vm/cgame.qvm \
-      $(B)/base/vm/game.qvm \
-      $(B)/base/vm/ui.qvm
+      $(B)/base/vm/game.qvm
   endif
 endif
 
@@ -796,15 +787,9 @@ all: debug release
 
 debug:
 	@$(MAKE) targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS)"
-ifeq ($(BUILD_MASTER_SERVER),1)
-	$(MAKE) -C $(MASTERDIR) debug
-endif
 
 release:
 	@$(MAKE) targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS)"
-ifeq ($(BUILD_MASTER_SERVER),1)
-	$(MAKE) -C $(MASTERDIR) release
-endif
 
 # Create the build directories and tools, print out
 # an informational message, then start building
@@ -886,6 +871,7 @@ Q3OBJ = \
   \
   $(B)/client/cmd.o \
   $(B)/client/common.o \
+  $(B)/client/crypto.o \
   $(B)/client/cvar.o \
   $(B)/client/files.o \
   $(B)/client/md4.o \
@@ -1089,6 +1075,7 @@ Q3DOBJ = \
   $(B)/ded/cm_trace.o \
   $(B)/ded/cmd.o \
   $(B)/ded/common.o \
+  $(B)/ded/crypto.o \
   $(B)/ded/cvar.o \
   $(B)/ded/files.o \
   $(B)/ded/md4.o \
@@ -1364,7 +1351,6 @@ $(B)/base/qcommon/%.asm: $(CMDIR)/%.c
 #############################################################################
 
 clean: clean-debug clean-release
-	@$(MAKE) -C $(MASTERDIR) clean
 
 clean2:
 	@echo "CLEAN $(B)"
