@@ -483,7 +483,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
         if( g_feedingSpree.integer &&
             level.reactorPresent &&
-            !G_BuildableRange( self->client->ps.origin, 900, BA_H_REACTOR ) )
+            !G_BuildableRange( self->client->ps.origin, 600, BA_H_REACTOR ) )
         {
           self->client->pers.statscounters.spreefeeds += 60;
         }
@@ -499,7 +499,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
         if( g_feedingSpree.integer &&
             level.overmindPresent &&
-            !G_BuildableRange( self->client->ps.origin, 900, BA_A_OVERMIND ) )
+            !G_BuildableRange( self->client->ps.origin, 600, BA_A_OVERMIND ) )
         {
           self->client->pers.statscounters.spreefeeds += 60;
         }
