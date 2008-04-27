@@ -787,6 +787,18 @@ void Cmd_Team_f( gentity_t *ent )
   else if( oldteam == PTE_HUMANS )
     humans--;
 
+  // practice mode
+  if( !force && g_practiceCount.integer )
+  {
+    char name[ MAX_NAME_LENGTH ];
+
+    G_DecolorString( ent->client->pers.netname, name );
+    if( strstr( name, g_practiceText.string ) )
+    {
+      force = qtrue;
+    }
+  }
+
   // do warm up
   if( g_doWarmup.integer &&
       level.time - level.startTime < g_warmup.integer * 1000 )
@@ -1329,6 +1341,31 @@ static void Cmd_Say_f( gentity_t *ent )
     }
   }
 
+  args = G_SayConcatArgs(0);
+  if( !Q_stricmpn( args, "say /join", 9 ) )
+  {
+    Cmd_Join_f( ent );
+    return;
+  }
+  if( !Q_stricmpn( args, "say /part", 9 ) )
+  {
+    Cmd_Part_f( ent );
+    return;
+  }
+  if( !Q_stricmpn( args, "say /0", 6 ) ||
+      !Q_stricmpn( args, "say /1", 6 ) ||
+      !Q_stricmpn( args, "say /2", 6 ) ||
+      !Q_stricmpn( args, "say /3", 6 ) ||
+      !Q_stricmpn( args, "say /4", 6 ) ||
+      !Q_stricmpn( args, "say /5", 6 ) ||
+      !Q_stricmpn( args, "say /6", 6 ) ||
+      !Q_stricmpn( args, "say /7", 6 ) ||
+      !Q_stricmpn( args, "say /8", 6 ) ||
+      !Q_stricmpn( args, "say /9", 6 ) )
+  {
+    Cmd_Channel_f( ent );
+    return;
+  }
 
   if( trap_Argc( ) < 2 )
     return;
@@ -1379,6 +1416,7 @@ void Cmd_Join_f( gentity_t *ent )
 {
   char pass[CHAT_MAXPASS];
   char arg[MAX_TOKEN_CHARS];
+  int  skipargs = 0;
   int  chan;
   int  i;
   gentity_t *target;
@@ -1391,7 +1429,11 @@ void Cmd_Join_f( gentity_t *ent )
     return;
   }
 
-  if( trap_Argc( ) < 2 )
+  G_SayArgv( skipargs, arg, sizeof( arg ) );
+  if( !Q_stricmp( arg, "say" ) )
+    skipargs++;
+
+  if( G_SayArgc( ) < 2 + skipargs )
   {
     char message[ 64 ];
     int n;
@@ -1414,7 +1456,7 @@ void Cmd_Join_f( gentity_t *ent )
     return;
   }
 
-  trap_Argv( 1, arg, sizeof( arg ) );
+  G_SayArgv( 1 + skipargs, arg, sizeof( arg ) );
   chan = atoi( arg );
   if( chan < 0 || chan >= CHAT_MAXCHAN )
   {
@@ -1423,7 +1465,7 @@ void Cmd_Join_f( gentity_t *ent )
     return;
   }
 
-  trap_Argv( 2, pass, sizeof( pass ) );
+  G_SayArgv( 2 + skipargs, pass, sizeof( pass ) );
   if( pass[0] == '\0' )
     Q_strncpyz( pass, "default", sizeof( pass ) );
 
@@ -1454,11 +1496,16 @@ void Cmd_Join_f( gentity_t *ent )
 void Cmd_Part_f( gentity_t *ent )
 {
   char arg[MAX_TOKEN_CHARS];
+  int  skipargs = 0;
   int  chan;
   int  i;
   gentity_t *target;
 
-  if( trap_Argc( ) < 2 )
+  G_SayArgv( skipargs, arg, sizeof( arg ) );
+  if( !Q_stricmp( arg, "say" ) )
+    skipargs++;
+
+  if( G_SayArgc( ) < 2 + skipargs )
   {
     trap_SendServerCommand( ent-g_entities, va( "print \"^3/part^7 usage: /part [0-%d]\n\"", CHAT_MAXCHAN - 1 ) );
     return;
@@ -1471,7 +1518,7 @@ void Cmd_Part_f( gentity_t *ent )
     return;
   }
 
-  trap_Argv( 1, arg, sizeof( arg ) );
+  G_SayArgv( 1 + skipargs, arg, sizeof( arg ) );
   chan = atoi( arg );
   if( chan < 0 || chan >= CHAT_MAXCHAN )
   {
@@ -1508,12 +1555,13 @@ void Cmd_Channel_f( gentity_t *ent )
 {
   char arg[MAX_TOKEN_CHARS];
   char str[MAX_STRING_CHARS];
-  char *p;
+  char *cmd, *p;
   char location[ 64 ];
   char escaped[ 64 ];
   int  chan;
   int  i;
   int  num = 0;
+  int  skipargs = 0;
   qboolean who = qfalse;
   gentity_t *target;
 
@@ -1524,17 +1572,25 @@ void Cmd_Channel_f( gentity_t *ent )
     return;
   }
 
-  trap_Argv( 0, arg, sizeof( arg ) );
-  chan = atoi( arg );
+  G_SayArgv( skipargs, arg, sizeof( arg ) );
+  if( !Q_stricmp( arg, "say" ) )
+  {
+    skipargs++;
+    G_SayArgv( skipargs, arg, sizeof( arg ) );
+  }
+  cmd = arg;
+  if( *cmd == '/' )
+    cmd++;
+  chan = atoi( cmd );
   if( chan < 0 || chan >= CHAT_MAXCHAN ||
       ent->client->pers.chat[chan][0] == '\0' )
   {
     trap_SendServerCommand( ent-g_entities,
-      va( "print \"^3/%s^7: you are not joined to that channel, use /join\n\"", arg ) );
+      va( "print \"^3/%s^7: you are not joined to that channel, use /join\n\"", cmd ) );
     return;
   }
 
-  p = ConcatArgs( 1 );
+  p = G_SayConcatArgs( 1 + skipargs );
   if( !p || p[0] == '\0' )
     who = qtrue;
 
@@ -1584,7 +1640,7 @@ void Cmd_Channel_f( gentity_t *ent )
         target->client->pers.connected == CON_CONNECTED &&
         !Q_stricmp( target->client->pers.chat[ chan ], ent->client->pers.chat[ chan ] ) )
     {
-      trap_SendServerCommand( i, va( "print \"(^1#%d^7 %d) [%s^7]%s: ^1%s^7\n\"",
+      trap_SendServerCommand( i, va( "chat \"(^1#%d^7 %d) [%s^7]%s: ^1%s^7\"",
         chan, num, ent->client->pers.netname,
         ( OnSameTeam( target, ent ) ) ? escaped : "",
         p ) );
@@ -2970,6 +3026,9 @@ void Cmd_Destroy_f( gentity_t *ent )
           new->next = NULL;
           new->marked = NULL;
           G_LogBuild( new );
+	  
+	  if(traceEnt->s.modelindex == BA_H_MEDISTAT )
+          traceEnt->oldent->client->pers.healing = qfalse;
 
            G_TeamCommand( ent->client->pers.teamSelection,
              va( "print \"%s ^3DECONSTRUCTED^7 by %s^7\n\"",
@@ -4829,7 +4888,8 @@ int G_SayArgc()
         s++;
       c++;
     }
-    s++;
+    if( *s )
+      s++;
   }
   return c;
 }
@@ -4877,7 +4937,8 @@ qboolean G_SayArgv( int n, char *buffer, int bufferLength )
         s++;
       c++;
     }
-    s++;
+    if( *s )
+      s++;
   }
   return qfalse;
 }
@@ -4903,7 +4964,8 @@ char *G_SayConcatArgs(int start)
         s++;
       c++;
     }
-    s++;
+    if( *s )
+      s++;
   }
   return s;
 }

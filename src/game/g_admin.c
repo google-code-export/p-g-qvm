@@ -256,6 +256,13 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "(^5name|slot|*^7)"
     },
 
+    {"practice", G_admin_practice, "[",
+      "set practice mode for player names with 'clan tag', "
+      "these players will be allowed to join any team regardless of balance. "
+      "'map count' is number of maps to maintain practice mode",
+      "[^3clan tag|off^7] [^3map count^7])"
+    },
+
     {"putteam", G_admin_putteam, "p",
       "move a player to a specified team",
       "[^3name|slot#^7] [^3h|a|s^7]"
@@ -4905,6 +4912,78 @@ qboolean G_admin_pause( gentity_t *ent, int skiparg )
     }
     ClientUserinfoChanged( pids[ i ] );
   }
+  return qtrue;
+}
+
+qboolean G_admin_practice( gentity_t *ent, int skiparg )
+{
+  char clantag[ MAX_NAME_LENGTH ];
+  char mapsarg[ 8 ];
+  int maps;
+
+  if( G_SayArgc() < 2 + skiparg )
+  {
+    if( g_practiceCount.integer )
+    {
+      AP( va( "print \"^3practice:^7 practice mode is in effect for the next %d maps\n\"",
+        g_practiceCount.integer ) );
+      ADMP( va( "^3!practice: ^7practice mode set to %s^7 for next %d maps\n",
+        g_practiceText.string, g_practiceCount.integer ) );
+    }
+    else
+    {
+      ADMP( "^3!practice: ^7practice mode is off\n" );
+    }
+    return qfalse;
+  }
+
+  G_SayArgv( 1 + skiparg, clantag, sizeof( clantag ) );
+
+  if( G_SayArgc() < 3 + skiparg )
+  {
+    if( !Q_stricmp( clantag, "off" ) )
+    {
+      if( g_practiceCount.integer )
+      {
+        trap_Cvar_Set( "g_practiceCount", "0" );
+        AP( va ("print \"^3!practice: ^7 practice mode turned off by %s^7\n\"",
+          ( ent ) ? ent->client->pers.netname : "console" ) );
+        ADMP( "^3!practice: ^7practice mode set to off\n" );
+        return qtrue;
+      }
+      else
+      {
+        ADMP( "^3!practice: ^7practice mode already off\n" );
+      }
+    }
+    else
+    {
+      ADMP( "^3!practice: ^7usage: practice [clan tag] [map count]\n" );
+    }
+    return qfalse;
+  }
+
+  G_SayArgv( 2 + skiparg, mapsarg, sizeof( mapsarg ) );
+  maps = atoi( mapsarg );
+
+  if( !clantag[ 0 ] )
+  {
+    ADMP( "^3!practice: ^7no clan tag specified\n" );
+    return qfalse;
+  }
+  if( maps < 1 || maps > 8  )
+  {
+    ADMP( "^3!practice: ^7map count must be between 1 and 8\n" );
+    return qfalse;
+  }
+
+  trap_Cvar_Set( "g_practiceText", clantag );
+  trap_Cvar_Set( "g_practiceCount", va( "%d", maps ) );
+
+  AP( va( "print \"^3practice:^7 %s^7 has activated practice mode for the next %d maps\n\"",
+      ( ent ) ? ent->client->pers.netname : "console",
+      maps ) );
+
   return qtrue;
 }
 

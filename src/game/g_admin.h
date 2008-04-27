@@ -82,7 +82,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ADMF_SEESFULLLISTPLAYERS '$'
 #define ADMF_DBUILDER '#'
 #define ADMF_ADMINCHAT '?'
-#define ADMF_BUILDCHECK '+'
+#define ADMF_BUILDCHECK ')'
 
 #define ADMF_BANIMMUNITY '&'
 
@@ -215,6 +215,7 @@ qboolean G_admin_designate( gentity_t *ent, int skiparg );
 qboolean G_admin_forcespec( gentity_t *ent, int skiparg );
 qboolean G_admin_unforcespec( gentity_t *ent, int skiparg );
 qboolean G_admin_pause( gentity_t *ent, int skiparg );
+qboolean G_admin_practice( gentity_t *ent, int skiparg );
 qboolean G_admin_buildlog( gentity_t *ent, int skiparg );
 qboolean G_admin_revert( gentity_t *ent, int skiparg );
 qboolean G_admin_slap( gentity_t *ent, int skiparg );
