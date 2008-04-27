@@ -242,6 +242,7 @@ struct gentity_s
   int               lastDamageTime;
   
   int               bdnumb;		// buildlog entry ID
+  gentity_t         *oldent;
   int               livetime;
 };
 
@@ -807,6 +808,9 @@ void      G_LeaveTeam( gentity_t *self );
 void      G_ChangeTeam( gentity_t *ent, pTeam_t newTeam );
 void      G_SanitiseName( char *in, char *out );
 void      G_PrivateMessage( gentity_t *ent );
+void      Cmd_Join_f( gentity_t *ent );
+void      Cmd_Part_f( gentity_t *ent );
+void      Cmd_Channel_f( gentity_t *ent );
 void      Cmd_TeamVote_f( gentity_t *ent ); 
 char      *G_statsString( statsCounters_t *sc, pTeam_t *pt );
 void      Cmd_Share_f( gentity_t *ent );
@@ -1376,6 +1380,9 @@ extern  vmCvar_t  g_devmapVotes;
 
 extern vmCvar_t  g_slapKnockback;
 extern vmCvar_t  g_slapDamage;
+
+extern  vmCvar_t g_practiceText;
+extern  vmCvar_t g_practiceCount;
 
 extern  vmCvar_t  g_msg;
 extern  vmCvar_t  g_msgTime;

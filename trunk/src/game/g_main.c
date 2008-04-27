@@ -198,6 +198,9 @@ vmCvar_t  g_devmapNoStructDmg;
 vmCvar_t  g_slapKnockback;
 vmCvar_t  g_slapDamage;
 
+vmCvar_t  g_practiceText;
+vmCvar_t  g_practiceCount;
+
 vmCvar_t  g_msg;
 vmCvar_t  g_msgTime;
 
@@ -267,7 +270,7 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_specAspec, "g_specAspec", "0", CVAR_ARCHIVE, 0, qtrue  },
 
-  { &g_healShove, "g_healShove", "0", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_healShove, "g_healShove", "1", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_modBuildableHealth, "g_modBuildableHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modBuildableSpeed, "g_modBuildableSpeed", "0", CVAR_ARCHIVE, 0, qfalse  },
@@ -427,6 +430,9 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_slapKnockback, "g_slapKnockback", "200", CVAR_ARCHIVE, 0, qfalse},
   { &g_slapDamage, "g_slapDamage", "5", CVAR_ARCHIVE, 0, qfalse},
+
+  { &g_practiceText, "g_practiceText", "", 0, 0, qfalse},
+  { &g_practiceCount, "g_practiceCount", "0", 0, 0, qfalse},
 
   { &g_msg, "g_msg", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_msgTime, "g_msgTime", "0", CVAR_ARCHIVE, 0, qfalse  },
@@ -825,6 +831,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   // syncronize mod cvars
   G_InitModCvars( );
+
+  // practice counter
+  if( g_practiceCount.integer > 0 )
+  {
+    trap_Cvar_Set( "g_practiceCount", va( "%d", g_practiceCount.integer - 1 ) );
+  }
 
   // general initialization
   G_FindTeams( );

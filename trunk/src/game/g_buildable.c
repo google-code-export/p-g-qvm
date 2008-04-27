@@ -1949,18 +1949,12 @@ void HMedistat_Think( gentity_t *self )
     //nothing left to heal so go back to idling
     if( !self->enemy && self->active )
     {
-       int i;
-	
-       for( i = 0; i < level.maxclients; i++ )
-        {
-         vic = &g_entities[ i ];
-         vic->client->pers.healing = qfalse;
-	}
     
       G_SetBuildableAnim( self, BANIM_CONSTRUCT2, qtrue );
       G_SetIdleBuildableAnim( self, BANIM_IDLE1 );
 
       self->active = qfalse;
+      self->oldent->client->pers.healing = qfalse;
     }
     else if( self->enemy ) //heal!
     {
@@ -1972,6 +1966,7 @@ void HMedistat_Think( gentity_t *self )
 
       self->enemy->health++;
       self->enemy->client->pers.healing = qtrue;
+      self->oldent = self->enemy;
 
       //if they're completely healed, give them a medkit
       if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] &&
@@ -2422,6 +2417,10 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   new->fate = ( attacker->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS ) ? BF_TEAMKILLED : BF_DESTROYED;
   new->next = NULL;
   G_LogBuild( new );
+  
+  if(self->s.modelindex == BA_H_MEDISTAT )
+  self->oldent->client->pers.healing = qfalse;
+      
     
   //pretty events and cleanup
   G_SetBuildableAnim( self, BANIM_DESTROY1, qtrue );
@@ -2431,7 +2430,7 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   self->powered = qfalse; //free up power
   //prevent any firing effects and cancel structure protection
   self->s.eFlags &= ~( EF_FIRING | EF_DBUILDER );
-
+  
   if( self->spawned )
   {
     self->think = HSpawn_Blast;
@@ -2809,6 +2808,9 @@ void G_FreeMarkedBuildables( void )
     new->marked = NULL;
 
     last = last->marked = new;
+    
+    if(ent->s.modelindex == BA_H_MEDISTAT )
+    ent->oldent->client->pers.healing = qfalse;
 
     G_FreeEntity( ent );
   }

@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_BASE_DELAY         17000
 #define ABUILDER_ADV_DELAY          12000
 #define ABUILDER_BLOB_DMG           ADM(9)
-#define ABUILDER_BLOB_REPEAT        600
+#define ABUILDER_BLOB_REPEAT        1000
 #define ABUILDER_BLOB_SPEED         800.0f
 #define ABUILDER_BLOB_SPEED_MOD     0.5f
 #define ABUILDER_BLOB_TIME          5000
@@ -157,13 +157,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL1_SPEED                1.25f
 #define LEVEL1_VALUE                AVM(225)
-#define LEVEL1_HEALTH               AHM(90)
+#define LEVEL1_HEALTH               AHM(75)
 #define LEVEL1_REGEN                2
 #define LEVEL1_COST                 1
 
 #define LEVEL1_UPG_SPEED            1.25f
 #define LEVEL1_UPG_VALUE            AVM(275)
-#define LEVEL1_UPG_HEALTH           AHM(115)
+#define LEVEL1_UPG_HEALTH           AHM(100)
 #define LEVEL1_UPG_REGEN            3
 #define LEVEL1_UPG_COST             1
 
