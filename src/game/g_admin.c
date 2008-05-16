@@ -245,6 +245,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
+    {"outlaw", G_admin_outlaw, "O",
+      "add to a player's bleed counter, making their base turn on them."
+      " adding a bleed value will add that many points to their bleed counter, 0 will pardon them",
+      "(^5name|slot^7) (^5bleed value)"
+    },
+
     {"passvote", G_admin_passvote, "V",
       "pass a vote currently taking place",
       ""
@@ -344,8 +350,13 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"time", G_admin_time, "C",
       "show the current local server time",
       ""},
+
+    {"tklog", G_admin_tklog, "t",
+      "list recent teamkill activity",
+      "(^5start id#|name|-skip#^7) (^5search skip#^7)"
+    },
 	  
-    {"trade", G_admin_trade, "t",
+    {"trade", G_admin_trade, "T",
       "trade health with another player",
       "[^3name|slot#^7]"
     },
@@ -406,6 +417,9 @@ g_admin_namelog_t *g_admin_namelog[ MAX_ADMIN_NAMELOGS ];
 
 static int admin_adminlog_index = 0;
 g_admin_adminlog_t *g_admin_adminlog[ MAX_ADMIN_ADMINLOGS ];
+
+static int admin_tklog_index = 0;
+g_admin_tklog_t *g_admin_tklog[ MAX_ADMIN_TKLOGS ];
 
 qboolean G_admin_permission( gentity_t *ent, char flag )
 {
@@ -6467,6 +6481,250 @@ qboolean G_admin_adminlog( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
+void G_admin_tklog_cleanup( void )
+{
+  int i;
+
+  for( i = 0; i < MAX_ADMIN_TKLOGS && g_admin_tklog[ i ]; i++ )
+  {
+    G_Free( g_admin_tklog[ i ] );
+    g_admin_tklog[ i ] = NULL;
+  }
+
+  admin_tklog_index = 0;
+}
+
+void G_admin_tklog_log( gentity_t *attacker, gentity_t *victim, int meansOfDeath )
+{
+  g_admin_tklog_t *tklog;
+  int previous;
+  int count = 1;
+
+  if( !attacker || !victim )
+    return;
+
+  previous = admin_tklog_index - 1;
+  if( previous < 0 )
+    previous = MAX_ADMIN_TKLOGS - 1;
+
+  if( g_admin_tklog[ previous ] )
+    count = g_admin_tklog[ previous ]->id + 1;
+
+  if( g_admin_tklog[ admin_tklog_index ] )
+    tklog = g_admin_tklog[ admin_tklog_index ];
+  else
+    tklog = G_Alloc( sizeof( g_admin_tklog_t ) );
+
+  memset( tklog, 0, sizeof( g_admin_tklog_t ) );
+  tklog->id = count;
+  tklog->time = level.time - level.startTime;
+  Q_strncpyz( tklog->name, attacker->client->pers.netname, sizeof( tklog->name ) );
+  Q_strncpyz( tklog->victim, victim->client->pers.netname, sizeof( tklog->victim ) );
+  tklog->damage = victim->client->tkcredits[ attacker->s.number ];
+  tklog->value = victim->client->ps.stats[ STAT_MAX_HEALTH ];
+  tklog->team = attacker->client->ps.stats[ STAT_PTEAM ];
+  if( meansOfDeath == MOD_GRENADE )
+    tklog->weapon = WP_GRENADE;
+  else if( tklog->team == PTE_HUMANS )
+    tklog->weapon = attacker->s.weapon;
+  else
+    tklog->weapon = attacker->client->ps.stats[ STAT_PCLASS ];
+
+  g_admin_tklog[ admin_tklog_index ] = tklog;
+  admin_tklog_index++;
+  if( admin_tklog_index >= MAX_ADMIN_TKLOGS )
+    admin_tklog_index = 0;
+}
+
+qboolean G_admin_tklog( gentity_t *ent, int skiparg )
+{
+  g_admin_tklog_t *results[ 10 ];
+  int result_index = 0;
+  char *search_name = NULL;
+  int index;
+  int skip = 0;
+  int skipped = 0;
+  int checked = 0;
+  char n1[ MAX_NAME_LENGTH ];
+  char fmt_name[ 16 ];
+  char argbuf[ 32 ];
+  char *weaponName;
+  int name_length = 10;
+  int max_id = 0;
+  int i;
+  qboolean match;
+
+  memset( results, 0, sizeof( results ) );
+
+  index = admin_tklog_index;
+  for( i = 0; i < 10; i++ )
+  {
+    int prev;
+
+    prev = index - 1;
+    if( prev < 0 )
+      prev = MAX_ADMIN_TKLOGS - 1;
+    if( !g_admin_tklog[ prev ] )
+      break;
+    if( g_admin_tklog[ prev ]->id > max_id )
+      max_id = g_admin_tklog[ prev ]->id;
+    index = prev;
+  }
+
+  if( G_SayArgc() > 1 + skiparg )
+  {
+    G_SayArgv( 1 + skiparg, argbuf, sizeof( argbuf ) );
+    if( ( *argbuf >= '0' && *argbuf <= '9' ) || *argbuf == '-' )
+    {
+      int id;
+
+      id = atoi( argbuf );
+      if( id < 0 )
+        id += ( max_id - 9 );
+      else if( id <= max_id - MAX_ADMIN_TKLOGS )
+        id = max_id - MAX_ADMIN_TKLOGS + 1;
+
+      if( id + 9 >= max_id )
+        id = max_id - 9;
+      if( id < 1 )
+        id = 1;
+      for( i = 0; i < MAX_ADMIN_TKLOGS; i++ )
+      {
+        if( g_admin_tklog[ i ]->id == id )
+        {
+          index = i;
+          break;
+        }
+      }
+    }
+    else
+    {
+      search_name = argbuf;
+    }
+
+    if( G_SayArgc() > 2 + skiparg && ( search_name ) )
+    {
+      char skipbuf[ 4 ];
+      G_SayArgv( 2 + skiparg, skipbuf, sizeof( skipbuf ) );
+      skip = atoi( skipbuf );
+    }
+  }
+
+  if( search_name )
+  {
+    g_admin_tklog_t *result_swap[ 10 ];
+
+    memset( &result_swap, 0, sizeof( result_swap ) );
+
+    index = admin_tklog_index - 1;
+    if( index < 0 )
+      index = MAX_ADMIN_TKLOGS - 1;
+
+    while( g_admin_tklog[ index ] &&
+      checked < MAX_ADMIN_TKLOGS &&
+      result_index < 10 )
+    {
+      match = qfalse;
+
+      G_SanitiseName( g_admin_tklog[ index ]->name, n1 );
+      if( strstr( n1, search_name ) )
+        match = qtrue;
+
+      if( match && skip > 0 )
+      {
+        match = qfalse;
+        skip--;
+        skipped++;
+      }
+      if( match )
+      {
+        result_swap[ result_index ] = g_admin_tklog[ index ];
+        result_index++;
+      }
+
+      checked++;
+      index--;
+      if( index < 0 )
+        index = MAX_ADMIN_TKLOGS - 1;
+    }
+    // search runs backwards, turn it around
+    for( i = 0; i < result_index; i++ )
+      results[ i ] = result_swap[ result_index - i - 1 ];
+  }
+  else
+  {
+    while( g_admin_tklog[ index ] && result_index < 10 )
+    {
+      results[ result_index ] = g_admin_tklog[ index ];
+      result_index++;
+      index++;
+      if( index >= MAX_ADMIN_TKLOGS )
+        index = 0;
+    }
+  }
+
+  for( i = 0; results[ i ] && i < 10; i++ )
+  {
+    int l;
+
+    G_DecolorString( results[ i ]->name, n1 );
+    l = strlen( n1 );
+    if( l > name_length )
+      name_length = l;
+  }
+  ADMBP_begin( );
+  for( i = 0; results[ i ] && i < 10; i++ )
+  {
+    int t;
+
+    t = results[ i ]->time / 1000;
+
+    G_DecolorString( results[ i ]->name, n1 );
+    Com_sprintf( fmt_name, sizeof( fmt_name ), "%%%ds", 
+      ( name_length + strlen( results[ i ]->name ) - strlen( n1 ) ) );
+    Com_sprintf( n1, sizeof( n1 ), fmt_name, results[ i ]->name );
+
+    if( results[ i ]->team == PTE_HUMANS )
+      weaponName = BG_FindNameForWeapon( results[ i ]->weapon );
+    else
+      weaponName = BG_FindNameForClassNum( results[ i ]->weapon );
+
+    ADMBP( va( "^7%3d %3d:%02d %s^7 %3d / %3d %10s %s^7\n",
+      results[ i ]->id,
+      t / 60, t % 60,
+      n1,
+      results[ i ]->damage,
+      results[ i ]->value,
+      weaponName,
+      results[ i ]->victim ) );
+  }
+  if( search_name )
+  {
+    ADMBP( va( "^3!tklog:^7 Showing %d matches for '%s^7'.",
+      result_index,
+      argbuf ) );
+    if( checked < MAX_ADMIN_TKLOGS && g_admin_tklog[ checked ] )
+      ADMBP( va( " run '!tklog %s^7 %d' to see more",
+       argbuf,
+       skipped + result_index ) );
+    ADMBP( "\n" );
+  }
+  else if ( results[ 0 ] )
+  {
+    ADMBP( va( "^3!tklog:^7 Showing %d - %d of %d.\n",
+      results[ 0 ]->id,
+      results[ result_index - 1 ]->id,
+      max_id ) );
+  }
+  else
+  {
+    ADMBP( "^3!tklog:^7 log is empty.\n" );
+  }
+  ADMBP_end( );
+
+  return qtrue;
+}
+
 void G_admin_maplog_update( void )
 {
   char map[ 64 ];
@@ -7134,6 +7392,75 @@ qboolean G_admin_demo( gentity_t *ent, int skiparg )
 
   return qtrue;
 }
+
+qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  char valuebuf[ 8 ];
+  gentity_t *vic;
+  int points;
+
+  if( !g_bleedingSpree.integer )
+  {
+    ADMP( "^3!outlaw: ^7bleeding sprees are disabled\n" );
+    return qfalse;
+  }
+
+  if( G_SayArgc() < 2 + skiparg )
+  {
+    ADMP( "^3!outlaw: ^7usage: !outlaw [name|slot#] (value)\n" );
+    return qfalse;
+  }
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!mute: ^7%s\n", err ) );
+    return qfalse;
+  }
+
+  if( G_SayArgc() > 2 + skiparg )
+  {
+    G_SayArgv( 2 + skiparg, valuebuf, sizeof( valuebuf ) );
+    points = atoi( valuebuf );
+  }
+  else
+  {
+    points = ( g_bleedingSpree.integer + 1 ) * 100;
+  }
+
+  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
+  {
+    ADMP( "^3!mute: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+  vic = &g_entities[ pids[ 0 ] ];
+  if( points )
+  {
+    vic->client->pers.statscounters.spreebleeds += points;
+    if( !vic->client->pers.bleeder )
+    {
+      vic->client->pers.bleeder = qtrue;
+      level.bleeders++;
+
+      AP( va( "print \"^3!outlaw: ^7%s^7 has been designated an outlaw by ^7%s\n\"",
+            vic->client->pers.netname,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+    }
+  }
+  else
+  {
+    vic->client->pers.statscounters.spreebleeds = 8;
+
+    AP( va( "print \"^3!outlaw: ^7%s^7 has been pardoned by ^7%s\n\"",
+            vic->client->pers.netname,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
+  return qtrue;
+}
+
 
 qboolean G_admin_mix( gentity_t *ent, int skiparg )
 {

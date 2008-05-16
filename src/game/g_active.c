@@ -944,6 +944,22 @@ void ClientTimerActions( gentity_t *ent, int msec )
       ent->client->pers.statscounters.spreefeeds -= 2;
     if( ent->client->pers.statscounters.spreekills > 1 )
       ent->client->pers.statscounters.spreekills -= 2;
+    if( ent->client->pers.statscounters.spreebleeds > 3 )
+    {
+      ent->client->pers.statscounters.spreebleeds -= 4;
+      if( ent->client->pers.bleeder )
+      {
+        if( ent->client->pers.statscounters.spreebleeds > 3 )
+          ent->client->pers.statscounters.spreebleeds -= 4;
+        if( ent->client->pers.statscounters.spreebleeds < 4 )
+        {
+          ent->client->pers.bleeder = qfalse;
+          trap_SendServerCommand( ent-g_entities, "cp \"^2Your base has forgiven you^7\"" );
+          if( level.bleeders )
+            level.bleeders--;
+        }
+      }
+    }
    
     // turn off life support when a team admits defeat 
     if( client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS &&

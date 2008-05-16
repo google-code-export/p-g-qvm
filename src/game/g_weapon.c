@@ -648,7 +648,8 @@ void teslaFire( gentity_t *ent )
   if( !traceEnt->client )
     return;
 
-  if( traceEnt->client && traceEnt->client->ps.stats[ STAT_PTEAM ] != PTE_ALIENS )
+  if( traceEnt->client && traceEnt->client->ps.stats[ STAT_PTEAM ] != PTE_ALIENS &&
+     !traceEnt->client->pers.bleeder )
     return;
 
   //so the client side knows

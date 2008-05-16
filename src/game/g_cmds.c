@@ -4222,6 +4222,8 @@ void Cmd_PTRCVerify_f( gentity_t *ent )
   connectionRecord_t  *connection;
   char                s[ MAX_TOKEN_CHARS ] = { 0 };
   int                 code;
+  int		      i;
+  gentity_t *players;
 
   trap_Argv( 1, s, sizeof( s ) );
 
@@ -4229,6 +4231,25 @@ void Cmd_PTRCVerify_f( gentity_t *ent )
     return;
 
   code = atoi( s );
+  
+  //Some sanity checks...BECAUSE THIS FUNCTION IS INSANE! lol
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    players = &g_entities[ i ];
+    if( !players->client )
+      continue;
+    if( players->client->pers.connected != CON_CONNECTED )
+      continue;
+    if( players == ent )
+    continue;
+
+    if( players->client->pers.connection->ptrCode == code )
+    {
+      trap_SendServerCommand( ent - g_entities,
+        "print \"This PTR code is already in use\n\"" );
+      G_AdminsPrintf("%s^7 attempted to use %s^7's PTR code", ent->client->pers.netname, players->client->pers.netname);
+    }
+  }
 
   if( G_VerifyPTRC( code ) )
   {
@@ -4266,6 +4287,9 @@ void Cmd_PTRCRestore_f( gentity_t *ent )
   char                s[ MAX_TOKEN_CHARS ] = { 0 };
   int                 code;
   connectionRecord_t  *connection;
+  gentity_t *ents;
+  int i;
+  gentity_t *players;
 
   trap_Argv( 1, s, sizeof( s ) );
 
@@ -4273,6 +4297,26 @@ void Cmd_PTRCRestore_f( gentity_t *ent )
     return;
 
   code = atoi( s );
+  
+  //Some sanity checks..
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    players = &g_entities[ i ];
+    if( !players->client )
+      continue;
+    if( players->client->pers.connected != CON_CONNECTED )
+      continue;
+    if( players == ent )
+    continue;
+
+    if( players->client->pers.connection->ptrCode == code )
+    {
+      trap_SendServerCommand( ent - g_entities,
+        "print \"This PTR code is already in use\n\"" );
+      G_AdminsPrintf("%s^7 attempted to use %s^7's PTR code", ent->client->pers.netname, players->client->pers.netname);
+    }
+  }
+  
 
   if( G_VerifyPTRC( code ) )
   {

@@ -1496,6 +1496,10 @@ void ClientBegin( int clientNum )
   gentity_t *ent;
   gclient_t *client;
   int       flags;
+  char flag[6];
+  char userinfo[ MAX_INFO_STRING ];
+  trap_Cvar_VariableStringBuffer( "g_chatAdminPrefix", flag, sizeof( flag ) );
+  
 
   ent = g_entities + clientNum;
 
@@ -1526,8 +1530,18 @@ void ClientBegin( int clientNum )
   // locate ent at a spawn point
 
   ClientSpawn( ent, NULL, NULL, NULL );
-
-  trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+  if( G_admin_permission( ent, ADMF_SHOWOFF) )
+  {
+   trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+   trap_SendServerCommand( -1, va( "print \"%s^7%s" S_COLOR_WHITE " entered the game\n\"", flag, client->pers.netname ) );
+   Info_SetValueForKey( userinfo, "name", va( "%s^7%s", flag, client->pers.netname ) );
+   trap_SetUserinfo( clientNum, userinfo );
+   ClientUserinfoChanged( clientNum );
+  }
+  else
+  {
+   trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+  }
 
   // name can change between ClientConnect() and ClientBegin()
   G_admin_namelog_update( client, qfalse );
