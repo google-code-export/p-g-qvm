@@ -275,6 +275,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
       self->client->pers.netname, attacker->client->pers.netname, self->client->tkcredits[ attacker->s.number ], self->client->ps.stats[ STAT_MAX_HEALTH ] ) );
     trap_SendServerCommand( attacker - g_entities,
       va( "cp \"You killed ^1TEAMMATE^7 %s\"", self->client->pers.netname ) );
+
+    G_admin_tklog_log( attacker, self, meansOfDeath );
   }
 
   self->enemy = attacker;
@@ -1222,7 +1224,7 @@ dflags    these flags are used to control how T_Damage works
 void G_SelectiveDamage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
          vec3_t dir, vec3_t point, int damage, int dflags, int mod, int team )
 {
-  if( targ->client && ( team != targ->client->ps.stats[ STAT_PTEAM ] ) )
+  if( targ->client && ( team != targ->client->ps.stats[ STAT_PTEAM ] || targ->client->pers.bleeder ) )
     G_Damage( targ, inflictor, attacker, dir, point, damage, dflags, mod );
 }
 
@@ -1485,6 +1487,23 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	{
 	  level.humanStatsCounters.ffdmgdone+=take;
 	}
+
+        // bleeding spree
+        if( g_bleedingSpree.integer > 1 )
+        {
+          attacker->client->pers.statscounters.spreebleeds += take;
+          if( attacker->client->pers.statscounters.spreebleeds > g_bleedingSpree.integer * 100 &&
+              !attacker->client->pers.bleeder )
+          {
+            attacker->client->pers.bleeder = qtrue;
+            level.bleeders++;
+            trap_SendServerCommand( -1,
+              va( "print \"%s^3 has become an enemy of their own base.\n\"",
+              attacker->client->pers.netname ) );
+            trap_SendServerCommand( attacker - g_entities,
+              "cp \"^1Your team bleeding has irritated your base^7\"" );
+          }
+        }
       }
       else if( targ->s.eType == ET_BUILDABLE )
       {

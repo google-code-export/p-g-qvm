@@ -170,6 +170,7 @@ vmCvar_t  g_antiSpawnBlock;
 
 vmCvar_t  g_killingSpree;
 vmCvar_t  g_feedingSpree;
+vmCvar_t  g_bleedingSpree;
 
 vmCvar_t  g_KillerHP;
 
@@ -218,6 +219,8 @@ vmCvar_t  g_deconTime;
 vmCvar_t  g_specAspec;
 
 vmCvar_t  g_healShove;
+
+vmCvar_t  g_chatAdminPrefix;
 
 vmCvar_t  g_modBuildableHealth;
 vmCvar_t  g_modBuildableSpeed;
@@ -271,6 +274,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_specAspec, "g_specAspec", "0", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_healShove, "g_healShove", "1", CVAR_ARCHIVE, 0, qtrue  },
+
+  { &g_chatAdminPrefix, "g_chatAdminPrefix", "^3@", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_modBuildableHealth, "g_modBuildableHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modBuildableSpeed, "g_modBuildableSpeed", "0", CVAR_ARCHIVE, 0, qfalse  },
@@ -419,6 +424,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_killingSpree, "g_killingSpree", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_feedingSpree, "g_feedingSpree", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_bleedingSpree, "g_bleedingSpree", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_KillerHP, "g_KillerHP", "0", CVAR_ARCHIVE, 0, qtrue  },
   
@@ -920,6 +926,7 @@ void G_ShutdownGame( int restart )
   G_admin_cleanup( );
   G_admin_namelog_cleanup( );
   G_admin_adminlog_cleanup( );
+  G_admin_tklog_cleanup( );
 
   level.restarted = qfalse;
   level.surrenderTeam = PTE_NONE;
@@ -1564,6 +1571,7 @@ void CalculateRanks( void )
   level.numHumanClients = 0;
   level.numLiveAlienClients = 0;
   level.numLiveHumanClients = 0;
+  level.bleeders = 0;
 
   for( i = 0; i < level.maxclients; i++ )
   {
@@ -1596,6 +1604,9 @@ void CalculateRanks( void )
           if( level.clients[ i ].sess.sessionTeam != TEAM_SPECTATOR )
             level.numLiveHumanClients++;
         }
+
+        if( level.clients[ i ].pers.bleeder )
+          level.bleeders++;
       }
     }
   }

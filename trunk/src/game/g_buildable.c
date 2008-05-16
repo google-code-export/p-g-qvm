@@ -1078,7 +1078,8 @@ void AAcidTube_Think( gentity_t *self )
       if( !G_Visible( self, enemy ) )
         continue;
 
-      if( enemy->client && enemy->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS &&
+      if( enemy->client &&
+          ( enemy->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS || enemy->client->pers.bleeder ) &&
           !level.paused &&
 	  !enemy->client->pers.paused )
       {
@@ -2120,7 +2121,8 @@ qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target, qboolean ign
   if( !traceEnt->client )
     return qfalse;
 
-  if( traceEnt->client && traceEnt->client->ps.stats[ STAT_PTEAM ] != PTE_ALIENS )
+  if( traceEnt->client && traceEnt->client->ps.stats[ STAT_PTEAM ] != PTE_ALIENS
+      && !traceEnt->client->pers.bleeder )
     return qfalse;
 
   return qtrue;
@@ -2178,6 +2180,24 @@ void HMGTurret_FindEnemy( gentity_t *self )
           continue;
 
         //we found a target
+        self->enemy = target;
+        return;
+      }
+    }
+  }
+
+  // bleeder retribution
+  if( level.bleeders )
+  {
+    for( i = 0; i < num; i++ )
+    {
+      target = &g_entities[ entityList[ i ] ];
+
+      if( target->client && target->client->pers.bleeder )
+      {
+        if( !HMGTurret_CheckTarget( self, target, qfalse ) )
+          continue;
+
         self->enemy = target;
         return;
       }
@@ -2299,7 +2319,8 @@ void HTeslaGen_Think( gentity_t *self )
       if( enemy->flags & FL_NOTARGET )
 	continue;
 
-      if( enemy->client && enemy->client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS &&
+      if( enemy->client &&
+          ( enemy->client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS || enemy->client->pers.bleeder ) &&
           enemy->health > 0 && !enemy->client->pers.paused &&
           !level.paused &&
           Distance( enemy->s.pos.trBase, self->s.pos.trBase ) <= TESLAGEN_RANGE )

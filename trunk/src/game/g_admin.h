@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_ADMIN_NAMELOG_NAMES 5
 #define MAX_ADMIN_ADMINLOGS 128
 #define MAX_ADMIN_ADMINLOG_ARGS 50
+#define MAX_ADMIN_TKLOGS 64
 #define MAX_ADMIN_FLAGS 128
 #define MAX_ADMIN_COMMANDS 128
 #define MAX_ADMIN_CMD_LEN 20
@@ -83,6 +84,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ADMF_DBUILDER '#'
 #define ADMF_ADMINCHAT '?'
 #define ADMF_BUILDCHECK ')'
+
+#define ADMF_SHOWOFF '('
+
 
 #define ADMF_BANIMMUNITY '&'
 
@@ -166,6 +170,19 @@ typedef struct g_admin_adminlog
 }
 g_admin_adminlog_t;
 
+typedef struct g_admin_tklog
+{
+  char      name[ MAX_NAME_LENGTH ];
+  char      victim[ MAX_NAME_LENGTH ];
+  int       id;
+  int       time;
+  int       damage;
+  int       value;
+  int       team;
+  int       weapon;
+}
+g_admin_tklog_t;
+
 qboolean G_admin_ban_check( char *userinfo, char *reason, int rlen );
 qboolean G_admin_cmd_check( gentity_t *ent, qboolean say );
 qboolean G_admin_readconfig( gentity_t *ent, int skiparg );
@@ -230,6 +247,9 @@ qboolean G_admin_demo( gentity_t *ent, int skiparg );
 qboolean G_admin_adminlog( gentity_t *ent, int skiparg );
 void G_admin_adminlog_cleanup( void );
 void G_admin_adminlog_log( gentity_t *ent, char *command, char *args, int skiparg, qboolean success );
+qboolean G_admin_tklog( gentity_t *ent, int skiparg );
+void G_admin_tklog_cleanup( void );
+void G_admin_tklog_log( gentity_t *attacker, gentity_t *victim, int meansOfDeath );
 qboolean G_admin_maplog( gentity_t *ent, int skiparg );
 void G_admin_maplog_update( void );
 void G_admin_maplog_result( char *flag );
@@ -250,6 +270,7 @@ qboolean G_admin_cp( gentity_t *ent, int skiparg );
 qboolean G_admin_credits( gentity_t *ent, int skiparg ); 
 qboolean G_admin_customgrav( gentity_t *ent, int skiparg ); 
 qboolean G_admin_explode( gentity_t *ent, int skiparg ); 
+qboolean G_admin_outlaw( gentity_t *ent, int skiparg );
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );

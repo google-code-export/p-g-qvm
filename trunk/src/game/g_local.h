@@ -340,6 +340,7 @@ typedef struct
   int hitslocational;
   int spreekills;
   int spreefeeds;
+  int spreebleeds;
   int teamkills;
   int dretchbasytime;
   int jetpackusewallwalkusetime;
@@ -389,6 +390,7 @@ typedef struct
   qboolean            denyBuild;
   int                 denyHumanWeapons;
   int                 denyAlienClasses;
+  qboolean            bleeder;
   qboolean            paused;
   int                 adminLevel;
   qboolean            specd;
@@ -757,6 +759,8 @@ typedef struct
   int               lastBuildID;
   int				lastTeamUnbalancedTime;
   int				numTeamWarnings;  
+
+  int               bleeders;
   
   statsCounters_t alienStatsCounters;
   statsCounters_t humanStatsCounters;
@@ -1359,6 +1363,7 @@ extern  vmCvar_t  g_antiSpawnBlock;
 
 extern  vmCvar_t  g_killingSpree;
 extern  vmCvar_t  g_feedingSpree;
+extern  vmCvar_t  g_bleedingSpree;
 
 extern  vmCvar_t  g_sayAreaLocations;
 
@@ -1397,6 +1402,8 @@ extern  vmCvar_t  g_deconTime;
 extern  vmCvar_t  g_specAspec;
 
 extern  vmCvar_t  g_healShove;
+
+extern  vmCvar_t  g_chatAdminPrefix;
 
 extern  vmCvar_t  g_modBuildableHealth;  // Buildable health
 extern  vmCvar_t  g_modBuildableSpeed;   // Buildable fire rate

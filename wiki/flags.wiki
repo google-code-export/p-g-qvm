@@ -1,5 +1,6 @@
 #summary Listing of ALL flags used in this QVM
 #labels Info-Help,Featured
+*Remember:* New revision flags are shown in _italics_
 || *Command/Feature* || *Flag* ||
 || no inactivity || 0 ||
 || Vote immunity || 1 ||
@@ -14,6 +15,9 @@
 || command immune || ! ||
 || perm. Designation || # ||
 || sees listplayers || $ ||
+|| immune from IP bans || & ||
+|| _Has Admin Team Prefix_ || _(_||
+|| /builder || + _)_ ||
 || demo || ? ||
 || sees adminchat || ? ||
 || anonymous || @ ||
@@ -61,6 +65,7 @@
 || nextmap || n ||
 || rename || N ||
 || drop || o ||
+|| _outlaw_ || _O_ ||
 || putteam || p ||
 || spec999 || P ||
 || customgrav || Q ||
@@ -71,7 +76,8 @@
 || setlevel || s ||
 || pause || S ||
 || unpause || S ||
-|| trade || t ||
+|| _tklog_ || _t_ ||
+|| trade || t _T_ ||
 || steal || T ||
 || credits || u ||
 || buildlog || U ||
@@ -83,6 +89,6 @@
 || switch || X ||
 || allready || y ||
 || cp || Z ||
-|| builder || + ||
+
 
 _*Note:* These are organised by flag, and not by command._
