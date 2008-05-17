@@ -1403,8 +1403,6 @@ extern  vmCvar_t  g_specAspec;
 
 extern  vmCvar_t  g_healShove;
 
-extern  vmCvar_t  g_chatAdminPrefix;
-
 extern  vmCvar_t  g_modBuildableHealth;  // Buildable health
 extern  vmCvar_t  g_modBuildableSpeed;   // Buildable fire rate
 extern  vmCvar_t  g_modHumanStamina;     // Human stamina

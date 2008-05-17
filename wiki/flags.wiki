@@ -16,7 +16,6 @@
 || perm. Designation || # ||
 || sees listplayers || $ ||
 || immune from IP bans || & ||
-|| _Has Admin Team Prefix_ || _(_||
 || /builder || + _)_ ||
 || demo || ? ||
 || sees adminchat || ? ||
