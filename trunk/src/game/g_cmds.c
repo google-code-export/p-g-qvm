@@ -4248,6 +4248,7 @@ void Cmd_PTRCVerify_f( gentity_t *ent )
       trap_SendServerCommand( ent - g_entities,
         "print \"This PTR code is already in use\n\"" );
       G_AdminsPrintf("%s^7 attempted to use %s^7's PTR code\n", ent->client->pers.netname, players->client->pers.netname);
+      return;
     }
   }
 
@@ -4314,6 +4315,7 @@ void Cmd_PTRCRestore_f( gentity_t *ent )
       trap_SendServerCommand( ent - g_entities,
         "print \"This PTR code is already in use\n\"" );
       G_AdminsPrintf("%s^7 attempted to use %s^7's PTR code\n", ent->client->pers.netname, players->client->pers.netname);
+      return;
     }
   }
   
