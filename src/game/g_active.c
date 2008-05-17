@@ -944,20 +944,21 @@ void ClientTimerActions( gentity_t *ent, int msec )
       ent->client->pers.statscounters.spreefeeds -= 2;
     if( ent->client->pers.statscounters.spreekills > 1 )
       ent->client->pers.statscounters.spreekills -= 2;
-    if( ent->client->pers.statscounters.spreebleeds > 3 )
+    if( ent->client->pers.statscounters.spreebleeds )
     {
-      ent->client->pers.statscounters.spreebleeds -= 4;
       if( ent->client->pers.bleeder )
+        ent->client->pers.statscounters.spreebleeds -= 8;
+      else
+        ent->client->pers.statscounters.spreebleeds -= 4;
+      if( ent->client->pers.statscounters.spreebleeds < 0 )
+        ent->client->pers.statscounters.spreebleeds = 0;
+      if( ent->client->pers.bleeder &&
+          !ent->client->pers.statscounters.spreebleeds )
       {
-        if( ent->client->pers.statscounters.spreebleeds > 3 )
-          ent->client->pers.statscounters.spreebleeds -= 4;
-        if( ent->client->pers.statscounters.spreebleeds < 4 )
-        {
-          ent->client->pers.bleeder = qfalse;
-          trap_SendServerCommand( ent-g_entities, "cp \"^2Your base has forgiven you^7\"" );
-          if( level.bleeders )
-            level.bleeders--;
-        }
+        ent->client->pers.bleeder = qfalse;
+        trap_SendServerCommand( ent-g_entities, "cp \"^2Your base has forgiven you^7\"" );
+        if( level.bleeders )
+          level.bleeders--;
       }
     }
    

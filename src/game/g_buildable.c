@@ -1468,6 +1468,18 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   if( client && client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS )
     return;
 
+  if( client->pers.bleeder )
+  {
+    if( !(client->ps.stats[ STAT_STATE ] & SS_POISONCLOUDED ) )
+    {
+      client->ps.stats[ STAT_STATE ] |= SS_POISONCLOUDED;
+      client->lastPoisonCloudedTime = level.time;
+      trap_SendServerCommand( client->ps.clientNum, "poisoncloud" );
+      trap_SendServerCommand( client->ps.clientNum, "print \"Your booster has poisoned you\n\"" );
+    }
+    return;
+  }
+
   //only allow boostage once every 30 seconds
   if( client->lastBoostedTime + BOOSTER_INTERVAL > level.time )
     return;
@@ -1910,6 +1922,7 @@ void HMedistat_Think( gentity_t *self )
       {
         if( player->health < player->client->ps.stats[ STAT_MAX_HEALTH ] &&
             player->client->ps.pm_type != PM_DEAD &&
+            !player->client->pers.bleeder &&
             self->enemy == player )
           occupied = qtrue;
       }
@@ -1927,7 +1940,9 @@ void HMedistat_Think( gentity_t *self )
 	if( player->flags & FL_NOTARGET )
 	  continue; // notarget cancels even beneficial effects?
 
-        if( player->client && player->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS && player->client->radiationTimer < g_radiationTime.integer )
+        if( player->client && player->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS &&
+            player->client->radiationTimer < g_radiationTime.integer &&
+            !player->client->pers.bleeder )
         {
           if( player->health < player->client->ps.stats[ STAT_MAX_HEALTH ] &&
               player->client->ps.pm_type != PM_DEAD )
@@ -1947,6 +1962,34 @@ void HMedistat_Think( gentity_t *self )
       }
     }
 
+    // bleeding spree retribution
+    if( level.bleeders && !self->enemy )
+    {
+      //look for something to hurt
+      for( i = 0; i < num; i++ )
+      {
+        player = &g_entities[ entityList[ i ] ];
+
+        if( player->client && player->client->ps.stats[ STAT_PTEAM ] == PTE_HUMANS && player->client->pers.bleeder )
+        {
+          if( player->health > 0 &&
+              player->client->ps.pm_type != PM_DEAD )
+          {
+            self->enemy = player;
+
+            //start the heal anim
+            if( !self->active )
+            {
+              G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+              self->active = qtrue;
+            }
+          }
+          if( BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) )
+            BG_RemoveUpgradeFromInventory( UP_MEDKIT, player->client->ps.stats );
+        }
+      }
+    }
+
     //nothing left to heal so go back to idling
     if( !self->enemy && self->active )
     {
@@ -1959,6 +2002,12 @@ void HMedistat_Think( gentity_t *self )
     }
     else if( self->enemy ) //heal!
     {
+      if( self->enemy->client->pers.bleeder )
+      {
+        G_Damage( self->enemy, NULL, NULL, NULL, NULL, 10, 0, MOD_SLIME );
+        return;
+      }
+
       if( self->enemy->client && self->enemy->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         self->enemy->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
 

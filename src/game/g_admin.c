@@ -246,8 +246,9 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
 
     {"outlaw", G_admin_outlaw, "O",
-      "add to a player's bleed counter, making their base turn on them."
-      " adding a bleed value will add that many points to their bleed counter, 0 will pardon them",
+      "adjust a player's bleed counter, usually to make their base turn on them."
+      " bleed value can be '?' to query their current value, a number to add and activate bleed status,"
+      " +num or -num will silently adjust their current bleed value, 0 will pardon them",
       "(^5name|slot^7) (^5bleed value)"
     },
 
@@ -7400,6 +7401,7 @@ qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
   char valuebuf[ 8 ];
   gentity_t *vic;
   int points;
+  qboolean activate = qtrue;
 
   if( !g_bleedingSpree.integer )
   {
@@ -7419,10 +7421,22 @@ qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
     ADMP( va( "^3!mute: ^7%s\n", err ) );
     return qfalse;
   }
+  vic = &g_entities[ pids[ 0 ] ];
 
   if( G_SayArgc() > 2 + skiparg )
   {
     G_SayArgv( 2 + skiparg, valuebuf, sizeof( valuebuf ) );
+    if( valuebuf[ 0 ] == '?' )
+    {
+      ADMP( va( "^3!outlaw: ^7%s^7's bleeder value is %d\n",
+        vic->client->pers.netname,
+        vic->client->pers.statscounters.spreebleeds ) );
+      return qtrue;
+    }
+    if( valuebuf[ 0 ] == '+' || valuebuf[ 0 ] == '-' )
+    {
+      activate = qfalse;
+    }
     points = atoi( valuebuf );
   }
   else
@@ -7432,15 +7446,16 @@ qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
 
   if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
   {
-    ADMP( "^3!mute: ^7sorry, but your intended victim has a higher admin"
+    ADMP( "^3!outlaw: ^7sorry, but your intended victim has a higher admin"
         " level than you\n" );
     return qfalse;
   }
-  vic = &g_entities[ pids[ 0 ] ];
   if( points )
   {
     vic->client->pers.statscounters.spreebleeds += points;
-    if( !vic->client->pers.bleeder )
+    if( vic->client->pers.statscounters.spreebleeds < 1 )
+      vic->client->pers.statscounters.spreebleeds = 1;
+    if( activate && !vic->client->pers.bleeder )
     {
       vic->client->pers.bleeder = qtrue;
       level.bleeders++;
@@ -7449,10 +7464,19 @@ qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
             vic->client->pers.netname,
             ( ent ) ? ent->client->pers.netname : "console" ) );
     }
+    else
+    {
+      AP( va( "print \"^3!outlaw: ^7%s^7 bleeder value has been adjusted by ^7%s\n\"",
+            vic->client->pers.netname,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+      ADMP( va( "^3!outlaw: ^7%s^7's bleeder value is now %d\n",
+        vic->client->pers.netname,
+        vic->client->pers.statscounters.spreebleeds ) );
+    }
   }
   else
   {
-    vic->client->pers.statscounters.spreebleeds = 8;
+    vic->client->pers.statscounters.spreebleeds = 1;
 
     AP( va( "print \"^3!outlaw: ^7%s^7 has been pardoned by ^7%s\n\"",
             vic->client->pers.netname,

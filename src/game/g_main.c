@@ -220,8 +220,6 @@ vmCvar_t  g_specAspec;
 
 vmCvar_t  g_healShove;
 
-vmCvar_t  g_chatAdminPrefix;
-
 vmCvar_t  g_modBuildableHealth;
 vmCvar_t  g_modBuildableSpeed;
 vmCvar_t  g_modHumanStamina;
@@ -274,8 +272,6 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_specAspec, "g_specAspec", "0", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_healShove, "g_healShove", "1", CVAR_ARCHIVE, 0, qtrue  },
-
-  { &g_chatAdminPrefix, "g_chatAdminPrefix", "^3@", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_modBuildableHealth, "g_modBuildableHealth", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modBuildableSpeed, "g_modBuildableSpeed", "0", CVAR_ARCHIVE, 0, qfalse  },
