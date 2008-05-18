@@ -1881,7 +1881,6 @@ void HMedistat_Think( gentity_t *self )
   int       i, num;
   gentity_t *player;
   qboolean  occupied = qfalse;
-  gentity_t *vic;
 
   self->nextthink = level.time + BG_FindNextThinkForBuildable( self->s.modelindex );
 

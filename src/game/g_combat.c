@@ -696,6 +696,23 @@ finish_dying:
     }
   }
 
+  if( self->client->pers.bleeder )
+  {
+    int spreeLength;
+
+    spreeLength = self->client->pers.statscounters.spreebleeds / 10;
+    self->client->respawnTime += 9 * 1000;
+    
+    trap_SendServerCommand( self->client->ps.clientNum,
+      va( "print \"^3Bleeding has made you an enemy of your own base for ^7%d:%02d\n^1Respawn delayed ^7%d^1 seconds\n",
+        spreeLength / 60, spreeLength % 60,
+        ( self->client->respawnTime - level.time) / 1000 ) );
+    trap_SendServerCommand( self->client->ps.clientNum,
+      va( "cp \"^3Bleeding made you an enemy of your own base!\n\n^7for %d:%02d\n\n^1Respawn delayed %d seconds\"",
+        spreeLength / 60, spreeLength % 60,
+        ( self->client->respawnTime - level.time) / 1000 ) );
+  }
+
   // remove powerups
   memset( self->client->ps.powerups, 0, sizeof( self->client->ps.powerups ) );
 
@@ -1498,10 +1515,22 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
             attacker->client->pers.bleeder = qtrue;
             level.bleeders++;
             trap_SendServerCommand( -1,
-              va( "print \"%s^3 has become an enemy of their own base.\n\"",
+              va( "print \"%s^3 has become an enemy of their own base\n\"",
               attacker->client->pers.netname ) );
             trap_SendServerCommand( attacker - g_entities,
-              "cp \"^1Your team bleeding has irritated your base^7\"" );
+              "cp \"^1Your team bleeding has irritated your base!\"" );
+
+            G_admin_tklog_log( attacker, NULL, mod );
+          }
+          else if( attacker->client->pers.statscounters.spreebleeds > g_bleedingSpree.integer * 66 &&
+                  !attacker->client->pers.bleeder &&
+                   attacker->client->pers.bleederLastWarn + 20 * 1000 < level.time )
+          {
+            attacker->client->pers.bleederLastWarn = level.time;
+            trap_SendServerCommand( attacker - g_entities,
+              "print \"^3Your bleeding is close to aggravating your base!\"" );
+            trap_SendServerCommand( attacker - g_entities,
+              "cp \"^1Your bleeding is close to aggravating your base!\n\"" );
           }
         }
       }

@@ -390,7 +390,9 @@ typedef struct
   qboolean            denyBuild;
   int                 denyHumanWeapons;
   int                 denyAlienClasses;
+  int                 spreeTime1000;
   qboolean            bleeder;
+  int                 bleederLastWarn;
   qboolean            paused;
   int                 adminLevel;
   qboolean            specd;
