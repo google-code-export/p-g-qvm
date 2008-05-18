@@ -521,6 +521,60 @@ qboolean ClientInactivityTimer( gclient_t *client )
   return qtrue;
 }
 
+static void ClientSpreeDecay( gentity_t *ent, int msec )
+{
+  gclient_t *client;
+
+  client = ent->client;
+  client->pers.spreeTime1000 += msec;
+
+  while( client->pers.spreeTime1000 >= 1000 )
+  {
+    client->pers.spreeTime1000 -= 1000;
+
+    // spree decay
+    if( ent->client->pers.statscounters.spreefeeds > 1 )
+      ent->client->pers.statscounters.spreefeeds -= 2;
+    if( ent->client->pers.statscounters.spreekills > 1 )
+      ent->client->pers.statscounters.spreekills -= 2;
+    if( ent->client->pers.statscounters.spreebleeds )
+    {
+      if( ent->client->pers.bleeder )
+        ent->client->pers.statscounters.spreebleeds -= 10;
+      else
+        ent->client->pers.statscounters.spreebleeds -= 4;
+      if( ent->client->pers.statscounters.spreebleeds < 0 )
+        ent->client->pers.statscounters.spreebleeds = 0;
+      if( ent->client->pers.bleeder )
+      {
+        if( !ent->client->pers.statscounters.spreebleeds )
+        {
+          ent->client->pers.bleeder = qfalse;
+          trap_SendServerCommand( ent-g_entities,
+            va( "print \"%s^7 has been ^2forgiven ^7by their base\n\"", ent->client->pers.netname ) );
+          if( client->sess.sessionTeam != TEAM_SPECTATOR ||
+              client->sess.spectatorState != SPECTATOR_SCOREBOARD )
+            trap_SendServerCommand( ent-g_entities, "cp \"^2Your base has forgiven you\"" );
+          if( level.bleeders )
+            level.bleeders--;
+        }
+        else if( client->sess.sessionTeam != TEAM_SPECTATOR &&
+                 ent->client->ps.stats[ STAT_HEALTH ] <= 0 )
+        {
+          int spreeLength;
+
+          spreeLength = ent->client->pers.statscounters.spreebleeds / 10;
+          trap_SendServerCommand( ent-g_entities,
+            va( "cp \"^3Bleeding made you an enemy of your own base!\n\n^7for %d:%02d\n\n^1Respawn delayed %d seconds\"",
+              spreeLength / 60, spreeLength % 60,
+              ( ent->client->respawnTime - level.time) / 1000 ) );
+        }
+      }
+    }
+   
+  }
+}
+
 /*
 ==================
 ClientTimerActions
@@ -939,29 +993,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
 
-    // spree decay
-    if( ent->client->pers.statscounters.spreefeeds > 1 )
-      ent->client->pers.statscounters.spreefeeds -= 2;
-    if( ent->client->pers.statscounters.spreekills > 1 )
-      ent->client->pers.statscounters.spreekills -= 2;
-    if( ent->client->pers.statscounters.spreebleeds )
-    {
-      if( ent->client->pers.bleeder )
-        ent->client->pers.statscounters.spreebleeds -= 8;
-      else
-        ent->client->pers.statscounters.spreebleeds -= 4;
-      if( ent->client->pers.statscounters.spreebleeds < 0 )
-        ent->client->pers.statscounters.spreebleeds = 0;
-      if( ent->client->pers.bleeder &&
-          !ent->client->pers.statscounters.spreebleeds )
-      {
-        ent->client->pers.bleeder = qfalse;
-        trap_SendServerCommand( ent-g_entities, "cp \"^2Your base has forgiven you^7\"" );
-        if( level.bleeders )
-          level.bleeders--;
-      }
-    }
-   
     // turn off life support when a team admits defeat 
     if( client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS &&
       level.surrenderTeam == PTE_ALIENS )
@@ -1499,6 +1530,9 @@ void ClientThink_real( gentity_t *ent )
     ClientIntermissionThink( client );
     return;
   }
+
+  //spree decay
+  ClientSpreeDecay( ent, msec );
 
   // spectators don't do much
   if( client->sess.sessionTeam == TEAM_SPECTATOR )

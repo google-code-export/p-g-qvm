@@ -1327,6 +1327,9 @@ void BG_ClientListRemove( clientList_t *list, int clientNum );
 char *BG_ClientListString( clientList_t *list );
 void BG_ClientListParse( clientList_t *list, const char *s );
 
+void BG_UpdateWeaponData(int proximityMine, int price);
+void BG_UpdateUpgradeData(int proximityMine, int price);
+
 // Friendly Fire Flags
 #define FFF_HUMANS         1
 #define FFF_ALIENS         2

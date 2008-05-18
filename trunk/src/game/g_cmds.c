@@ -4288,7 +4288,6 @@ void Cmd_PTRCRestore_f( gentity_t *ent )
   char                s[ MAX_TOKEN_CHARS ] = { 0 };
   int                 code;
   connectionRecord_t  *connection;
-  gentity_t *ents;
   int i;
   gentity_t *players;
 

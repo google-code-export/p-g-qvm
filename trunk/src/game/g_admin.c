@@ -6501,7 +6501,7 @@ void G_admin_tklog_log( gentity_t *attacker, gentity_t *victim, int meansOfDeath
   int previous;
   int count = 1;
 
-  if( !attacker || !victim )
+  if( !attacker )
     return;
 
   previous = admin_tklog_index - 1;
@@ -6520,9 +6520,20 @@ void G_admin_tklog_log( gentity_t *attacker, gentity_t *victim, int meansOfDeath
   tklog->id = count;
   tklog->time = level.time - level.startTime;
   Q_strncpyz( tklog->name, attacker->client->pers.netname, sizeof( tklog->name ) );
-  Q_strncpyz( tklog->victim, victim->client->pers.netname, sizeof( tklog->victim ) );
-  tklog->damage = victim->client->tkcredits[ attacker->s.number ];
-  tklog->value = victim->client->ps.stats[ STAT_MAX_HEALTH ];
+
+  if( victim )
+  {
+    Q_strncpyz( tklog->victim, victim->client->pers.netname, sizeof( tklog->victim ) );
+    tklog->damage = victim->client->tkcredits[ attacker->s.number ];
+    tklog->value = victim->client->ps.stats[ STAT_MAX_HEALTH ];
+  }
+  else
+  {
+    Q_strncpyz( tklog->victim, "^3BLEEDING", sizeof( tklog->victim ) );
+    tklog->damage = attacker->client->pers.statscounters.spreebleeds;
+    tklog->value = g_bleedingSpree.integer * 100;
+  }
+
   tklog->team = attacker->client->ps.stats[ STAT_PTEAM ];
   if( meansOfDeath == MOD_GRENADE )
     tklog->weapon = WP_GRENADE;
