@@ -550,7 +550,7 @@ static void ClientSpreeDecay( gentity_t *ent, int msec )
         if( !ent->client->pers.statscounters.spreebleeds )
         {
           ent->client->pers.bleeder = qfalse;
-          trap_SendServerCommand( ent-g_entities,
+          trap_SendServerCommand( -1,
             va( "print \"%s^7 has been ^2forgiven ^7by their base\n\"", ent->client->pers.netname ) );
           if( client->sess.sessionTeam != TEAM_SPECTATOR ||
               client->sess.spectatorState != SPECTATOR_SCOREBOARD )
