@@ -1,4 +1,3 @@
-know
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
@@ -25,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 #define QVM_VARIANT       "P-G-QVM"
-#define QVM_VERSION       "SVN r59"
+#define QVM_VERSION       "SVN r61"
 #define QVM_URL           "http://p-g-qvm.googlecode.com"
 
 level_locals_t  level;
@@ -251,7 +250,6 @@ static cvarTable_t   gameCvarTable[ ] =
   { NULL, "ff", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   
   { NULL, "qvm_version", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-  
 
   // latched vars
 
@@ -758,9 +756,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   trap_Cvar_Set( "qvm_version", va( "%s %s %s %s",
    QVM_VARIANT,
    QVM_VERSION,
-   __DATE__,
-   QVM_URL ) );
-   
+   QVM_URL,
+   __DATE__ ) );
+
   if( g_logFile.string[ 0 ] )
   {
     if( g_logFileSync.integer )
