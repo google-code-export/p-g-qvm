@@ -1,3 +1,4 @@
+know
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
@@ -249,10 +250,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { NULL, "ff", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   
-  { NULL, "qvm_variant", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { NULL, "qvm_version", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-  { NULL, "qvm_url", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-  { NULL, "qvm_date", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   
 
   // latched vars
@@ -757,17 +755,11 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
-  trap_Cvar_Set( "qvm_variant", va( "%s",
-   QVM_VARIANT ) );
-
-  trap_Cvar_Set( "qvm_version", va( "%s",
-   QVM_VERSION ) );
-   
-   trap_Cvar_Set( "qvm_url", va( "%s",
+  trap_Cvar_Set( "qvm_version", va( "%s %s %s %s",
+   QVM_VARIANT,
+   QVM_VERSION,
+   __DATE__,
    QVM_URL ) );
-   
-   trap_Cvar_Set( "qvm_date", va( "%s",
-   __DATE__ ) );
    
   if( g_logFile.string[ 0 ] )
   {
