@@ -6049,7 +6049,7 @@ qboolean G_admin_L0(gentity_t *ent, int skiparg ){
     vic = &g_entities[ id ];
     if( !vic || !(vic->client) || vic->client->pers.connected != CON_CONNECTED )
     {
-      ADMP( "^3!L0:^7 no one connectd by that slot number\n" );
+      ADMP( "^3!L0:^7 no one connected by that slot number\n" );
       return qfalse;
     }
 

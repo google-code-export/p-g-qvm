@@ -2875,6 +2875,17 @@ void Cmd_Destroy_f( gentity_t *ent )
     return;
   }
 
+  if( g_newbieNoBuild.integer
+    && g_newbieNamePrefix.string[ 0 ]
+    && Q_stricmpn ( ent->client->pers.netname, g_newbieNamePrefix.string, strlen(g_newbieNamePrefix.string ) ) == 0 )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"You cannot build until you set a name\n%s%s\"",
+      ( g_newbieNoBuildMessage.string[ 0 ] ) ? g_newbieNoBuildMessage.string : "",
+      ( g_newbieNoBuildMessage.string[ 0 ] ) ? "\n" : "" ) );
+    return;
+  }
+
   trap_Argv( 0, cmd, sizeof( cmd ) );
   if( Q_stricmp( cmd, "destroy" ) == 0 )
     deconstruct = qfalse;
@@ -3080,6 +3091,17 @@ void Cmd_Mark_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent-g_entities,
       "print \"Your building rights have been revoked\n\"" );
+    return;
+  }
+
+  if( g_newbieNoBuild.integer
+    && g_newbieNamePrefix.string[ 0 ]
+    && Q_stricmpn ( ent->client->pers.netname, g_newbieNamePrefix.string, strlen(g_newbieNamePrefix.string ) ) == 0 )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"You cannot build until you set a name\n%s%s\"",
+      ( g_newbieNoBuildMessage.string[ 0 ] ) ? g_newbieNoBuildMessage.string : "",
+      ( g_newbieNoBuildMessage.string[ 0 ] ) ? "\n" : "" ) );
     return;
   }
 
@@ -3690,6 +3712,17 @@ void Cmd_Build_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent-g_entities,
       "print \"Your building rights have been revoked\n\"" );
+    return;
+  }
+
+  if( g_newbieNoBuild.integer
+    && g_newbieNamePrefix.string[ 0 ]
+    && Q_stricmpn ( ent->client->pers.netname, g_newbieNamePrefix.string, strlen(g_newbieNamePrefix.string ) ) == 0 )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"You cannot build until you set a name\n%s%s\"",
+      ( g_newbieNoBuildMessage.string[ 0 ] ) ? g_newbieNoBuildMessage.string : "",
+      ( g_newbieNoBuildMessage.string[ 0 ] ) ? "\n" : "" ) );
     return;
   }
 

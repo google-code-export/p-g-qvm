@@ -112,6 +112,8 @@ vmCvar_t  g_minNameChangePeriod;
 vmCvar_t  g_maxNameChanges;
 vmCvar_t  g_newbieNumbering;
 vmCvar_t  g_newbieNamePrefix;
+vmCvar_t  g_newbieNoBuild;
+vmCvar_t  g_newbieNoBuildMessage;
 
 vmCvar_t  g_humanBuildPoints;
 vmCvar_t  g_alienBuildPoints;
@@ -350,6 +352,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_maxNameChanges, "g_maxNameChanges", "5", 0, 0, qfalse},
   { &g_newbieNumbering, "g_newbieNumbering", "0", CVAR_ARCHIVE, 0, qfalse},
   { &g_newbieNamePrefix, "g_newbieNamePrefix", "Newbie#", CVAR_ARCHIVE, 0, qfalse},
+  { &g_newbieNoBuild, "g_newbieNoBuild", "0", CVAR_ARCHIVE, 0, qfalse},
+  { &g_newbieNoBuildMessage, "g_newbieNoBuildMessage",
+    "Set a name by pressing Escape and choosing Options", CVAR_ARCHIVE, 0, qfalse},
 
   { &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
   { &g_clientUpgradeNotice, "g_clientUpgradeNotice", "1", 0, 0, qfalse},
@@ -410,10 +415,10 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_chat, "g_chat", "chat.dat", CVAR_ARCHIVE, 0, qfalse  },
   
-  { &g_radiationDamage, "g_radiationDamage", "1", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_radiationTime, "g_radiationTime", "60", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_radiationCredits, "g_radiationCredits", "1000", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_radiationCreditsCount, "g_radiationCreditsCount", "2", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_radiationDamage, "g_radiationDamage", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_radiationTime, "g_radiationTime", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_radiationCredits, "g_radiationCredits", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_radiationCreditsCount, "g_radiationCreditsCount", "0", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_deconTime, "g_deconTime", "0", CVAR_ARCHIVE, 0, qfalse  },
 

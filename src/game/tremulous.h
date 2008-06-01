@@ -43,7 +43,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_CLAW_K_SCALE       1.0f
 #define ABUILDER_BASE_DELAY         17000
 #define ABUILDER_ADV_DELAY          12000
-#define ABUILDER_BLOB_DMG           ADM(9)
+#define ABUILDER_BLOB_DMG           ADM(4)
 #define ABUILDER_BLOB_REPEAT        1000
 #define ABUILDER_BLOB_SPEED         800.0f
 #define ABUILDER_BLOB_SPEED_MOD     0.5f
@@ -55,7 +55,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_BITE_REPEAT          500
 #define LEVEL0_BITE_K_SCALE         1.0f
 
-#define LEVEL1_CLAW_DMG             ADM(35)
+#define LEVEL1_CLAW_DMG             ADM(32)
 #define LEVEL1_CLAW_RANGE           96.0f
 #define LEVEL1_CLAW_WIDTH           10.0f
 #define LEVEL1_CLAW_REPEAT          600
@@ -66,9 +66,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_GRAB_TIME            300
 #define LEVEL1_GRAB_U_TIME          450
 #define LEVEL1_PCLOUD_DMG           ADM(4)
-#define LEVEL1_PCLOUD_RANGE         250.0f
-#define LEVEL1_PCLOUD_REPEAT        2750
-#define LEVEL1_PCLOUD_TIME          15000
+#define LEVEL1_PCLOUD_RANGE         200.0f
+#define LEVEL1_PCLOUD_REPEAT        2000
+#define LEVEL1_PCLOUD_TIME          10000
 
 #define LEVEL2_CLAW_DMG             ADM(40)
 #define LEVEL2_CLAW_RANGE           96.0f
