@@ -1231,6 +1231,11 @@ extern  gentity_t       g_entities[ MAX_GENTITIES ];
 
 #define FOFS(x) ((int)&(((gentity_t *)0)->x))
 
+//spree values
+#define SPREE_FEED_VALUE 120
+#define SPREE_FEED_FADE  3
+#define SPREE_FEED_DELAY 50
+
 extern  vmCvar_t  g_dedicated;
 extern  vmCvar_t  g_cheats;
 extern  vmCvar_t  g_maxclients;     // allow this many total, including spectators
@@ -1242,6 +1247,8 @@ extern  vmCvar_t  g_minNameChangePeriod;
 extern  vmCvar_t  g_maxNameChanges;
 extern  vmCvar_t  g_newbieNumbering;
 extern  vmCvar_t  g_newbieNamePrefix;
+extern  vmCvar_t  g_newbieNoBuild;
+extern  vmCvar_t  g_newbieNoBuildMessage;
 
 extern  vmCvar_t  g_timelimit;
 extern  vmCvar_t  g_suddenDeathTime;

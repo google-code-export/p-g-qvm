@@ -533,11 +533,18 @@ static void ClientSpreeDecay( gentity_t *ent, int msec )
     client->pers.spreeTime1000 -= 1000;
 
     // spree decay
-    if( ent->client->pers.statscounters.spreefeeds > 1 )
-      ent->client->pers.statscounters.spreefeeds -= 2;
+    if( ent->client->pers.statscounters.spreefeeds )
+    {
+      ent->client->pers.statscounters.spreefeeds -= SPREE_FEED_FADE;
+      if( ent->client->pers.statscounters.spreefeeds < 0 )
+        ent->client->pers.statscounters.spreefeeds = 0;
+    }
     if( ent->client->pers.statscounters.spreekills > 1 )
+    {
       ent->client->pers.statscounters.spreekills -= 2;
-    if( ent->client->pers.statscounters.spreebleeds )
+    }
+    if( ent->client->pers.statscounters.spreebleeds ||
+        ent->client->pers.bleeder )
     {
       if( ent->client->pers.bleeder )
         ent->client->pers.statscounters.spreebleeds -= 10;

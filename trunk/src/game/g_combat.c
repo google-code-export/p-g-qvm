@@ -485,9 +485,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
         if( g_feedingSpree.integer &&
             level.reactorPresent &&
-            !G_BuildableRange( self->client->ps.origin, 600, BA_H_REACTOR ) )
+            !G_BuildableRange( self->client->ps.origin, 600, BA_H_REACTOR ) &&
+            !G_BuildableRange( self->client->ps.origin, 200, BA_H_SPAWN ) )
         {
-          self->client->pers.statscounters.spreefeeds += 60;
+          self->client->pers.statscounters.spreefeeds += SPREE_FEED_VALUE;
         }
       }
     }
@@ -501,9 +502,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
         if( g_feedingSpree.integer &&
             level.overmindPresent &&
-            !G_BuildableRange( self->client->ps.origin, 600, BA_A_OVERMIND ) )
+            !G_BuildableRange( self->client->ps.origin, 600, BA_A_OVERMIND ) &&
+            !G_BuildableRange( self->client->ps.origin, 200, BA_A_SPAWN ) )
         {
-          self->client->pers.statscounters.spreefeeds += 60;
+          self->client->pers.statscounters.spreefeeds += SPREE_FEED_VALUE;
         }
       }
     }
@@ -682,14 +684,14 @@ finish_dying:
   // g_forcerespawn may force spawning at some later time
   self->client->respawnTime = level.time + 1700;
 
-  if( g_feedingSpree.integer > 2 )
+  if( g_feedingSpree.integer )
   {
     int maxfeed;
 
-    maxfeed = (g_feedingSpree.integer - 1) * 60;
+    maxfeed = g_feedingSpree.integer * SPREE_FEED_VALUE;
     if( self->client->pers.statscounters.spreefeeds > maxfeed )
     {
-      self->client->respawnTime += 100 * (self->client->pers.statscounters.spreefeeds - maxfeed );
+      self->client->respawnTime += SPREE_FEED_DELAY * (self->client->pers.statscounters.spreefeeds - maxfeed );
       trap_SendServerCommand( self->client->ps.clientNum,
         va( "print \"You are on a feeding spree! respawn delayed %d seconds\n\"",
         (self->client->respawnTime - level.time) / 1000 ) );
@@ -1559,6 +1561,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	   level.humanStatsCounters.structskilled++;
 	 }
 	}
+
+        if( attacker->client->pers.statscounters.spreefeeds )
+        {
+          attacker->client->pers.statscounters.spreefeeds -= take;
+          if( attacker->client->pers.statscounters.spreefeeds < 0 )
+            attacker->client->pers.statscounters.spreefeeds = 0;
+        }
       }
       else if( targ->client )
       {
@@ -1572,6 +1581,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	{
 	  level.humanStatsCounters.dmgdone+=take;
 	}
+
+        if( attacker->client->pers.statscounters.spreefeeds )
+        {
+          attacker->client->pers.statscounters.spreefeeds -= take;
+          if( attacker->client->pers.statscounters.spreefeeds < 0 )
+            attacker->client->pers.statscounters.spreefeeds = 0;
+        }
       }	
     }
 
