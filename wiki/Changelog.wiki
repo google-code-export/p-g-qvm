@@ -1,5 +1,30 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
+=1.6x=
+==1.6==
+ * Major cleanup to code
+ * Added semi mark fix and designate fix, now, on aliens reload works as protect when designated, and if not designated on either team reload is mark. (Issue 84)
+ * Added medi-stat shove control, `g_healShove` 1=can be shoved, 0=cant (Issue 85)
+ * `g_modHumanStamina` now affects jumps (Issue 86)
+ * Added high turret angles, `g_modTurretAngles` (Issue 87)
+ * Changed `!demo` flag to match adminchat flag ?
+ * Added patch to allow chat messages in messagemode, similar to /m (Issue 92)
+ * Added patch to fix medi slow heals (Issue 90)
+ * Reduced feeding spree near base (Issue 89)
+ * Added `!practice` command, allows for temporary clan practice, based on tag. Flag [ (Issue 94)
+ * Changed `/builder` flag to )
+ * Fixed class changes
+ * Added `!tklog` flag t
+ * Added `!outlaw` (flag O) commands, punishes bleeders and tkers, cvar `g_bleedingSpree` (Issue 97)  (Issue 99) (Issue 100)
+ * Added PTRC abuse prevention, complete with admin warning
+ * Added `qvm_version` cvar, this qvm is part of the `qvm_` cvar initiative
+ * Radioactive turrets off by default now
+ * People who are affected by `g_newbieNamePrefix` can have building disabled for them via `g_newbieNoBuild`. Message to players can be changed via `g_newbieNoBuild` (Issue 107)
+ * Fixed feeding spree (Issue 108)
+ * Fixed typo in !l0 print output (Issue 109)
+ * Added sanitise name fix (Issue 111)
+ * Added random maprotation slot (Issue 106)
+ * Added fix for vote math, no more annoying (66 percent) needed 66 percent to pass (Issue 110)
 =1.5x=
 ==1.5.2x==
 ===1.5.2===

@@ -1211,6 +1211,7 @@ qboolean  G_StartMapRotation( char *name, qboolean changeMap );
 void      G_StopMapRotation( void );
 qboolean  G_MapRotationActive( void );
 void      G_InitMapRotations( void );
+qboolean	G_GetRandomMap(char *name, int size);
 
 //
 // g_ptr.c
@@ -1409,8 +1410,12 @@ extern  vmCvar_t  g_mapvoteMaxTime;
 extern  vmCvar_t  g_deconTime;
 
 extern  vmCvar_t  g_specAspec;
+extern	vmCvar_t  g_randomLayoutPercent;
 
 extern  vmCvar_t  g_healShove;
+
+extern	vmCvar_t	g_randomMaps;
+extern	vmCvar_t	g_randomMapList;
 
 extern  vmCvar_t  g_modBuildableHealth;  // Buildable health
 extern  vmCvar_t  g_modBuildableSpeed;   // Buildable fire rate

@@ -487,7 +487,20 @@ static void G_IssueMapChange( int rotation )
 {
   int   i;
   int   map = G_GetCurrentMap( rotation );
-  char  cmd[ MAX_TOKEN_CHARS ];
+  char  cmd[ MAX_TOKEN_CHARS ], mapName[MAX_STRING_CHARS];
+  fileHandle_t f;
+  
+  Q_strncpyz(mapName, mapRotations.rotations[rotation].maps[map].name, sizeof(mapName));
+  if (!Q_stricmp(mapName, "*RANDOM*"))
+	G_GetRandomMap(mapName, sizeof(mapName));
+
+  if( trap_FS_FOpenFile( va("maps/%s.bsp", mapName), &f, FS_READ ) > 0 )
+    trap_FS_FCloseFile( f );
+  else
+  {
+	G_AdvanceMapRotation();
+	return;
+  }
 
   // allow a manually defined g_layouts setting to override the maprotation
   if( !g_layouts.string[ 0 ] &&
@@ -497,11 +510,10 @@ static void G_IssueMapChange( int rotation )
       mapRotations.rotations[ rotation ].maps[ map ].layouts );
   }
 
-  trap_SendConsoleCommand( EXEC_APPEND, va( "map %s\n",
-    mapRotations.rotations[ rotation ].maps[ map ].name ) );
+  trap_SendConsoleCommand( EXEC_APPEND, va( "map %s\n", mapName ) );
 
   // load up map defaults if g_mapConfigs is set
-  G_MapConfigs( mapRotations.rotations[ rotation ].maps[ map ].name );
+  G_MapConfigs( mapName );
 
   for( i = 0; i < mapRotations.rotations[ rotation ].maps[ map ].numCmds; i++ )
   {
@@ -740,4 +752,104 @@ void G_InitMapRotations( void )
       trap_Cvar_Update( &g_initialMapRotation );
     }
   }
+}
+
+/*
+===============
+G_GetRandomMap
+
+Chooses a random map
+===============
+*/
+qboolean G_GetRandomMap(char *name, int size)
+{
+  if (g_randomMapList.string[0])
+  {
+	char mapList[ MAX_STRING_CHARS ];
+	char *data, *next, *token;
+	int length, choose, maps = 0;
+	fileHandle_t handle, f;
+
+	trap_Cvar_VariableStringBuffer( "g_randomMapList", mapList, sizeof( mapList ) );
+
+	length = trap_FS_FOpenFile( mapList, &handle, FS_READ );
+	if( handle ) 
+	{
+		next = data = G_Alloc( length );
+		trap_FS_Read( data, length, handle );
+		do 
+		{
+			token = COM_Parse( &next );
+			if( token[ 0 ] == '{' ) 
+			{
+				while( *next && *next != '}' ) next++;
+				if( *next ) next++;
+				continue;
+			} 
+			else if( !token[ 0 ] ) break;
+			if (trap_FS_FOpenFile(va("maps/%s.bsp", token), &f, FS_READ))
+			{
+				maps++;
+				trap_FS_FCloseFile(f);
+			}
+			else
+				G_Printf( S_COLOR_YELLOW "WARNING: map \'%s\' does not exist\n", token);
+		} while( *next );
+		trap_FS_FCloseFile( handle );
+	}
+	else
+	{
+		G_Printf( S_COLOR_RED "ERROR: failed to parse %s file\n", mapList );
+		return qfalse;
+	}
+
+	choose = (int)(random( )*maps);
+	next = data;
+	do {
+		token = COM_Parse( &next );
+		if( token[ 0 ] == '{' ) {
+		while( *next && *next != '}' ) next++;
+		if( *next ) next++;
+		continue;
+    } else if( !token[ 0 ] ) break;
+		if( !choose ) {
+			Q_strncpyz( name, token, size);
+			break;
+		}
+		if (trap_FS_FOpenFile(va("maps/%s.bsp", token), &f, FS_READ))
+		{
+			choose--;
+			trap_FS_FCloseFile(f);
+		}
+	} while( *next );
+	G_Free( data );
+	return qtrue;
+  }
+  else
+  {
+	char fileList[ 4096 ] = {""}, out[MAX_STRING_CHARS];
+	int numFiles, i, fileLen = 0, choose;
+	char *filePtr;
+
+	numFiles = trap_FS_GetFileList( "maps/", ".bsp", fileList, sizeof( fileList ) );
+	if (!numFiles)
+	{
+		G_Printf( S_COLOR_RED "ERROR: failed to generate map list\n");
+		return qfalse;
+	}
+	choose = (int)(random( )*numFiles);
+	filePtr = fileList;
+	for( i = 0; i < numFiles; i++, filePtr += fileLen + 1, choose-- )
+	{
+		fileLen = strlen( filePtr );
+		if (!choose)
+		{
+			Q_strncpyz(out, filePtr, strlen(filePtr));
+			COM_StripExtension(out, out, sizeof(out));
+			Q_strncpyz(name, out, size);
+			return qtrue;
+		}
+	}
+  }
+  return qfalse;
 }

@@ -16,7 +16,7 @@
 || perm. Designation || # ||
 || sees listplayers || $ ||
 || immune from IP bans || & ||
-|| /builder || + _)_ ||
+|| /builder || ) ||
 || demo || ? ||
 || sees adminchat || ? ||
 || anonymous || @ ||
@@ -64,7 +64,7 @@
 || nextmap || n ||
 || rename || N ||
 || drop || o ||
-|| _outlaw_ || _O_ ||
+|| outlaw || O ||
 || putteam || p ||
 || spec999 || P ||
 || customgrav || Q ||
@@ -75,8 +75,8 @@
 || setlevel || s ||
 || pause || S ||
 || unpause || S ||
-|| _tklog_ || _t_ ||
-|| trade || t _T_ ||
+|| tklog || t ||
+|| trade || T ||
 || steal || T ||
 || credits || u ||
 || buildlog || U ||
