@@ -3964,7 +3964,7 @@ void G_LayoutSelect( void )
   char *s;
   int cnt = 0;
   int layoutNum;
-
+  
   Q_strncpyz( layouts, g_layouts.string, sizeof( layouts ) );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 
@@ -4012,6 +4012,9 @@ void G_LayoutSelect( void )
         "found, using map default\n" );
       return;
   }
+
+  if (cnt > 1 && !(g_randomLayoutPercent.integer && g_randomLayoutPercent.integer > (random() * 100))) return;
+
   layoutNum = ( rand( ) % cnt ) + 1;
   cnt = 0;
 

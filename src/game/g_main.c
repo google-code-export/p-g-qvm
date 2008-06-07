@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 #define QVM_VARIANT       "P-G-QVM"
-#define QVM_VERSION       "SVN r63"
+#define QVM_VERSION       "SVN r64"
 #define QVM_URL           "http://p-g-qvm.googlecode.com"
 
 level_locals_t  level;
@@ -223,8 +223,12 @@ vmCvar_t  g_mapvoteMaxTime;
 vmCvar_t  g_deconTime;
 
 vmCvar_t  g_specAspec;
+vmCvar_t  g_randomLayoutPercent;
 
 vmCvar_t  g_healShove;
+
+vmCvar_t	g_randomMaps;
+vmCvar_t	g_randomMapList;
 
 vmCvar_t  g_modBuildableHealth;
 vmCvar_t  g_modBuildableSpeed;
@@ -456,6 +460,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_allowActions, "g_allowActions", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_actionPrefix, "g_actionPrefix", "***", CVAR_ARCHIVE, 0, qfalse },
   { &g_banNotice, "g_banNotice", "", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_randomLayoutPercent, "g_randomLayoutPercent", "100", CVAR_ARCHIVE, 0, qfalse },
+  { &g_randomMaps, "g_randomMaps", "1", CVAR_ARCHIVE, 0, qfalse },
+  { &g_randomMapList, "g_randomMapList", "", CVAR_ARCHIVE, 0, qfalse },
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );
@@ -2402,7 +2409,7 @@ void CheckVote( void )
   }
   if( level.time - level.voteTime >= VOTE_TIME || ( level.voteYes + level.voteNo == level.numConnectedClients ) )
   {
-    if( voteYesPercent> votePercentToPass || level.voteNo == 0 )
+    if( voteYesPercent >= votePercentToPass || level.voteNo == 0 )
     {
       // execute the command, then remove the vote
       result = "^2passed";
@@ -2415,7 +2422,7 @@ void CheckVote( void )
   }
   else
   {
-    if( level.voteYes > (int)((double)level.numConnectedClients * ((double)votePercentToPass/100.0)) )
+    if( level.voteYes >= (int)((double)level.numConnectedClients * ((double)votePercentToPass/100.0)) )
     {
       // execute the command, then remove the vote
       result = "^2passed";
