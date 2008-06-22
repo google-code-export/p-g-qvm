@@ -1,6 +1,14 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.6x=
+==1.6.1==
+ * Added Teamstatus command `/teamstatus`. Shows you the status of your base (nodes/eggs, om/reac, etc). Cvar `g_teamStatus` to toggle (Issue 120)
+ * Added Welcome Messages feature. Sends welcome messages to connecting players. `g_welcomeMsg` is message sent to players (supports \n), `g_welcomeMsgTime` is the duration of display. (Issue 118)
+ * Increased `!listmaps` display to 256. (Issue 117)
+ * Fixed Medi-Radioactive Rets glitch (Issue 116)
+ * Fixed vote math issues with 50%. (Issue 115)
+ * Added instant build, `g_instantBuild`. (Issue 112)
+ * Changed `qvm_version` appearance, removed website, added time.
 ==1.6==
  * Major cleanup to code
  * Added semi mark fix and designate fix, now, on aliens reload works as protect when designated, and if not designated on either team reload is mark. (Issue 84)

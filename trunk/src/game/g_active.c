@@ -905,7 +905,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         client->radiationTimer--;    // could be set to 0 but then would be too easy to exploit
     }
     else
-      client->radiationTimer = 0;
+      client->radiationTimer = -1;
 
 
     //replenish alien health

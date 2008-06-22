@@ -6920,7 +6920,7 @@ qboolean G_admin_maplog( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
-#define MAX_LISTMAPS_MAPS 128
+#define MAX_LISTMAPS_MAPS 256
 
 static int SortMaps(const void *a, const void *b)
 {

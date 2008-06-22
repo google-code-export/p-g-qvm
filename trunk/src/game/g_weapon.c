@@ -762,7 +762,7 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
     if( G_BuildIfValid( ent, ent->client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) )
     {
-      if( g_cheats.integer )
+      if( g_cheats.integer || g_instantBuild.integer )
       {
         ent->client->ps.stats[ STAT_MISC ] = 0;
       }

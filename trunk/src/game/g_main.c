@@ -24,8 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 #define QVM_VARIANT       "P-G-QVM"
-#define QVM_VERSION       "SVN r64"
-#define QVM_URL           "http://p-g-qvm.googlecode.com"
+#define QVM_VERSION       "SVN r65"
 
 level_locals_t  level;
 
@@ -210,6 +209,8 @@ vmCvar_t  g_practiceCount;
 
 vmCvar_t  g_msg;
 vmCvar_t  g_msgTime;
+vmCvar_t  g_welcomeMsg;
+vmCvar_t  g_welcomeMsgTime;
 
 vmCvar_t  g_buyAll;
 vmCvar_t  g_multipleWeapons;
@@ -240,6 +241,11 @@ vmCvar_t  g_modAlienRate;
 vmCvar_t  g_modWeaponAmmo;
 vmCvar_t  g_modWeaponReload;
 vmCvar_t  g_modTurretAngle;
+
+vmCvar_t  g_teamStatus;
+
+
+vmCvar_t  g_instantBuild;
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -295,6 +301,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_modWeaponAmmo, "g_modWeaponAmmo", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modWeaponReload, "g_modWeaponReload", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modTurretAngle, "g_modTurretAngle", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_teamStatus, "g_teamStatus", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_instantBuild, "g_instantBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
   { &g_proximityMinesPrice, "g_proximityMinesPrice", "800", 0, 0, qtrue  },
@@ -453,6 +461,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_msg, "g_msg", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_msgTime, "g_msgTime", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_welcomeMsg, "g_welcomeMsg", "", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_welcomeMsgTime, "g_welcomeMsgTime", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_rankings, "g_rankings", "0", 0, 0, qfalse },
   { &g_allowShare, "g_allowShare", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
@@ -765,11 +775,11 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
-  trap_Cvar_Set( "qvm_version", va( "%s %s %s %s",
+  trap_Cvar_Set( "qvm_version", va( "%s %s (%s %s)",
    QVM_VARIANT,
    QVM_VERSION,
-   QVM_URL,
-   __DATE__ ) );
+   __DATE__,
+   __TIME__ ) );
 
   if( g_logFile.string[ 0 ] )
   {
@@ -2403,13 +2413,17 @@ void CheckVote( void )
   if( !level.voteTime )
     return;
 
+  // when over 50% needed, change to 'yes >= needed'
+  if( votePercentToPass > 50 )
+    votePercentToPass--;
+
   if( level.voteYes || level.voteNo )
   {
     voteYesPercent = (int)(100* (level.voteYes)/(level.voteYes + level.voteNo));
   }
   if( level.time - level.voteTime >= VOTE_TIME || ( level.voteYes + level.voteNo == level.numConnectedClients ) )
   {
-    if( voteYesPercent >= votePercentToPass || level.voteNo == 0 )
+    if( voteYesPercent> votePercentToPass || level.voteNo == 0 )
     {
       // execute the command, then remove the vote
       result = "^2passed";
@@ -2422,7 +2436,7 @@ void CheckVote( void )
   }
   else
   {
-    if( level.voteYes >= (int)((double)level.numConnectedClients * ((double)votePercentToPass/100.0)) )
+    if( level.voteYes > (int)((double)level.numConnectedClients * ((double)votePercentToPass/100.0)) )
     {
       // execute the command, then remove the vote
       result = "^2passed";
@@ -2535,6 +2549,38 @@ CheckMsgTimer
 */
 void CheckMsgTimer( void )
 {
+  static int LastTime = 0;
+
+  if( level.time - LastTime < 1000 )
+    return;
+
+  LastTime = level.time;
+
+  if( g_welcomeMsgTime.integer && g_welcomeMsg.string[ 0 ] )
+  {
+    char buffer[ MAX_STRING_CHARS ];
+    int wt;
+    int i;
+
+    buffer[ 0 ] = '\0';
+    wt = g_welcomeMsgTime.integer * 1000;
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if( level.clients[ i ].pers.connected != CON_CONNECTED )
+        continue;
+
+      if( level.time - level.clients[ i ].pers.enterTime < wt )
+      {
+        if( buffer[ 0 ] == '\0' )
+        {
+          Q_strncpyz( buffer, g_welcomeMsg.string, sizeof( buffer ) );
+          G_ParseEscapedString( buffer );
+        }
+      trap_SendServerCommand( i, va( "cp \"%s\"", buffer ) );
+      }
+    }
+  }
+
   if( !g_msgTime.integer )
     return;
 
