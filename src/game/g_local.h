@@ -1401,6 +1401,8 @@ extern  vmCvar_t g_practiceCount;
 
 extern  vmCvar_t  g_msg;
 extern  vmCvar_t  g_msgTime;
+extern  vmCvar_t  g_welcomeMsg;
+extern  vmCvar_t  g_welcomeMsgTime;
 
 extern  vmCvar_t  g_banNotice;
 
@@ -1427,6 +1429,9 @@ extern  vmCvar_t  g_modAlienRate;        // Alien fire rate
 extern  vmCvar_t  g_modWeaponAmmo;       // Weapon ammo per clip
 extern  vmCvar_t  g_modWeaponReload;     // Weapon reload time
 extern  vmCvar_t  g_modTurretAngle;      // Allow high turret build angles
+extern  vmCvar_t  g_instantBuild;        // Enable instant building outside of devmap mode
+
+extern  vmCvar_t  g_teamStatus;          // Allow the use of /teamstatus
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

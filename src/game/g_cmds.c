@@ -3059,10 +3059,11 @@ void Cmd_Destroy_f( gentity_t *ent )
             G_Damage( traceEnt, ent, ent, forward, tr.endpos, 10000, 0, MOD_SUICIDE );
           else
             G_FreeEntity( traceEnt );
-
-          if( !g_cheats.integer )
+	  if( !g_instantBuild.integer ){
+          if( !g_cheats.integer ){
             ent->client->ps.stats[ STAT_MISC ] +=
-              BG_FindBuildDelayForWeapon( ent->s.weapon ) >> 2;
+              BG_FindBuildDelayForWeapon( ent->s.weapon ) >> 2;}}
+	    
         }
       }
     }
@@ -4069,6 +4070,88 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
 }
 
 
+/*
+=================
+Cmd_TeamStatus_f
+=================
+*/
+void Cmd_TeamStatus_f( gentity_t *ent )
+{
+ int i;
+ int builders = 0;
+ char *omrc;
+ gentity_t *tmp;
+ qboolean found = qfalse;
+ 
+ if( !g_teamStatus.integer )
+ return;
+ 
+ if( ent->client->pers.teamSelection == PTE_ALIENS ){
+ 
+ for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
+  {
+    if( tmp->s.eType != ET_BUILDABLE )
+      continue;
+    if( tmp->s.modelindex == BA_A_OVERMIND ){
+      omrc = va("^3OM: %s(%d)^3", ( tmp->health <= 0 ) ? "^1Down" : "^2Up", (tmp->health * 100 / OVERMIND_HEALTH ) );
+      found = qtrue;
+      break;
+      }
+  }
+  
+ for( i = 0; i < level.maxclients; i++ )
+  {
+    tmp = &g_entities[ i ];
+    if( !tmp->client )
+      continue;
+    if( tmp->client->pers.connected != CON_CONNECTED )
+      continue;
+    if( tmp->client->pers.teamSelection == PTE_NONE )
+      continue;
+    if( ( tmp->client->ps.stats[ STAT_PCLASS ] == PCL_ALIEN_BUILDER0 ||
+       tmp->client->ps.stats[ STAT_PCLASS ] == PCL_ALIEN_BUILDER0_UPG ) ){
+       builders++;
+       }
+  }
+    if( found == qfalse )
+    omrc = "^3OM: ^1Down(0)^3";
+    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Eggs: ^6%i^3 Builders: ^6%i^7", omrc, level.numAlienSpawns, builders ));
+ }
+ 
+ if( ent->client->pers.teamSelection == PTE_HUMANS ){
+ 
+ for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
+  {
+    if( tmp->s.eType != ET_BUILDABLE )
+      continue;
+    if( tmp->s.modelindex == BA_H_REACTOR ){
+      omrc = va("^3RC: %s(%d)^3", ( tmp->health <= 0 ) ? "^1Down" : "^2Up", (tmp->health * 100 / REACTOR_HEALTH ) );
+      found = qtrue;
+      break;
+      }
+  }
+  
+ for( i = 0; i < level.maxclients; i++ )
+  {
+    tmp = &g_entities[ i ];
+    if( !tmp->client )
+      continue;
+    if( tmp->client->pers.connected != CON_CONNECTED )
+      continue;
+    if( tmp->client->pers.teamSelection == PTE_NONE )
+      continue;
+    if( ( BG_InventoryContainsWeapon( WP_HBUILD, tmp->client->ps.stats ) ||
+       BG_InventoryContainsWeapon( WP_HBUILD2, tmp->client->ps.stats ) ) ){
+       builders++;
+       }
+  }
+    if( found == qfalse )
+    omrc = "^3RC: ^1Down(0)^3";
+    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Telenodes: ^6%i^3 Builders: ^6%i^7", omrc, level.numHumanSpawns, builders ));
+ }
+ 
+ return;
+}
 
 /*
 =================
@@ -4810,6 +4893,8 @@ commands_t cmds[ ] = {
 
   { "score", CMD_INTERMISSION, ScoreboardMessage },
   { "mystats", CMD_TEAM|CMD_INTERMISSION, Cmd_MyStats_f },
+  { "teamstatus", CMD_TEAM, Cmd_TeamStatus_f },
+
 
   // cheats
   { "give", CMD_CHEAT|CMD_TEAM|CMD_LIVING, Cmd_Give_f },
