@@ -404,6 +404,7 @@ typedef struct
   qboolean            healing;
   char                chat[ CHAT_MAXCHAN ][ CHAT_MAXPASS ];
   qboolean            ignoreAdminWarnings;
+  int		      lastTeamStatus;
 
   qboolean            firstConnect;
 } clientPersistant_t;
@@ -1432,6 +1433,7 @@ extern  vmCvar_t  g_modTurretAngle;      // Allow high turret build angles
 extern  vmCvar_t  g_instantBuild;        // Enable instant building outside of devmap mode
 
 extern  vmCvar_t  g_teamStatus;          // Allow the use of /teamstatus
+extern  vmCvar_t  g_teamStatusTime;          // Allow the use of /teamstatus
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );
