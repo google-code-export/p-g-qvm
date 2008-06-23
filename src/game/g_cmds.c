@@ -4079,6 +4079,7 @@ void Cmd_TeamStatus_f( gentity_t *ent )
 {
  int i;
  int builders = 0;
+ int arm = 0, medi = 0, boost = 0;
  char *omrc;
  gentity_t *tmp;
  qboolean found = qfalse;
@@ -4086,8 +4087,24 @@ void Cmd_TeamStatus_f( gentity_t *ent )
  if( !g_teamStatus.integer )
  return;
  
+ if( ent->client->pers.muted )
+  {
+    trap_SendServerCommand( ent - g_entities,
+      "print \"You are muted and cannot use message commands.\n\"" );
+    return;
+  }
+  
+ if( g_teamStatusTime.integer && ent->client->pers.lastTeamStatus && (level.time - ent->client->pers.lastTeamStatus) < g_teamStatusTime.integer * 1000 )
+  {
+   ADMP( va("You may only check your team's status once every %i seconds.\n", g_teamStatusTime.integer  ));
+   return;
+  }
+  
+ ent->client->pers.lastTeamStatus = level.time;
+ 
  if( ent->client->pers.teamSelection == PTE_ALIENS ){
  
+ //OM detection
  for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
   {
     if( tmp->s.eType != ET_BUILDABLE )
@@ -4099,6 +4116,7 @@ void Cmd_TeamStatus_f( gentity_t *ent )
       }
   }
   
+ //Builder detection
  for( i = 0; i < level.maxclients; i++ )
   {
     tmp = &g_entities[ i ];
@@ -4113,13 +4131,26 @@ void Cmd_TeamStatus_f( gentity_t *ent )
        builders++;
        }
   }
+  
+  //Booster detection
+  for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
+  {
+    if( tmp->s.eType != ET_BUILDABLE )
+      continue;
+    if( tmp->s.modelindex == BA_A_BOOSTER ){
+       boost++;
+      }
+  }
+  
     if( found == qfalse )
     omrc = "^3OM: ^1Down(0)^3";
-    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Eggs: ^6%i^3 Builders: ^6%i^7", omrc, level.numAlienSpawns, builders ));
+    
+    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Eggs: ^6%i^3 Builders: ^6%i^3 Boosters: ^6%i^7", omrc, level.numAlienSpawns, builders, boost ));
  }
  
  if( ent->client->pers.teamSelection == PTE_HUMANS ){
  
+ //RC detection
  for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
   {
     if( tmp->s.eType != ET_BUILDABLE )
@@ -4130,7 +4161,8 @@ void Cmd_TeamStatus_f( gentity_t *ent )
       break;
       }
   }
-  
+ 
+ //Builder detection
  for( i = 0; i < level.maxclients; i++ )
   {
     tmp = &g_entities[ i ];
@@ -4145,9 +4177,30 @@ void Cmd_TeamStatus_f( gentity_t *ent )
        builders++;
        }
   }
+  
+ //Arm detection
+ for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
+  {
+    if( tmp->s.eType != ET_BUILDABLE )
+      continue;
+    if( tmp->s.modelindex == BA_H_ARMOURY ){
+      arm++;
+      }
+  }
+  
+ //Medi detection
+ for ( i = 1, tmp = g_entities + i; i < level.num_entities; i++, tmp++ )
+  {
+    if( tmp->s.eType != ET_BUILDABLE )
+      continue;
+    if( tmp->s.modelindex == BA_H_MEDISTAT ){
+      medi++;
+      }
+  }
     if( found == qfalse )
     omrc = "^3RC: ^1Down(0)^3";
-    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Telenodes: ^6%i^3 Builders: ^6%i^7", omrc, level.numHumanSpawns, builders ));
+    
+    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Telenodes: ^6%i^3 Builders: ^6%i^3 Armouries: ^6%i^3 Medistations: ^6%i^7", omrc, level.numHumanSpawns, builders, arm, medi ));
  }
  
  return;

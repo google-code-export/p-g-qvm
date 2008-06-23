@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 #define QVM_VARIANT       "P-G-QVM"
-#define QVM_VERSION       "SVN r65"
+#define QVM_VERSION       "SVN r66"
 
 level_locals_t  level;
 
@@ -243,6 +243,7 @@ vmCvar_t  g_modWeaponReload;
 vmCvar_t  g_modTurretAngle;
 
 vmCvar_t  g_teamStatus;
+vmCvar_t  g_teamStatusTime;
 
 
 vmCvar_t  g_instantBuild;
@@ -302,6 +303,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_modWeaponReload, "g_modWeaponReload", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_modTurretAngle, "g_modTurretAngle", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_teamStatus, "g_teamStatus", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_teamStatusTime, "g_teamStatusTime", "10", CVAR_ARCHIVE, 0, qfalse  },
   { &g_instantBuild, "g_instantBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_proximityMines, "g_proximityMines", "0", 0, 0, qtrue  },
