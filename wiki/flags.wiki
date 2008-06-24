@@ -87,6 +87,7 @@
 || mix || X ||
 || switch || X ||
 || allready || y ||
+|| _fireworks_ || _Y_ ||
 || cp || Z ||
 
 
