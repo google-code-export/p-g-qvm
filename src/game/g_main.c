@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 #define QVM_VARIANT       "P-G-QVM"
-#define QVM_VERSION       "SVN r68"
+#define QVM_VERSION       "SVN r69"
 
 level_locals_t  level;
 
