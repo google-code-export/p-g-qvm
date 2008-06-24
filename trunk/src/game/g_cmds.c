@@ -4080,9 +4080,9 @@ void Cmd_TeamStatus_f( gentity_t *ent )
  int i;
  int builders = 0;
  int arm = 0, medi = 0, boost = 0;
- char *omrc;
+ int omrc = 0;
+ qboolean omrcbuild = qfalse;
  gentity_t *tmp;
- qboolean found = qfalse;
  
  if( !g_teamStatus.integer )
  return;
@@ -4110,8 +4110,8 @@ void Cmd_TeamStatus_f( gentity_t *ent )
     if( tmp->s.eType != ET_BUILDABLE )
       continue;
     if( tmp->s.modelindex == BA_A_OVERMIND ){
-      omrc = va("^3OM: %s(%d)^3", ( tmp->health <= 0 ) ? "^1Down" : "^2Up", (tmp->health * 100 / OVERMIND_HEALTH ) );
-      found = qtrue;
+      omrc = tmp->health;
+      omrcbuild = tmp->spawned;
       break;
       }
   }
@@ -4142,10 +4142,7 @@ void Cmd_TeamStatus_f( gentity_t *ent )
       }
   }
   
-    if( found == qfalse )
-    omrc = "^3OM: ^1Down(0)^3";
-    
-    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Eggs: ^6%i^3 Builders: ^6%i^3 Boosters: ^6%i^7", omrc, level.numAlienSpawns, builders, boost ));
+    G_Say( ent, NULL, SAY_TEAM, va("^3OM: %s(%d) ^3Eggs: ^6%i^3 Builders: ^6%i^3 Boosters: ^6%i^7", ( omrc <= 0 ) ? "^1Down" : ( omrcbuild ) ? "^2Up" : "^5Building", ( omrc > 0 ) ? omrc * 100 / OVERMIND_HEALTH : 0, level.numAlienSpawns, builders, boost ));
  }
  
  if( ent->client->pers.teamSelection == PTE_HUMANS ){
@@ -4156,8 +4153,8 @@ void Cmd_TeamStatus_f( gentity_t *ent )
     if( tmp->s.eType != ET_BUILDABLE )
       continue;
     if( tmp->s.modelindex == BA_H_REACTOR ){
-      omrc = va("^3RC: %s(%d)^3", ( tmp->health <= 0 ) ? "^1Down" : "^2Up", (tmp->health * 100 / REACTOR_HEALTH ) );
-      found = qtrue;
+      omrc = tmp->health;
+      omrcbuild = tmp->spawned;
       break;
       }
   }
@@ -4197,10 +4194,9 @@ void Cmd_TeamStatus_f( gentity_t *ent )
       medi++;
       }
   }
-    if( found == qfalse )
-    omrc = "^3RC: ^1Down(0)^3";
-    
-    G_Say( ent, NULL, SAY_TEAM, va("%s ^3Telenodes: ^6%i^3 Builders: ^6%i^3 Armouries: ^6%i^3 Medistations: ^6%i^7", omrc, level.numHumanSpawns, builders, arm, medi ));
+
+    G_Say( ent, NULL, SAY_TEAM, va("^3RC: %s(%d) ^3Telenodes: ^6%i^3 Builders: ^6%i^3 Armouries: ^6%i^3 Medistations: ^6%i^7", ( omrc <= 0 ) ? "^1Down" : ( omrcbuild ) ? "^2Up" : "^5Building",
+     ( omrc > 0 ) ? omrc * 100 / REACTOR_HEALTH : 0, level.numHumanSpawns, builders, arm, medi ));
  }
  
  return;

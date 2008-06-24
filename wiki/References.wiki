@@ -27,6 +27,7 @@
 =Amanieu d'Antras=
  * [http://www.mercenariesguild.net/patches/?getfile=363 Admin warnings]
  * [http://www.mercenariesguild.net/patches/?getfile=282 Radioactive turrets]
+ =Amine=
  * [http://tremulous.net/forum/index.php?topic=7377.0 Grenade proximity thingy]
 
 =Lakitu7=
@@ -36,5 +37,5 @@
   * LogFile decolor
  
 =Google=
- * Large number of commands unique to this qvm
+ * Large number of commands unique to this qvm, see issue tracker
  * [http://code.google.com/p/p-g-qvm/issues/detail?id=13 Ban notice patch]
