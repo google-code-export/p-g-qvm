@@ -26,6 +26,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // from g_combat.c
 extern char *modNames[ ];
 
+
+void NoThink(gentity_t *ent)
+{
+return;
+}
+
 /*
 ================
 G_SetBuildableAnim
@@ -3028,20 +3034,23 @@ Checks to see if a buildable can be built
 itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance, vec3_t origin )
 {
   vec3_t            angles;
-  vec3_t            entity_origin, normal;
+  vec3_t            entity_origin, normal, tmp;
   vec3_t            mins, maxs, mins1, maxs1;
-  int               num;
-  int               entitylist[ MAX_GENTITIES ];
   trace_t           tr1, tr2, tr3;
-  int               i;
   itemBuildError_t  reason = IBE_NONE;
   gentity_t         *tempent;
+  int 		    num;
   float             minNormal;
   qboolean          invert;
   int               contents;
   playerState_t     *ps = &ent->client->ps;
   int               buildPoints;
-
+  vec3_t            mins3, maxs3, range;
+  int               i, num2;
+  int               entitylist[ MAX_GENTITIES ];
+  gentity_t	    *nb;
+  gentity_t	    *nbent;
+  
   BG_FindBBoxForBuildable( buildable, mins, maxs );
 
   BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, trap_Trace, entity_origin, angles, &tr1 );
@@ -3056,7 +3065,48 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   VectorCopy( tr1.plane.normal, normal );
   minNormal = BG_FindMinNormalForBuildable( buildable );
   invert = BG_FindInvertNormalForBuildable( buildable );
+  
+  VectorCopy( entity_origin, tmp );
+  
+  tmp[2] += mins[2];
+  
+  nb = G_Spawn( );
+  nb->s.modelindex = 1337; //Coder humor is awesome isn't it?
+  nb->think = NoThink;
+  nb->nextthink = level.time;
+  VectorCopy( tmp, nb->s.pos.trBase );
+  VectorCopy( tmp, nb->r.currentOrigin );
+  trap_LinkEntity( nb );
 
+  
+  for ( i = 1, nbent = g_entities + i; i < level.num_entities; i++, nbent++ )
+  {
+   if( nbent->nobuilder == qtrue )
+   {
+    
+    range[0] = nbent->nobuildarea;
+    range[1] = nbent->nobuildarea;
+    range[2] = 0;
+   
+    VectorAdd( nbent->r.currentOrigin, range, maxs3 );
+    VectorSubtract( nbent->r.currentOrigin, range, mins3 );
+    maxs[2] += 5;
+   
+    num2 = trap_EntitiesInBox( mins3, maxs3, entitylist, MAX_GENTITIES );
+    for(i = 0; i < num2; i++)
+      {
+       gentity_t *tent2 = &g_entities[ entitylist[ i ] ];
+      
+       if( tent2 == nb )
+	 {
+	  reason = IBE_PERMISSION;
+	 }
+       }
+     }
+   }
+  
+  G_FreeEntity( nb );
+  
   //can we build at this angle?
   if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
     reason = IBE_NORMAL;
@@ -3077,6 +3127,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   for(i = 0; i < num; i++)
   {
     gentity_t *tent = &g_entities[ entitylist[ i ] ];
+    
     if( tent->s.eType == ET_PLAYER )
     {
       reason = IBE_NOROOM;
@@ -3570,7 +3621,6 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable, vec3_t ori
     G_SetBuildableAnim( built, BANIM_CONSTRUCT1, qtrue );
 
   trap_LinkEntity( built );
-  
   
   if( builder->client ) 
   {
@@ -4417,3 +4467,160 @@ char *G_FindBuildLogName( int id )
   return "<world>";
 }
 
+/*
+=========================
+Me stealing all of the layout code and making it work for nobuild, i know, im lazy, shutup.
+=========================
+*/
+
+/*
+============
+G_NobuildSave
+
+============
+*/
+void G_NobuildSave( void )
+{
+  char map[ MAX_QPATH ];
+  char fileName[ MAX_OSPATH ];
+  fileHandle_t f;
+  int len;
+  int i;
+  gentity_t *ent;
+  char *s;
+
+  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+  if( !map[ 0 ] )
+  {
+    G_Printf( "NobuildSave( ): no map is loaded\n" );
+    return;
+  }
+  Com_sprintf( fileName, sizeof( fileName ), "nobuild/%s.dat", map );
+
+  len = trap_FS_FOpenFile( fileName, &f, FS_WRITE );
+  if( len < 0 )
+  {
+    G_Printf( "nobuildsave: could not open %s\n", fileName );
+    return;
+  }
+
+  G_Printf("nobuildsave: saving nobuild to %s\n", fileName );
+
+  for( i = MAX_CLIENTS; i < level.num_entities; i++ )
+  {
+    ent = &level.gentities[ i ];
+    if( ent->nobuilder != qtrue )
+      continue;
+
+    s = va( "%f %f %f %f\n",
+      ent->s.pos.trBase[ 0 ],
+      ent->s.pos.trBase[ 1 ],
+      ent->s.pos.trBase[ 2 ],
+      ent->nobuildarea );
+    trap_FS_Write( s, strlen( s ), f );
+  }
+  trap_FS_FCloseFile( f );
+}
+
+int G_NobuildList( char *list, int len )
+{
+  // up to 128 single character nobuild names could fit in nobuilds
+  char fileList[ ( MAX_CVAR_VALUE_STRING / 2 ) * 5 ] = {""};
+  char nobuild[ MAX_CVAR_VALUE_STRING ] = {""};
+  int numFiles, i, fileLen = 0, listLen;
+  int  count = 0;
+  char *filePtr;
+ 
+  numFiles = trap_FS_GetFileList( va( "nobuild" ), ".dat",
+    fileList, sizeof( fileList ) );
+  filePtr = fileList;
+  for( i = 0; i < numFiles; i++, filePtr += fileLen + 1 )
+  {
+    fileLen = strlen( filePtr );
+    listLen = strlen( nobuild );
+    if( fileLen < 5 )
+      continue; 
+
+    // list is full, stop trying to add to it
+    if( ( listLen + fileLen ) >= sizeof( nobuild ) )
+      break;
+
+    Q_strcat( nobuild,  sizeof( nobuild ), filePtr );
+    listLen = strlen( nobuild );
+
+    // strip extension and add space delimiter
+    nobuild[ listLen - 4 ] = ' ';
+    nobuild[ listLen - 3 ] = '\0';
+    count++;
+  }
+  if( count != numFiles )
+  {
+    G_Printf( S_COLOR_YELLOW "WARNING: nobuild list was truncated to %d "
+      "nobuilds, but %d nobuild files exist in /nobuilds/.\n",
+      count, numFiles );
+  }
+  Q_strncpyz( list, nobuild, len );
+  return count + 1;
+}
+
+/*
+============
+G_NobuildLoad
+
+load the nobuild markers that were previously saved (if there are any).
+============
+*/
+void G_NobuildLoad( void )
+{
+  fileHandle_t f;
+  int len;
+  char *nobuild;
+  char map[ MAX_QPATH ];
+  vec3_t origin = { 0.0f, 0.0f, 0.0f };
+  char line[ MAX_STRING_CHARS ];
+  int i = 0;
+  gentity_t *nb;
+  float units;
+
+  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+  len = trap_FS_FOpenFile( va( "nobuild/%s.dat", map ),
+    &f, FS_READ );
+  if( len < 0 )
+  {
+    G_Printf( "ERROR: nobuild for %s could not be opened\n", map );
+    return;
+  }
+  nobuild = G_Alloc( len + 1 );
+  trap_FS_Read( nobuild, len, f );
+  *( nobuild + len ) = '\0';
+  trap_FS_FCloseFile( f );
+  while( *nobuild )
+  {
+    if( i >= sizeof( line ) - 1 )
+    {
+      G_Printf( S_COLOR_RED "ERROR: line overflow in %s before \"%s\"\n",
+       va( "nobuild/%s.dat", map ), line );
+      return; 
+    }
+    line[ i++ ] = *nobuild;
+    line[ i ] = '\0';
+    if( *nobuild == '\n' )
+    {
+      i = 0; 
+      sscanf( line, "%f %f %f %f\n",
+        &origin[ 0 ], &origin[ 1 ], &origin[ 2 ], &units  );
+
+	nb = G_Spawn( );
+ 	nb->s.modelindex = 1337; //Coder humor is awesome isn't it?
+	nb->think = NoThink;
+	nb->nextthink = level.time;
+ 	VectorCopy( origin, nb->s.pos.trBase );
+ 	VectorCopy( origin, nb->r.currentOrigin );
+	nb->nobuilder = qtrue;
+  	nb->nobuildarea = units;
+ 	trap_LinkEntity( nb );
+      
+    }
+    nobuild++;
+  }
+}

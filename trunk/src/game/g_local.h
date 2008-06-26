@@ -244,6 +244,9 @@ struct gentity_s
   int               bdnumb;		// buildlog entry ID
   gentity_t         *oldent;
   int               livetime;
+  
+  qboolean	    nobuilder;
+  float		    nobuildarea;
 };
 
 typedef enum
@@ -884,6 +887,9 @@ void              G_LayoutSave( char *name );
 int               G_LayoutList( const char *map, char *list, int len );
 void              G_LayoutSelect( void );
 void              G_LayoutLoad( void );
+void              G_NobuildSave( void );
+int               G_NobuildList( char *list, int len );
+void              G_NobuildLoad( void );
 void              G_BaseSelfDestruct( pTeam_t team );
 gentity_t         *G_InstantBuild( buildable_t buildable, vec3_t origin, vec3_t angles, vec3_t origin2, vec3_t angles2 );
 void              G_SpawnRevertedBuildable( buildHistory_t *bh, qboolean mark );

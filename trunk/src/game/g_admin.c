@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+void NoThink(gentity_t *ent);
 // big ugly global buffer for use with buffered printing of long outputs
 static char g_bfb[ 32000 ];
 
@@ -193,6 +194,16 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"layoutsave", G_admin_layoutsave, "L",
       "save a map layout",
       "[^3mapname^7]"
+    },
+    
+    {"nobuild", G_admin_nobuild, "L",
+      "make an area nobuild",
+      "[^3game units^7]"
+    },
+    
+    {"nobuildsave", G_admin_nobuildsave, "L",
+      "save a map's nobuild markers",
+      ""
     },
     
     {"listadmins", G_admin_listadmins, "D",
@@ -2834,6 +2845,14 @@ qboolean G_admin_layoutsave( gentity_t *ent, int skiparg )
   trap_SendConsoleCommand( EXEC_APPEND, va( "layoutsave %s", layout ) );
   AP( va( "print \"^3!layoutsave: ^7layout saved as '%s' by %s\n\"", layout,
           ( ent ) ? ent->client->pers.netname : "console" ) );
+  return qtrue;
+}
+
+qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg )
+{
+
+  trap_SendConsoleCommand( EXEC_APPEND, "nobuildsave" );
+  AP( va( "print \"^3!nobuildsave: ^7nobuild saved by %s\n\"", ( ent ) ? ent->client->pers.netname : "console" ) );
   return qtrue;
 }
 
@@ -7708,4 +7727,47 @@ qboolean G_admin_fireworks( gentity_t *ent, int skiparg )
     }
   }
   return qtrue;
-} 
+}
+
+qboolean G_admin_nobuild( gentity_t *ent, int skiparg )
+{
+  int minargc;
+  char units[ MAX_STRING_CHARS ];
+  gentity_t *nb;
+  vec3_t low;
+  int units2;
+  minargc = 2 + skiparg;
+
+  if( G_SayArgc() < minargc )
+  {
+    ADMP( "^3!buildno: ^7usage: !nobuild [game units]\n" );
+    return qfalse;
+  }
+  
+  if( !ent )
+  {
+    ADMP( "^3!nobuild: ^7console cannot use this command\n" );
+    return qfalse;
+  }
+  
+  G_SayArgv( 1 + skiparg, units, sizeof( units ) );
+
+  VectorAdd( ent->s.origin, ent->r.mins, low );
+  
+  units2 = atoi(units);
+  low[0] = ent->s.origin[0];
+  low[1] = ent->s.origin[1];
+  
+  nb = G_Spawn( );
+  nb->s.modelindex = 1337;
+  nb->think = NoThink;
+  nb->nextthink = level.time;
+  VectorCopy( low, nb->s.pos.trBase );
+  VectorCopy( low, nb->r.currentOrigin );
+  trap_LinkEntity( nb );
+  nb->nobuilder = qtrue;
+  nb->nobuildarea = units2;
+  
+  return qtrue;
+}
+

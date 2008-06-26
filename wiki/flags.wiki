@@ -58,6 +58,8 @@
 || L1 || l ||
 || devmap || L ||
 || layoutsave || L ||
+|| _nobuild_ || _L_ ||
+|| _nobuildsave_ || _L_ ||
 || mute || m ||
 || unmute || m ||
 || map || M ||
