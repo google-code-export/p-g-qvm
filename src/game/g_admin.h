@@ -269,6 +269,8 @@ qboolean G_admin_customgrav( gentity_t *ent, int skiparg );
 qboolean G_admin_explode( gentity_t *ent, int skiparg ); 
 qboolean G_admin_outlaw( gentity_t *ent, int skiparg );
 qboolean G_admin_fireworks( gentity_t *ent, int skiparg );
+qboolean G_admin_nobuild( gentity_t *ent, int skiparg );
+qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg );
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );

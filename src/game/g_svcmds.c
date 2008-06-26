@@ -544,6 +544,33 @@ void  Svcmd_LayoutLoad_f( void )
   level.restarted = qtrue;
 }
 
+/*
+===================
+Svcmd_NobuildSave_f
+
+nobuildsave
+===================
+*/
+void  Svcmd_NobuildSave_f( void )
+{
+  G_NobuildSave();
+}
+
+char  *ConcatArgs( int start );
+
+/*
+===================
+Svcmd_NobuildLoad_f
+
+nobuildload
+
+===================
+*/
+void  Svcmd_NobuildLoad_f( void )
+{
+  G_NobuildLoad();
+}
+
 static void Svcmd_AdmitDefeat_f( void )
 {
   int  team;
@@ -685,6 +712,18 @@ qboolean  ConsoleCommand( void )
   if( !Q_stricmp( cmd, "layoutload" ) )
   {
     Svcmd_LayoutLoad_f( );
+    return qtrue;
+  }
+  
+  if( !Q_stricmp( cmd, "nobuildsave" ) )
+  {
+    Svcmd_NobuildSave_f( );
+    return qtrue;
+  }
+  
+  if( !Q_stricmp( cmd, "nobuildload" ) )
+  {
+    Svcmd_NobuildLoad_f( );
     return qtrue;
   }
   
