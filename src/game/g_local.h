@@ -348,7 +348,6 @@ typedef struct
   int dretchbasytime;
   int jetpackusewallwalkusetime;
   int timeLastViewed;
-  int AllstatstimeLastViewed;
 } statsCounters_t;
 
 // client data that stays across multiple respawns, but is cleared
@@ -1441,9 +1440,6 @@ extern  vmCvar_t  g_instantBuild;        // Enable instant building outside of d
 
 extern  vmCvar_t  g_teamStatus;          // Allow the use of /teamstatus
 extern  vmCvar_t  g_teamStatusTime;          // Allow the use of /teamstatus
-
-extern vmCvar_t  g_AllStats;
-extern vmCvar_t  g_AllStatsTime;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );
