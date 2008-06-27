@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 #define QVM_VARIANT       "P-G-QVM"
-#define QVM_VERSION       "SVN r71"
+#define QVM_VERSION       "SVN r72"
 
 level_locals_t  level;
 
@@ -247,6 +247,9 @@ vmCvar_t  g_teamStatusTime;
 
 
 vmCvar_t  g_instantBuild;
+
+vmCvar_t  g_AllStats;
+vmCvar_t  g_AllStatsTime;
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -475,6 +478,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_randomLayoutPercent, "g_randomLayoutPercent", "100", CVAR_ARCHIVE, 0, qfalse },
   { &g_randomMaps, "g_randomMaps", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_randomMapList, "g_randomMapList", "", CVAR_ARCHIVE, 0, qfalse },
+
+  { &g_AllStats, "g_AllStats", "", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_AllStatsTime, "g_AllStatsTime", "", CVAR_ARCHIVE, 0, qfalse  },
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );
