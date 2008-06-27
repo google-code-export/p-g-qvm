@@ -4069,6 +4069,89 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
   return s;
 }
 
+ /*
+ =================
+ Cmd_AllStats_f
+ =================
+ */
+ void Cmd_AllStats_f( gentity_t *ent )
+ {
+    int i;
+    int NextViewTime;
+    qboolean HasResults;
+    gentity_t *tmpent;
+ 
+    //check if ent exists
+    if(!ent) return;
+ 
+    NextViewTime = ent->client->pers.statscounters.AllstatstimeLastViewed + g_AllStatsTime.integer * 1000;
+    //check if you can use the cmd at this time
+    if( !level.intermissiontime && level.time < NextViewTime)
+    {
+      ADMP( va("You may only check your stats every %i Seconds and during intermission. Next valid time is %d:%02d\n",( g_AllStatsTime.integer ) ? ( g_AllStatsTime.integer ) : 60, ( NextViewTime / 60000 ), ( NextViewTime / 1000 ) % 60 ) );
+      return;
+    }
+    //see if allstats is enabled
+    if( !g_AllStats.integer )
+    {
+     ADMP( "AllStats has been disabled\n");
+     return;
+    }
+ 
+    //display a header describing the data
+    ADMP( "^3  K   A  SK|  D   F   S  TK|   DD| SB| Name\n" );
+    HasResults = qfalse;
+    //loop through the clients that are connected
+    for( i = 0; i < level.numConnectedClients; i++ ) 
+    {
+       //assign a tempent 4 the hell of it
+       tmpent = &g_entities[ level.sortedClients[ i ] ];
+ 
+       //check for what mode we are working in and display relevent data
+       if( g_AllStats.integer == 1 )
+       {
+            //check if client is connected and on same team
+            if( tmpent->client && tmpent->client->pers.connected == CON_CONNECTED && tmpent->client->pers.teamSelection == ent->client->pers.teamSelection && tmpent->client->pers.teamSelection != PTE_NONE )
+            {
+               ADMP( va( "^7%3i %3i %3i^3|^7%3i %3i %3i %3i^3|^7%5i^3|^7%3i^3|^7 %s\n",
+               ( tmpent->client->pers.statscounters.kills ) ? tmpent->client->pers.statscounters.kills : 0,
+               ( tmpent->client->pers.statscounters.assists ) ? tmpent->client->pers.statscounters.assists : 0,
+               ( tmpent->client->pers.statscounters.structskilled ) ? tmpent->client->pers.statscounters.structskilled : 0,
+               ( tmpent->client->pers.statscounters.deaths ) ? tmpent->client->pers.statscounters.deaths : 0,
+               ( tmpent->client->pers.statscounters.feeds ) ? tmpent->client->pers.statscounters.feeds : 0,
+               ( tmpent->client->pers.statscounters.suicides ) ? tmpent->client->pers.statscounters.suicides : 0,
+               ( tmpent->client->pers.statscounters.teamkills ) ? tmpent->client->pers.statscounters.teamkills : 0,
+               ( tmpent->client->pers.statscounters.dmgdone ) ? tmpent->client->pers.statscounters.dmgdone : 0,
+               ( tmpent->client->pers.statscounters.structsbuilt ) ? tmpent->client->pers.statscounters.structsbuilt : 0,
+               ( tmpent->client->pers.netname ) ? tmpent->client->pers.netname : "Unknown" ) );
+               HasResults = qtrue;
+            }
+       }
+       else if( g_AllStats.integer == 2 )
+       {
+            //check if client is connected and has some stats or atleast is on a team
+            if( tmpent->client && tmpent->client->pers.connected == CON_CONNECTED && ( tmpent->client->pers.teamSelection != PTE_NONE ) )
+            {
+               ADMP( va( "^7%3i %3i %3i^3|^7%3i %3i %3i %3i^3|^7%5i^3|^7%3i^3|^7 %s\n",
+               ( tmpent->client->pers.statscounters.kills ) ? tmpent->client->pers.statscounters.kills : 0,
+               ( tmpent->client->pers.statscounters.assists ) ? tmpent->client->pers.statscounters.assists : 0,
+               ( tmpent->client->pers.statscounters.structskilled ) ? tmpent->client->pers.statscounters.structskilled : 0,
+               ( tmpent->client->pers.statscounters.deaths ) ? tmpent->client->pers.statscounters.deaths : 0,
+               ( tmpent->client->pers.statscounters.feeds ) ? tmpent->client->pers.statscounters.feeds : 0,
+               ( tmpent->client->pers.statscounters.suicides ) ? tmpent->client->pers.statscounters.suicides : 0,
+               ( tmpent->client->pers.statscounters.teamkills ) ? tmpent->client->pers.statscounters.teamkills : 0,
+               ( tmpent->client->pers.statscounters.dmgdone ) ? tmpent->client->pers.statscounters.dmgdone : 0,
+               ( tmpent->client->pers.statscounters.structsbuilt ) ? tmpent->client->pers.statscounters.structsbuilt : 0,
+               ( tmpent->client->pers.netname ) ? tmpent->client->pers.netname : "Unknown" ) );
+               HasResults = qtrue;
+            }
+       }
+    }
+    if( HasResults == qfalse ) ADMP( "   ^3EMPTY!\n" );
+    //update time last viewed
+    ent->client->pers.statscounters.AllstatstimeLastViewed = level.time;
+    return;
+}
 
 /*
 =================
@@ -4942,6 +5025,7 @@ commands_t cmds[ ] = {
 
   { "score", CMD_INTERMISSION, ScoreboardMessage },
   { "mystats", CMD_TEAM|CMD_INTERMISSION, Cmd_MyStats_f },
+  { "allstats", 0|CMD_INTERMISSION, Cmd_AllStats_f },
   { "teamstatus", CMD_TEAM, Cmd_TeamStatus_f },
 
 
