@@ -3086,11 +3086,10 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     
     range[0] = nbent->nobuildarea;
     range[1] = nbent->nobuildarea;
-    range[2] = 0;
+    range[2] = 5;
    
     VectorAdd( nbent->r.currentOrigin, range, maxs3 );
     VectorSubtract( nbent->r.currentOrigin, range, mins3 );
-    maxs[2] += 5;
    
     num2 = trap_EntitiesInBox( mins3, maxs3, entitylist, MAX_GENTITIES );
     for(i = 0; i < num2; i++)
@@ -4522,47 +4521,6 @@ void G_NobuildSave( void )
   trap_FS_FCloseFile( f );
 }
 
-int G_NobuildList( char *list, int len )
-{
-  // up to 128 single character nobuild names could fit in nobuilds
-  char fileList[ ( MAX_CVAR_VALUE_STRING / 2 ) * 5 ] = {""};
-  char nobuild[ MAX_CVAR_VALUE_STRING ] = {""};
-  int numFiles, i, fileLen = 0, listLen;
-  int  count = 0;
-  char *filePtr;
- 
-  numFiles = trap_FS_GetFileList( va( "nobuild" ), ".dat",
-    fileList, sizeof( fileList ) );
-  filePtr = fileList;
-  for( i = 0; i < numFiles; i++, filePtr += fileLen + 1 )
-  {
-    fileLen = strlen( filePtr );
-    listLen = strlen( nobuild );
-    if( fileLen < 5 )
-      continue; 
-
-    // list is full, stop trying to add to it
-    if( ( listLen + fileLen ) >= sizeof( nobuild ) )
-      break;
-
-    Q_strcat( nobuild,  sizeof( nobuild ), filePtr );
-    listLen = strlen( nobuild );
-
-    // strip extension and add space delimiter
-    nobuild[ listLen - 4 ] = ' ';
-    nobuild[ listLen - 3 ] = '\0';
-    count++;
-  }
-  if( count != numFiles )
-  {
-    G_Printf( S_COLOR_YELLOW "WARNING: nobuild list was truncated to %d "
-      "nobuilds, but %d nobuild files exist in /nobuilds/.\n",
-      count, numFiles );
-  }
-  Q_strncpyz( list, nobuild, len );
-  return count + 1;
-}
-
 /*
 ============
 G_NobuildLoad
@@ -4598,8 +4556,9 @@ void G_NobuildLoad( void )
   {
     if( i >= sizeof( line ) - 1 )
     {
-      G_Printf( S_COLOR_RED "ERROR: line overflow in %s before \"%s\"\n",
-       va( "nobuild/%s.dat", map ), line );
+      // Since nobuild will be loaded on every map load, or atleast attmepted to be loaded, im just going to disable this warning since its just spam.
+      /*G_Printf( S_COLOR_RED "ERROR: line overflow in %s before \"%s\"\n",
+       va( "nobuild/%s.dat", map ), line );*/
       return; 
     }
     line[ i++ ] = *nobuild;

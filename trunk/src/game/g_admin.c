@@ -2848,14 +2848,6 @@ qboolean G_admin_layoutsave( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
-qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg )
-{
-
-  trap_SendConsoleCommand( EXEC_APPEND, "nobuildsave" );
-  AP( va( "print \"^3!nobuildsave: ^7nobuild saved by %s\n\"", ( ent ) ? ent->client->pers.netname : "console" ) );
-  return qtrue;
-}
-
 qboolean G_admin_mute( gentity_t *ent, int skiparg )
 {
   int pids[ MAX_CLIENTS ];
@@ -7740,7 +7732,7 @@ qboolean G_admin_nobuild( gentity_t *ent, int skiparg )
 
   if( G_SayArgc() < minargc )
   {
-    ADMP( "^3!buildno: ^7usage: !nobuild [game units]\n" );
+    ADMP( "^3!nobuild: ^7usage: !nobuild [game units]\n" );
     return qfalse;
   }
   
@@ -7771,3 +7763,11 @@ qboolean G_admin_nobuild( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
+qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg )
+{
+
+  trap_SendConsoleCommand( EXEC_APPEND, "nobuildsave" );
+  AP( va( "print \"^3!nobuildsave: ^7nobuild markers saved by %s\n\"", ( ent ) ? ent->client->pers.netname : "console" ) );
+  
+  return qtrue;
+}
