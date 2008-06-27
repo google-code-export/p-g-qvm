@@ -197,8 +197,8 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
     
     {"nobuild", G_admin_nobuild, "L",
-      "make an area nobuild",
-      "[^3game units^7]"
+      "make an area unbuildable",
+      "[^3game units area^7] [ ^3game units height^7]"
     },
     
     {"nobuildsave", G_admin_nobuildsave, "L",
@@ -7725,16 +7725,11 @@ qboolean G_admin_nobuild( gentity_t *ent, int skiparg )
 {
   int minargc;
   char units[ MAX_STRING_CHARS ];
+  char units2[ MAX_STRING_CHARS ];
   gentity_t *nb;
-  vec3_t low;
-  int units2;
-  minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!nobuild: ^7usage: !nobuild [game units]\n" );
-    return qfalse;
-  }
+  int units3;
+  int units4;
+  minargc = 3 + skiparg;
   
   if( !ent )
   {
@@ -7743,22 +7738,29 @@ qboolean G_admin_nobuild( gentity_t *ent, int skiparg )
   }
   
   G_SayArgv( 1 + skiparg, units, sizeof( units ) );
+  G_SayArgv( 2 + skiparg, units2, sizeof( units2 ) );
+ 
+  units3 = atoi(units);
+  units4 = atoi(units2);
 
-  VectorAdd( ent->s.origin, ent->r.mins, low );
-  
-  units2 = atoi(units);
-  low[0] = ent->s.origin[0];
-  low[1] = ent->s.origin[1];
-  
-  nb = G_Spawn( );
-  nb->s.modelindex = 1337;
-  nb->think = NoThink;
-  nb->nextthink = level.time;
-  VectorCopy( low, nb->s.pos.trBase );
-  VectorCopy( low, nb->r.currentOrigin );
-  trap_LinkEntity( nb );
-  nb->nobuilder = qtrue;
-  nb->nobuildarea = units2;
+  if( level.nobuild == qfalse ){
+   
+   if( G_SayArgc() < minargc )
+   {
+     ADMP( "^3!nobuild: ^7usage: !nobuild [game units area] [gane units height]\n" );
+     return qfalse;
+   }
+   
+  level.nobuild = qtrue;
+  level.nobuildArea = units3;
+  level.nobuildHeight = units4;
+  AP( va( "print \"^3!nobuild: ^7nobuild mode has been enabled by %s^7\n\"", ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
+  else{
+  level.nobuild = qfalse;
+  level.nobuildArea = 0.0f;
+  AP( va( "print \"^3!nobuild: ^7nobuild mode has been disabled by %s^7\n\"", ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
   
   return qtrue;
 }
@@ -7771,3 +7773,4 @@ qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg )
   
   return qtrue;
 }
+
