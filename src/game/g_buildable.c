@@ -3067,11 +3067,11 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   invert = BG_FindInvertNormalForBuildable( buildable );
   
   VectorCopy( entity_origin, tmp );
-  
+
   tmp[2] += mins[2];
   
   nb = G_Spawn( );
-  nb->s.modelindex = 1337; //Coder humor is awesome isn't it?
+  nb->s.modelindex = 0;
   nb->think = NoThink;
   nb->nextthink = level.time;
   VectorCopy( tmp, nb->s.pos.trBase );
@@ -3084,9 +3084,9 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
    if( nbent->nobuilder == qtrue )
    {
     
-    range[0] = nbent->nobuildarea;
-    range[1] = nbent->nobuildarea;
-    range[2] = 5;
+    range[0] = nbent->nobuildArea;
+    range[1] = nbent->nobuildArea;
+    range[2] = nbent->nobuildHeight;
    
     VectorAdd( nbent->r.currentOrigin, range, maxs3 );
     VectorSubtract( nbent->r.currentOrigin, range, mins3 );
@@ -3104,7 +3104,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
      }
    }
   
-  G_FreeEntity( nb );
+   G_FreeEntity( nb );
   
   //can we build at this angle?
   if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
@@ -3671,6 +3671,40 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable, vec3_t ori
 }
 
 /*
+================
+G_SpawnMarker
+
+Spawns a nobuild marker
+================
+*/
+static void G_SpawnMarker( vec3_t origin, buildable_t buildable )
+{
+  gentity_t *nb;
+  vec3_t    mins, maxs, tmp;
+  
+  BG_FindBBoxForBuildable( buildable, mins, maxs );
+  
+  VectorCopy( origin, tmp );
+  tmp[2] += mins[2];
+ 
+  
+  nb = G_Spawn( );
+  nb->s.modelindex = 1337; //Coder humor is win
+  nb->think = NoThink;
+  nb->nextthink = level.time;
+  VectorCopy( tmp, nb->s.pos.trBase );
+  VectorCopy( tmp, nb->r.currentOrigin );
+  nb->nobuilder = qtrue;
+  nb->nobuildArea = level.nobuildArea;
+  nb->nobuildHeight = level.nobuildHeight;
+  trap_LinkEntity( nb );
+  
+  level.nobuild = qfalse;
+  level.nobuildArea = 0.0f;
+  level.nobuildHeight = 0.0f;
+}
+
+/*
 =================
 G_BuildIfValid
 =================
@@ -3685,6 +3719,10 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
   switch( G_CanBuild( ent, buildable, dist, origin ) )
   {
     case IBE_NONE:
+      if ( level.nobuild ){
+      G_SpawnMarker( origin, buildable );
+      return qtrue;
+      }
       G_Build( ent, buildable, origin, ent->s.apos.trBase );
       return qtrue;
 
@@ -3750,16 +3788,28 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
       return qfalse;
 
     case IBE_SPWNWARN:
+      if ( level.nobuild ){
+      G_SpawnMarker( origin, buildable );
+      return qtrue;
+      }
       G_TriggerMenu( ent->client->ps.clientNum, MN_A_SPWNWARN );
       G_Build( ent, buildable, origin, ent->s.apos.trBase );
       return qtrue;
 
     case IBE_TNODEWARN:
+      if ( level.nobuild ){
+      G_SpawnMarker( origin, buildable );
+      return qtrue;
+      }
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_TNODEWARN );
       G_Build( ent, buildable, origin, ent->s.apos.trBase );
       return qtrue;
 
     case IBE_RPTWARN:
+      if ( level.nobuild ){
+      G_SpawnMarker( origin, buildable );
+      return qtrue;
+      }
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_RPTWARN );
       G_Build( ent, buildable, origin, ent->s.apos.trBase );
       return qtrue;
@@ -4511,11 +4561,12 @@ void G_NobuildSave( void )
     if( ent->nobuilder != qtrue )
       continue;
 
-    s = va( "%f %f %f %f\n",
+    s = va( "%f %f %f %f %f\n",
       ent->s.pos.trBase[ 0 ],
       ent->s.pos.trBase[ 1 ],
       ent->s.pos.trBase[ 2 ],
-      ent->nobuildarea );
+      ent->nobuildArea,
+      ent->nobuildHeight );
     trap_FS_Write( s, strlen( s ), f );
   }
   trap_FS_FCloseFile( f );
@@ -4539,6 +4590,7 @@ void G_NobuildLoad( void )
   int i = 0;
   gentity_t *nb;
   float units;
+  float units2;
 
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
   len = trap_FS_FOpenFile( va( "nobuild/%s.dat", map ),
@@ -4566,17 +4618,18 @@ void G_NobuildLoad( void )
     if( *nobuild == '\n' )
     {
       i = 0; 
-      sscanf( line, "%f %f %f %f\n",
-        &origin[ 0 ], &origin[ 1 ], &origin[ 2 ], &units  );
+      sscanf( line, "%f %f %f %f %f\n",
+        &origin[ 0 ], &origin[ 1 ], &origin[ 2 ], &units, &units2  );
 
 	nb = G_Spawn( );
- 	nb->s.modelindex = 1337; //Coder humor is awesome isn't it?
+ 	nb->s.modelindex = 0; //Coder humor is awesome isn't it?
 	nb->think = NoThink;
 	nb->nextthink = level.time;
  	VectorCopy( origin, nb->s.pos.trBase );
  	VectorCopy( origin, nb->r.currentOrigin );
 	nb->nobuilder = qtrue;
-  	nb->nobuildarea = units;
+  	nb->nobuildArea = units;
+	nb->nobuildHeight = units2;
  	trap_LinkEntity( nb );
       
     }

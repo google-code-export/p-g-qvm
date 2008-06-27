@@ -23,10 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
-#define QVM_VARIANT       "P-G-QVM"
-//#define QVM_VERSION       "SVN r73" //Use this if your releasing a version or dont have svn installed. If you dont have svn, please use a syntax similar to SVN r#
-#define QVM_VERSION       "SVN r" SVN_VERSION //Use this if you have SVN installed
-
 
 level_locals_t  level;
 
@@ -785,9 +781,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
-  trap_Cvar_Set( "qvm_version", va( "%s %s (%s %s)",
-   QVM_VARIANT,
-   QVM_VERSION,
+  trap_Cvar_Set( "qvm_version", va( "%s (%s %s)",
+   Q3_VERSION,
    __DATE__,
    __TIME__ ) );
 

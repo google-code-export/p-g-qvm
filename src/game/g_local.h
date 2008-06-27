@@ -246,7 +246,8 @@ struct gentity_s
   int               livetime;
   
   qboolean	    nobuilder;
-  float		    nobuildarea;
+  float		    nobuildArea;
+  float	     	    nobuildHeight;
 };
 
 typedef enum
@@ -768,6 +769,10 @@ typedef struct
   int				numTeamWarnings;  
 
   int               bleeders;
+  
+  qboolean	    nobuild;
+  float		    nobuildArea;
+  float	     	    nobuildHeight;
   
   statsCounters_t alienStatsCounters;
   statsCounters_t humanStatsCounters;
