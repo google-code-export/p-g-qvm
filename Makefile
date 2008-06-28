@@ -735,6 +735,7 @@ endif
 
 ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
+  Q3CFLAGS += -DSVN_VERSION=\"$(SVN_VERSION)\"
 endif
 
 define DO_CC       
@@ -843,7 +844,7 @@ endif
 
 define DO_Q3LCC
 @echo "Q3LCC $<"
-@$(Q3LCC) -o $@ $<
+@$(Q3LCC) -o $@ $(Q3CFLAGS) $<
 endef
 
 #############################################################################
