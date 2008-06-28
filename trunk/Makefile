@@ -735,7 +735,11 @@ endif
 
 ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
-  Q3CFLAGS += -DSVN_VERSION=\"$(SVN_VERSION)\"
+  ifeq ($(PLATFORM),mingw32)
+    Q3CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
+  else
+    Q3CFLAGS += -DSVN_VERSION=\"$(SVN_VERSION)\"
+  endif
 endif
 
 define DO_CC       
