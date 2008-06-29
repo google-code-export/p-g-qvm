@@ -150,6 +150,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "cause a player to explode. Caution: damages surrounding players and structures.",
       "[^3name|slot#^7]"
     },
+    
+    {"grab", G_admin_grab, "Q",
+      "Grab a player as a spectator and make him move around.",
+      "[^3name|slot#^7]"
+    },
 
     {"flag", G_admin_flag, "f",
       "add an admin flag to a player, prefix flag with '-' to disallow",
@@ -7774,3 +7779,71 @@ qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
+qboolean G_admin_grab( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  int minargc;
+  gentity_t *vic;
+  int i;
+
+  if( !ent )
+  {
+  ADMP( "^3!grab: ^7console cannot use this command\n" );
+    return qfalse;
+  }
+  
+  minargc = 2 + skiparg;
+
+  if( G_SayArgc() < minargc )
+  {
+    ADMP( "^3!grab: ^7usage: !grab [name|slot#|clear]\n" );
+    return qfalse;
+  }
+  
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+  
+  if( !strcmp( name, "clear") ){
+  
+  for( i = 0; i < level.maxclients; i++ )
+  {
+     vic = &g_entities[ i ];
+     if( !vic->client )
+      continue;
+     if( vic->client->pers.connected != CON_CONNECTED )
+      continue;
+     if( vic->client->pers.grabbed )
+      {
+       vic->client->pers.grabbed = qfalse;
+      }
+    }
+    return qtrue;
+  }
+
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!grab: ^7%s\n", err ) );
+    return qfalse;
+  }
+
+  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
+  {
+    ADMP( "^3!grab: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+
+  vic = &g_entities[ pids[ 0 ] ];
+  
+  if( vic->client->pers.grabbed ){
+  ADMP( "^3!grab: ^7grabbing has been disabled.\n" );
+  vic->client->pers.grabbed = qfalse;
+  }
+  else{
+  vic->client->pers.grabber = ent;
+  vic->client->pers.grabbed = qtrue;
+  ADMP( "^3!grab: ^7grabbing has been enabled.\n" );
+  }
+  return qtrue;
+}

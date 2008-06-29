@@ -249,6 +249,9 @@ vmCvar_t  g_instantBuild;
 vmCvar_t  g_AllStats;
 vmCvar_t  g_AllStatsTime;
 
+vmCvar_t  g_wwNoHovelBuild;
+
+
 static cvarTable_t   gameCvarTable[ ] =
 {
   // don't override the cheat state set by the system
@@ -479,6 +482,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_AllStats, "g_AllStats", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_AllStatsTime, "g_AllStatsTime", "", CVAR_ARCHIVE, 0, qfalse  },
+  
+  { &g_wwNoHovelBuild, "g_wwNoHovelBuild", "0", CVAR_ARCHIVE, 0, qfalse  }
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );

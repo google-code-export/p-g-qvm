@@ -410,6 +410,9 @@ typedef struct
   char                chat[ CHAT_MAXCHAN ][ CHAT_MAXPASS ];
   qboolean            ignoreAdminWarnings;
   int		      lastTeamStatus;
+  
+  qboolean	      grabbed;
+  gentity_t	      *grabber;
 
   qboolean            firstConnect;
 } clientPersistant_t;
@@ -1449,6 +1452,8 @@ extern  vmCvar_t  g_teamStatusTime;          // Allow the use of /teamstatus
 
 extern vmCvar_t  g_AllStats;
 extern vmCvar_t  g_AllStatsTime;
+
+extern vmCvar_t  g_wwNoHovelBuild;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

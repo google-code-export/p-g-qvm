@@ -3173,6 +3173,13 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if( ent->client->ps.stats[ STAT_PTEAM ] == PTE_ALIENS )
   {
     //alien criteria
+    
+    //This is here to give that nice little red colored buildable to display that you cannot build there
+    if( buildable == BA_A_HOVEL && ( ent->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && g_wwNoHovelBuild.integer ||
+         buildable == BA_A_HOVEL &&  ( ent->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBINGCEILING ) && g_wwNoHovelBuild.integer )
+       {
+        reason = IBE_HOVELEXIT;
+       }
 
     if( buildable == BA_A_HOVEL )
     {
@@ -3715,7 +3722,15 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
   vec3_t        origin;
 
   dist = BG_FindBuildDistForClass( ent->client->ps.stats[ STAT_PCLASS ] );
-
+  
+  //This is only here to report the reason why you cannot build the hovel
+  if( buildable == BA_A_HOVEL && ( ent->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && g_wwNoHovelBuild.integer ||
+         buildable == BA_A_HOVEL &&  ( ent->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBINGCEILING ) && g_wwNoHovelBuild.integer )
+     {
+      trap_SendServerCommand( ent-g_entities, va( "print \"You cannot build a hovel while wallwalking.\n\"" ) );
+      return qfalse;
+     }
+  
   switch( G_CanBuild( ent, buildable, dist, origin ) )
   {
     case IBE_NONE:
@@ -3821,7 +3836,7 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
     default:
       break;
   }
-
+  
   return qfalse;
 }
 

@@ -72,6 +72,7 @@
 || customgrav || Q ||
 || drug || Q ||
 || explode	|| Q ||
+|| _grab_ || _Q_
 || restart	 || r ||
 || register || R ||
 || setlevel || s ||
