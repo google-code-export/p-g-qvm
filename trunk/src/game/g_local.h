@@ -1374,7 +1374,7 @@ extern  vmCvar_t  g_chat;
 
 extern  vmCvar_t  g_KillerHP;
 
-extern  vmCvar_t  g_maraObituary
+extern  vmCvar_t  g_maraObituary;
 
 extern  vmCvar_t  g_decolorLogfiles;
 
