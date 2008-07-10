@@ -1,6 +1,18 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.6x=
+==1.6.2==
+ * Teamstatus now flood limited, via cvar `g_teamStatusTime`, and updated quite a bit (Issue 121)
+ * New Marauder obituary (toggled via cvar `g_maraObituary`) (Issue 125 and seperate cvar)
+ * Added `!fireworks` command, flag `Y` (Issue 126)
+ * Added nobuild series of commands, `!nobuild` and `!nobuildsave`, flag `L` (Issue 128)
+ * Added /allstats command, cvar `g_allStats` controls who can see it (0=off, 1=teammates only, 2=serverwide) and `g_allstatsTime` controls the rate at which players can repeat command. (Issue 123) (Issue 139)
+ * Cleaned up name sanitize to filter ALL non-visible ascii characters (boxes) (Issue 131)
+ * Added `!grab` command (Issue 135) (Issue 135) (Issue 138)
+ * Removed `!mix`, `!switch`, `!trade`, `!steal`, `!explode` (Issue 138)
+ * Added `!bring` command, brings the admin who ran it as a spectator to another spectators point of view. (Issue 138)
+ * Added cvar controlling many wallwalk hovel glitches, `g_wwNoHovelBuild` (Issue 136)
+ * Hardcoded `!info credits` into qvm, now server operators dont have to upload 2 files. (Issue 140)
 ==1.6.1==
  * Added Teamstatus command `/teamstatus`. Shows you the status of your base (nodes/eggs, om/reac, etc). Cvar `g_teamStatus` to toggle (Issue 120)
  * Added Welcome Messages feature. Sends welcome messages to connecting players. `g_welcomeMsg` is message sent to players (supports \n), `g_welcomeMsgTime` is the duration of display. (Issue 118)

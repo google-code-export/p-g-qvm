@@ -256,22 +256,15 @@ qboolean G_admin_chat_readconfig( gentity_t *ent );
 void G_admin_chat_sync( gentity_t *ent );
 void G_admin_chat_update( gentity_t *ent, int chan );
 
-//all of my commands WEEEEEEEEEE
-qboolean G_admin_switch( gentity_t *ent, int skiparg ); 
-qboolean G_admin_mix( gentity_t *ent, int skiparg ); 
-qboolean G_admin_steal( gentity_t *ent, int skiparg ); 
-qboolean G_admin_trade( gentity_t *ent, int skiparg ); 
-qboolean G_admin_drug( gentity_t *ent, int skiparg ); 
 qboolean G_admin_drop( gentity_t *ent, int skiparg ); 
 qboolean G_admin_cp( gentity_t *ent, int skiparg ); 
-qboolean G_admin_credits( gentity_t *ent, int skiparg ); 
-qboolean G_admin_customgrav( gentity_t *ent, int skiparg ); 
-qboolean G_admin_explode( gentity_t *ent, int skiparg ); 
+qboolean G_admin_credits( gentity_t *ent, int skiparg );
 qboolean G_admin_outlaw( gentity_t *ent, int skiparg );
 qboolean G_admin_fireworks( gentity_t *ent, int skiparg );
 qboolean G_admin_nobuild( gentity_t *ent, int skiparg );
 qboolean G_admin_nobuildsave( gentity_t *ent, int skiparg );
 qboolean G_admin_grab( gentity_t *ent, int skiparg );
+qboolean G_admin_bring( gentity_t *ent, int skiparg );
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );

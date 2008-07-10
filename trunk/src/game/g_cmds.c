@@ -4069,7 +4069,7 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
   return s;
 }
 
- /*
+  /*
  =================
  Cmd_AllStats_f
  =================
@@ -4078,7 +4078,8 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
  {
     int i;
     int NextViewTime;
-    qboolean HasResults;
+    int NumResults;
+    int Teamcolor;
     gentity_t *tmpent;
  
     //check if ent exists
@@ -4097,10 +4098,10 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
      ADMP( "AllStats has been disabled\n");
      return;
     }
- 
+    ADMP("^3K^2=^7Kills ^3A^2=^7Assists ^3SK^2=^7StructKills\n^3D^2=^7Deaths ^3F^2=^7Feeds ^3S^2=^7Suicides ^3TK^2=^7Teamkills\n^3DD^2=^7Damage done ^3TDD^2=^7Team Damage done\n^3SB^2=^7Structs Built\n\n" );
     //display a header describing the data
-    ADMP( "^3  K   A  SK|  D   F   S  TK|   DD| SB| Name\n" );
-    HasResults = qfalse;
+    ADMP( "^3 #|  K   A  SK|  D   F   S  TK|   DD   TDD| SB| Name\n" );
+    NumResults = 0;
     //loop through the clients that are connected
     for( i = 0; i < level.numConnectedClients; i++ ) 
     {
@@ -4113,18 +4114,27 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
             //check if client is connected and on same team
             if( tmpent->client && tmpent->client->pers.connected == CON_CONNECTED && tmpent->client->pers.teamSelection == ent->client->pers.teamSelection && tmpent->client->pers.teamSelection != PTE_NONE )
             {
-               ADMP( va( "^7%3i %3i %3i^3|^7%3i %3i %3i %3i^3|^7%5i^3|^7%3i^3|^7 %s\n",
+               NumResults++;
+               if( tmpent->client->pers.teamSelection == PTE_ALIENS ) Teamcolor = 1;
+               if( tmpent->client->pers.teamSelection == PTE_HUMANS ) Teamcolor = 5;
+               ADMP( va( "^%i%2i^3|^%i%3i %3i %3i^3|^%i%3i %3i %3i %3i^3|^%i%5i %5i^3|^%i%3i^3|^7 %s\n",
+               Teamcolor,
+               NumResults,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.kills ) ? tmpent->client->pers.statscounters.kills : 0,
                ( tmpent->client->pers.statscounters.assists ) ? tmpent->client->pers.statscounters.assists : 0,
                ( tmpent->client->pers.statscounters.structskilled ) ? tmpent->client->pers.statscounters.structskilled : 0,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.deaths ) ? tmpent->client->pers.statscounters.deaths : 0,
                ( tmpent->client->pers.statscounters.feeds ) ? tmpent->client->pers.statscounters.feeds : 0,
                ( tmpent->client->pers.statscounters.suicides ) ? tmpent->client->pers.statscounters.suicides : 0,
                ( tmpent->client->pers.statscounters.teamkills ) ? tmpent->client->pers.statscounters.teamkills : 0,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.dmgdone ) ? tmpent->client->pers.statscounters.dmgdone : 0,
+               ( tmpent->client->pers.statscounters.ffdmgdone ) ? tmpent->client->pers.statscounters.ffdmgdone : 0,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.structsbuilt ) ? tmpent->client->pers.statscounters.structsbuilt : 0,
                ( tmpent->client->pers.netname ) ? tmpent->client->pers.netname : "Unknown" ) );
-               HasResults = qtrue;
             }
        }
        else if( g_AllStats.integer == 2 )
@@ -4132,23 +4142,37 @@ char *G_statsString( statsCounters_t *sc, pTeam_t *pt )
             //check if client is connected and has some stats or atleast is on a team
             if( tmpent->client && tmpent->client->pers.connected == CON_CONNECTED && ( tmpent->client->pers.teamSelection != PTE_NONE ) )
             {
-               ADMP( va( "^7%3i %3i %3i^3|^7%3i %3i %3i %3i^3|^7%5i^3|^7%3i^3|^7 %s\n",
+               NumResults++;
+               if( tmpent->client->pers.teamSelection == PTE_ALIENS ) Teamcolor = 1;
+               if( tmpent->client->pers.teamSelection == PTE_HUMANS ) Teamcolor = 5;
+               ADMP( va( "^%i%2i^3|^%i%3i %3i %3i^3|^%i%3i %3i %3i %3i^3|^%i%5i %5i^3|^%i%3i^3|^7 %s\n",
+               Teamcolor,
+               NumResults,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.kills ) ? tmpent->client->pers.statscounters.kills : 0,
                ( tmpent->client->pers.statscounters.assists ) ? tmpent->client->pers.statscounters.assists : 0,
                ( tmpent->client->pers.statscounters.structskilled ) ? tmpent->client->pers.statscounters.structskilled : 0,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.deaths ) ? tmpent->client->pers.statscounters.deaths : 0,
                ( tmpent->client->pers.statscounters.feeds ) ? tmpent->client->pers.statscounters.feeds : 0,
                ( tmpent->client->pers.statscounters.suicides ) ? tmpent->client->pers.statscounters.suicides : 0,
                ( tmpent->client->pers.statscounters.teamkills ) ? tmpent->client->pers.statscounters.teamkills : 0,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.dmgdone ) ? tmpent->client->pers.statscounters.dmgdone : 0,
+               ( tmpent->client->pers.statscounters.ffdmgdone ) ? tmpent->client->pers.statscounters.ffdmgdone : 0,
+               Teamcolor,
                ( tmpent->client->pers.statscounters.structsbuilt ) ? tmpent->client->pers.statscounters.structsbuilt : 0,
                ( tmpent->client->pers.netname ) ? tmpent->client->pers.netname : "Unknown" ) );
-               HasResults = qtrue;
             }
        }
     }
-    if( HasResults == qfalse ) ADMP( "   ^3EMPTY!\n" );
+    if( NumResults == 0 ) {
+       ADMP( "   ^3EMPTY!\n" );
+    } else {
+       ADMP( va( "^7 %i Players found!\n", NumResults ) );
+    }
     //update time last viewed
+
     ent->client->pers.statscounters.AllstatstimeLastViewed = level.time;
     return;
 }

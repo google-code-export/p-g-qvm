@@ -104,11 +104,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "Add/subtract credits to/from a player",
       "[^3name|slot#^7] [^3amount#^7]"
     },
-    
-    {"customgrav", G_admin_customgrav, "Q",
-      "set the gravity for a specific player. Normal gives normal server gravity",
-      "[^3name|slot#^7] [^3#^7]"
-    },
 
     {"demo", G_admin_demo, "?",
       "turn admin chat off for the caller so it does not appear in demos. "
@@ -140,19 +135,14 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "kick a client from the server without log",
       "[^3name|slot#^7] [^3message^7]"
     },
-
-    {"drug", G_admin_drug, "Q",
-      "induce a gas like effect on a player",
-      "[^3name|slot#^7]"
-    },
-    
-    {"explode", G_admin_explode, "Q",
-      "cause a player to explode. Caution: damages surrounding players and structures.",
-      "[^3name|slot#^7]"
-    },
     
     {"grab", G_admin_grab, "Q",
       "Grab a player as a spectator and make him move around.",
+      "[^3name|slot#^7]"
+    },
+    
+    {"bring", G_admin_bring, "Q",
+      "This will bring you to said players location.",
       "[^3name|slot#^7]"
     },
 
@@ -244,11 +234,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"maplog", G_admin_maplog, "j",
       "show recently played maps",
       ""
-    },
-	
-    {"mix", G_admin_mix, "X",
-      "mix another player into yourself",
-      "[^3name|slot#^7]"
     },
 
     {"mute", G_admin_mute, "m",
@@ -352,21 +337,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
 	""
     },
 	
-    {"steal", G_admin_steal, "T",
-      "steal health from another player",
-      "[^3name|slot#^7]"
-    },
-	
     {"suspendban", G_admin_suspendban, "B",
       "suspend a ban for a length of time. time is specified as numbers "
       "followed by units 'w' (weeks), 'd' (days), 'h' (hours) or 'm' (minutes),"
       " or seconds if no units are specified",
       "[^5ban #^7] [^5length^7]"
-    },
-	
-    {"switch", G_admin_switch, "X",
-      "switch places with somenone",
-      "[^3name|slot#^7]"
     },
 
     {"time", G_admin_time, "C",
@@ -376,11 +351,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"tklog", G_admin_tklog, "t",
       "list recent teamkill activity",
       "(^5start id#|name|-skip#^7) (^5search skip#^7)"
-    },
-	  
-    {"trade", G_admin_trade, "T",
-      "trade health with another player",
-      "[^3name|slot#^7]"
     },
 
     {"unban", G_admin_unban, "b",
@@ -3827,6 +3797,14 @@ qboolean G_admin_info( gentity_t *ent, int skiparg )
     Q_strncpyz( infoname, "default", 8 );
   else //what subject?
     G_SayArgv( 1 + skiparg, infoname, sizeof( infoname ) );
+  //Hardcoded info file for p-g-qvm
+  if( !Q_stricmp( infoname, "credits" ) )
+  {
+   trap_Cvar_VariableStringBuffer( "qvm_version", info, sizeof( info ) );
+   ADMP( va( "%s\n", info ) );
+   return qtrue;
+  }
+    
   Com_sprintf( filename, MAX_OSPATH, "info/info-%s.txt", infoname );
   length = trap_FS_FOpenFile( filename, &handle, FS_READ );
   if( !handle || !length ) //file not found or length 0
@@ -5558,288 +5536,6 @@ qboolean G_admin_revert( gentity_t *ent, int skiparg )
   return qfalse;
 }
 
-
-//once again my long, long ass list of commands
-qboolean G_admin_switch( gentity_t *ent, int skiparg )
-{
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  gentity_t *vic;
-
-  if( !ent )
-  {
-  ADMP( "^3!switch: ^7console cannot use this command\n" );
-    return qfalse;
-  }
-    minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!switch: ^7usage: !switch [name|slot#]\n" );
-    return qfalse;
-  }
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!switch: ^7%s\n", err ) );
-    return qfalse;
-  }
-  
-  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!switch: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-
-  vic = &g_entities[ pids[ 0 ] ];
-
-
-//put them on noclip
-vic->client->noclip = qtrue;
-ent->client->noclip = qtrue;
-
-//switch places
-  trap_UnlinkEntity( ent );
-  VectorCopy( vic->s.origin, ent->client->ps.origin );
-
-//switch places
-  trap_UnlinkEntity( vic );
-  VectorCopy( ent->s.origin, vic->client->ps.origin );
-
-//spectator fix
-  if( ent->client->sess.sessionTeam != TEAM_SPECTATOR )
-    trap_LinkEntity (ent);
-
-  if( vic->client->sess.sessionTeam != TEAM_SPECTATOR )
-    trap_LinkEntity (vic);
-
-
-//take them off noclip
-vic->client->noclip = qfalse;
-ent->client->noclip = qfalse;
-
-     trap_SendServerCommand( vic-g_entities, va( "print \"^7%s^7 switched with you\n\"", ent->client->pers.netname ) );
-     trap_SendServerCommand( ent-g_entities, va( "print \"^7you switched with ^7%s^7\n\"", vic->client->pers.netname ) );
-
-
-
-  return qtrue;
-
-} 
-
-qboolean G_admin_steal( gentity_t *ent, int skiparg )
-{
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  gentity_t *vic;
-
-  if( !ent )
-  {
-  ADMP( "^3!steal: ^7console cannot use this command\n" );
-    return qfalse;
-  }
-
-    minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!steal: ^7usage: !steal [name|slot#]\n" );
-    return qfalse;
-  }
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!steal: ^7%s\n", err ) );
-    return qfalse;
-  }
-
-  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!switch: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-
-  vic = &g_entities[ pids[ 0 ] ];
-//dont steal from the dead
-if( vic->client->pers.teamSelection == PTE_NONE || vic->client->pers.classSelection == PCL_NONE )
-{
-    ADMP( "^3!steal: ^7cannot steal from the dead\n" );
-    return qfalse;
-}
-//have to be alive to steal
-if( ent->client->pers.teamSelection == PTE_NONE || ent->client->pers.classSelection == PCL_NONE )
-{
-    ADMP( "^3!steal: ^7must be living to use this command\n" );
-    return qfalse;
-}
-//your at full health
-if( ent->health >= ent->client->ps.stats[ STAT_MAX_HEALTH ] )
-{
-    ADMP( "^3!steal: ^7you cannot steal anymore health\n" );
-    return qfalse;
-}
-
-    vic->health -= 5;
-    ent->health += 5;
-    vic->lastDamageTime = level.time;
-    ent->lastDamageTime = level.time;
-
-
-    if( vic->health <= 0 )
-    {
-      vic->enemy = ent;
-      vic->die( vic, ent, ent, 5, MOD_UNKNOWN );
-    }
-//make sure you dont go over max health
-if( ent->health > ent->client->ps.stats[ STAT_MAX_HEALTH ] )
-{
-ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
-ent->lastDamageTime = level.time;
-}
-
-
-     trap_SendServerCommand( vic-g_entities, va( "print \"^7%s^7 stole health from you\n\"", ent->client->pers.netname ) );
-     trap_SendServerCommand( ent-g_entities, va( "print \"^7you stole health from ^7%s^7\n\"", vic->client->pers.netname ) );
-
-  return qtrue;
-
-} 
-
-qboolean G_admin_trade( gentity_t *ent, int skiparg )
-{
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  int hp1, hp2;
-  gentity_t *vic;
-
-
-  if( !ent )
-  {
-  ADMP( "^3!trade: ^7console cannot use this command\n" );
-    return qfalse;
-  }
-
-
-    minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!trade: ^7usage: !trade [name|slot#]\n" );
-    return qfalse;
-  }
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!trade: ^7%s\n", err ) );
-    return qfalse;
-  }
-  
-  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!trade: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-
-  vic = &g_entities[ pids[ 0 ] ];
-//dont trade with the dead
-
-if( vic->client->pers.teamSelection == PTE_NONE || vic->client->pers.classSelection == PCL_NONE )
-{
-    ADMP( "^3!trade: ^7cannot trade with the dead\n" );
-    return qfalse;
-}
-
-//have to be alive to trade
-if( ent->client->pers.teamSelection == PTE_NONE || ent->client->pers.classSelection == PCL_NONE )
-{
-    ADMP( "^3!trade: ^7must be living to use this command\n" );
-    return qfalse;
-}
-
-hp1 = vic->health;
-hp2 = ent->health;
-
-    vic->health = hp2;
-    ent->health = hp1;
-
-    vic->lastDamageTime = level.time;
-    ent->lastDamageTime = level.time;
-
-
-//make sure you dont go over max health
-if( ent->health > ent->client->ps.stats[ STAT_MAX_HEALTH ] )
-{
-ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
-ent->lastDamageTime = level.time;
-}
-
-//make sure they dont go over max health
-if( vic->health > vic->client->ps.stats[ STAT_MAX_HEALTH ] )
-{
-vic->health = vic->client->ps.stats[ STAT_MAX_HEALTH ];
-vic->lastDamageTime = level.time;
-}
-
-     trap_SendServerCommand( vic-g_entities, va( "print \"^7%s^7 traded health with you\n\"", ent->client->pers.netname ) );
-     trap_SendServerCommand( ent-g_entities, va( "print \"^7you traded health with ^7%s^7\n\"", vic->client->pers.netname ) );
-
-  return qtrue;
-
-} 
-
-qboolean G_admin_drug( gentity_t *ent, int skiparg )
-{
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  gentity_t *vic;
-
-
-    minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!drug: ^7usage: !drug [name|slot#]\n" );
-    return qfalse;
-  }
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!drug: ^7%s\n", err ) );
-    return qfalse;
-  }
-  
-  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!drug: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-
-  vic = &g_entities[ pids[ 0 ] ];
-
-        vic->client->ps.stats[ STAT_STATE ] |= SS_POISONCLOUDED;
-        vic->client->lastPoisonCloudedTime = level.time;
-        trap_SendServerCommand( vic->client->ps.clientNum, "poisoncloud" );
-
-  return qtrue;
-
-}
-
 qboolean G_admin_drop( gentity_t *ent, int skiparg )
 {
   int pids[ MAX_CLIENTS ];
@@ -5916,111 +5612,6 @@ qboolean G_admin_cp( gentity_t *ent, int skiparg )
   trap_SendServerCommand( -1, va( "cp \"%s\"", msg ) );
   trap_SendServerCommand( -1, va( "print \"CP: %s\n\"", msg ) );
 
-  return qtrue;
-}
-
-qboolean G_admin_customgrav( gentity_t *ent, int skiparg )
-{
-  
-  char lvl[ MAX_STRING_CHARS ];
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  gentity_t *vic;
-
-
-    minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!customgrav: ^7usage: !customgrav [name|slot#] [gravity#]\n" );
-    return qfalse;
-  }
-  
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!customgrav: ^7%s\n", err ) );
-    return qfalse;
-  }
-  
-  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!customgrav: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-  
-  vic = &g_entities[ pids[ 0 ] ];
-  
-G_SayArgv( 2 + skiparg, lvl, sizeof( lvl ) );
-
-minargc = 3 + skiparg;
-
-if( G_SayArgc() < minargc )
-{
-vic->client->pers.cusgrav = qfalse;
-ADMP( "^3!customgrav: ^7player's custom gravity has been disabled\n" );
-}
-
-else
-{
-ADMP( va( "^3!customgrav: ^7player's gravity has been set to %s\n", ( atoi(lvl) == 0 ) ? "0" : lvl ) );
-vic->client->pers.cusgrav = qtrue;
-vic->client->pers.cusgravlvl = atoi(lvl);
-}
-
-
-	return qtrue;
-
-}
-
-qboolean G_admin_explode( gentity_t *ent, int skiparg )
-{
-
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  gentity_t *vic;
-	
-  minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!explode: ^7usage: !explode [name|slot#]\n" );
-    return qfalse;
-  }
-
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!explode: ^7%s\n", err ) );
-    return qfalse;
-  }
-  
-  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!explode: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-  
-  vic = &g_entities[ pids[ 0 ] ];
-
-
-  if( vic->client->pers.teamSelection == PTE_NONE || vic->client->pers.classSelection == PCL_NONE )
-  {
-    ADMP( "^3!explode: ^7they must be living to use this command\n" );
-    return qfalse;
-  }
-
-  
-  Blow_up(vic);
-  
   return qtrue;
 }
 
@@ -7517,76 +7108,6 @@ qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
   return qtrue;
 }
 
-
-qboolean G_admin_mix( gentity_t *ent, int skiparg )
-{
-  int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
-  int minargc;
-  gentity_t *vic;
-
-  if( !ent )
-  {
-  ADMP( "^3!mix: ^7console cannot use this command\n" );
-    return qfalse;
-  }
-
-
-    minargc = 2 + skiparg;
-
-  if( G_SayArgc() < minargc )
-  {
-    ADMP( "^3!mix: ^7usage: !mix [name|slot#]\n" );
-    return qfalse;
-  }
-  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-
-  if( G_ClientNumbersFromString( name, pids ) != 1 )
-  {
-    G_MatchOnePlayer( pids, err, sizeof( err ) );
-    ADMP( va( "^3!mix: ^7%s\n", err ) );
-    return qfalse;
-  }
-
-if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
-  {
-    ADMP( "^3!mix: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
-    return qfalse;
-  }
-
-  vic = &g_entities[ pids[ 0 ] ];
-
-
-//put them on noclip
-vic->client->noclip = qtrue;
-ent->client->noclip = qtrue;
-
-//mix us
-  trap_UnlinkEntity( ent );
-  trap_UnlinkEntity( vic );
-  VectorCopy( ent->s.origin, vic->client->ps.origin );
-
-//spectator fix
-  if( ent->client->sess.sessionTeam != TEAM_SPECTATOR )
-    trap_LinkEntity (ent);
-
-  if( vic->client->sess.sessionTeam != TEAM_SPECTATOR )
-    trap_LinkEntity (vic);
-
-
-//take them off noclip
-vic->client->noclip = qfalse;
-ent->client->noclip = qfalse;
-
-
-     trap_SendServerCommand( vic-g_entities, va( "print \"^7%s^7 mixed with you\n\"", ent->client->pers.netname ) );
-     trap_SendServerCommand( ent-g_entities, va( "print \"^7you mixed with ^7%s^7\n\"", vic->client->pers.netname ) );
-
-  return qtrue;
-
-} 
-
 qboolean G_admin_credits( gentity_t *ent, int skiparg )
 {
   int pids[ MAX_CLIENTS ];
@@ -7802,23 +7323,6 @@ qboolean G_admin_grab( gentity_t *ent, int skiparg )
   }
   
   G_SayArgv( 1 + skiparg, name, sizeof( name ) );
-  
-  if( !strcmp( name, "clear") ){
-  
-  for( i = 0; i < level.maxclients; i++ )
-  {
-     vic = &g_entities[ i ];
-     if( !vic->client )
-      continue;
-     if( vic->client->pers.connected != CON_CONNECTED )
-      continue;
-     if( vic->client->pers.grabbed )
-      {
-       vic->client->pers.grabbed = qfalse;
-      }
-    }
-    return qtrue;
-  }
 
   if( G_ClientNumbersFromString( name, pids ) != 1 )
   {
@@ -7833,17 +7337,67 @@ qboolean G_admin_grab( gentity_t *ent, int skiparg )
         " level than you\n" );
     return qfalse;
   }
+  
+  if( ent->client->pers.teamSelection != PTE_NONE )
+  {
+    ADMP( "^3!grab: ^7you can only use this command while being a spectator\n" );
+    return qfalse;
+  }
 
   vic = &g_entities[ pids[ 0 ] ];
   
   if( vic->client->pers.grabbed ){
-  ADMP( "^3!grab: ^7grabbing has been disabled.\n" );
+  ADMP( va("^3!grab: ^7grabbing of %s^7 has been disabled.\n", vic->client->pers.netname ));
   vic->client->pers.grabbed = qfalse;
   }
   else{
   vic->client->pers.grabber = ent;
   vic->client->pers.grabbed = qtrue;
-  ADMP( "^3!grab: ^7grabbing has been enabled.\n" );
+  ADMP( va("^3!grab: ^7grabbing of %s^7 has been enabled.\n", vic->client->pers.netname ));
   }
+  return qtrue;
+}
+
+qboolean G_admin_bring( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  int minargc;
+  gentity_t *vic;
+  int i;
+
+  if( !ent )
+  {
+  ADMP( "^3!bring: ^7console cannot use this command\n" );
+    return qfalse;
+  }
+  
+  minargc = 2 + skiparg;
+
+  if( G_SayArgc() < minargc )
+  {
+    ADMP( "^3!bring: ^7usage: !grab [name|slot#|clear]\n" );
+    return qfalse;
+  }
+  
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!bring: ^7%s\n", err ) );
+    return qfalse;
+  }
+  
+  if( ent->client->pers.teamSelection != PTE_NONE )
+  {
+    ADMP( "^3!bring: ^7you can only use this command while being a spectator\n" );
+    return qfalse;
+  }
+
+  vic = &g_entities[ pids[ 0 ] ];
+  
+  VectorCopy( vic->s.origin, ent->client->ps.origin );
+  
   return qtrue;
 }

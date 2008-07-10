@@ -177,6 +177,8 @@ vmCvar_t  g_bleedingSpree;
 
 vmCvar_t  g_KillerHP;
 
+vmCvar_t  g_maraObituary;
+
 vmCvar_t  g_decolorLogfiles;
 
 vmCvar_t  g_tag;
@@ -452,6 +454,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bleedingSpree, "g_bleedingSpree", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_KillerHP, "g_KillerHP", "0", CVAR_ARCHIVE, 0, qtrue  },
+  
+  { &g_maraObituary, "g_maraObituary", "1", CVAR_ARCHIVE, 0, qfalse  },
   
   { &g_decolorLogfiles, "g_decolorLogfiles", "0", CVAR_ARCHIVE, 0, qfalse  },
   

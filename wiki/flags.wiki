@@ -58,8 +58,8 @@
 || L1 || l ||
 || devmap || L ||
 || layoutsave || L ||
-|| _nobuild_ || _L_ ||
-|| _nobuildsave_ || _L_ ||
+|| nobuild || L ||
+|| nobuildsave || L ||
 || mute || m ||
 || unmute || m ||
 || map || M ||
@@ -69,28 +69,21 @@
 || outlaw || O ||
 || putteam || p ||
 || spec999 || P ||
-|| customgrav || Q ||
-|| drug || Q ||
-|| explode	|| Q ||
-|| _grab_ || _Q_
+|| grab || Q ||
 || restart	 || r ||
 || register || R ||
 || setlevel || s ||
 || pause || S ||
 || unpause || S ||
 || tklog || t ||
-|| trade || T ||
-|| steal || T ||
 || credits || u ||
 || buildlog || U ||
 || revert || U ||
 || passvote || V ||
 || warn || w ||
 || slap || x ||
-|| mix || X ||
-|| switch || X ||
 || allready || y ||
-|| _fireworks_ || _Y_ ||
+|| fireworks || Y ||
 || cp || Z ||
 
 
