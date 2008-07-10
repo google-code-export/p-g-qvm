@@ -3066,46 +3066,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   minNormal = BG_FindMinNormalForBuildable( buildable );
   invert = BG_FindInvertNormalForBuildable( buildable );
   
-  VectorCopy( entity_origin, tmp );
-
-  tmp[2] += mins[2];
-  
-  nb = G_Spawn( );
-  nb->s.modelindex = 0;
-  nb->think = NoThink;
-  nb->nextthink = level.time;
-  VectorCopy( tmp, nb->s.pos.trBase );
-  VectorCopy( tmp, nb->r.currentOrigin );
-  trap_LinkEntity( nb );
-
-  
-  for ( i = 1, nbent = g_entities + i; i < level.num_entities; i++, nbent++ )
-  {
-   if( nbent->nobuilder == qtrue )
-   {
-    
-    range[0] = nbent->nobuildArea;
-    range[1] = nbent->nobuildArea;
-    range[2] = nbent->nobuildHeight;
-   
-    VectorAdd( nbent->r.currentOrigin, range, maxs3 );
-    VectorSubtract( nbent->r.currentOrigin, range, mins3 );
-   
-    num2 = trap_EntitiesInBox( mins3, maxs3, entitylist, MAX_GENTITIES );
-    for(i = 0; i < num2; i++)
-      {
-       gentity_t *tent2 = &g_entities[ entitylist[ i ] ];
-      
-       if( tent2 == nb )
-	 {
-	  reason = IBE_PERMISSION;
-	 }
-       }
-     }
-   }
-  
-   G_FreeEntity( nb );
-  
   //can we build at this angle?
   if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
     reason = IBE_NORMAL;
@@ -3338,6 +3298,47 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     if( !G_SufficientBPAvailable( BIT_HUMANS, buildPoints, buildable ) )
       reason = IBE_NOPOWER;
   }
+  
+  BG_FindBBoxForBuildable( buildable, mins, maxs );
+  VectorCopy( entity_origin, tmp );
+
+  tmp[2] += mins[2];
+  
+  nb = G_Spawn( );
+  nb->s.modelindex = 0;
+  nb->think = NoThink;
+  nb->nextthink = level.time;
+  VectorCopy( tmp, nb->s.pos.trBase );
+  VectorCopy( tmp, nb->r.currentOrigin );
+  trap_LinkEntity( nb );
+
+  
+   for ( i = 1, nbent = g_entities + i; i < level.num_entities; i++, nbent++ )
+   {
+    if( nbent->nobuilder == qtrue )
+    {
+    
+    range[0] = nbent->nobuildArea;
+    range[1] = nbent->nobuildArea;
+    range[2] = nbent->nobuildHeight;
+   
+    VectorAdd( nbent->r.currentOrigin, range, maxs3 );
+    VectorSubtract( nbent->r.currentOrigin, range, mins3 );
+   
+    num2 = trap_EntitiesInBox( mins3, maxs3, entitylist, MAX_GENTITIES );
+    for(i = 0; i < num2; i++)
+      {
+       gentity_t *tent2 = &g_entities[ entitylist[ i ] ];
+      
+       if( tent2 == nb )
+	 {
+	  reason = IBE_PERMISSION;
+	 }
+       }
+     }
+   }
+  
+   G_FreeEntity( nb );
 
   //this item does not fit here
   if( reason == IBE_NONE && ( tr2.fraction < 1.0 || tr3.fraction < 1.0 ) )

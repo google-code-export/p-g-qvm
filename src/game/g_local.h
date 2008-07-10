@@ -403,9 +403,7 @@ typedef struct
   qboolean            specd;
   qboolean            saved;
   qboolean            designatedBuilder;
-  statsCounters_t statscounters;	
-  qboolean            cusgrav;
-  int                 cusgravlvl;
+  statsCounters_t statscounters;
   qboolean            healing;
   char                chat[ CHAT_MAXCHAN ][ CHAT_MAXPASS ];
   qboolean            ignoreAdminWarnings;
@@ -993,8 +991,6 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
-
 
 //
 // g_mover.c
@@ -1075,7 +1071,6 @@ qboolean  G_FilterPacket( char *from );
 void FireWeapon( gentity_t *ent );
 void FireWeapon2( gentity_t *ent );
 void FireWeapon3( gentity_t *ent );
-void Blow_up( gentity_t *ent );
 
 //
 // g_cmds.c
@@ -1378,6 +1373,8 @@ extern  vmCvar_t  g_minLevelToSpecMM1;
 extern  vmCvar_t  g_chat;
 
 extern  vmCvar_t  g_KillerHP;
+
+extern  vmCvar_t  g_maraObituary
 
 extern  vmCvar_t  g_decolorLogfiles;
 

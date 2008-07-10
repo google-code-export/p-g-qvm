@@ -264,7 +264,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // this works as a temporary hack until the client supports it
   if ( meansOfDeath == MOD_RADIATION )
     trap_SendServerCommand( -1, va( "print \"%s^7 was irradiated by his base\n\"", self->client->pers.netname ) );
-  else if ( meansOfDeath == MOD_LEVEL2_CLAW )
+  else if ( meansOfDeath == MOD_LEVEL2_CLAW && g_maraObituary.integer )
     trap_SendServerCommand( -1, va( "print \"%s^7 bit off %s^7's face\n\"", attacker->client->pers.netname, self->client->pers.netname ) );
   else
   {
