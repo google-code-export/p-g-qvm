@@ -91,6 +91,7 @@ vmCvar_t  g_extendVotesPercent;
 vmCvar_t  g_extendVotesTime;
 vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_mapVotesPercent;
+vmCvar_t  g_mapRotationVote;
 vmCvar_t  g_layoutVotePercent;
 vmCvar_t  g_designateVotes;
 vmCvar_t  g_admitDefeatVotePercent;
@@ -138,6 +139,7 @@ vmCvar_t  g_deconDead;
 vmCvar_t  g_debugMapRotation;
 vmCvar_t  g_currentMapRotation;
 vmCvar_t  g_currentMap;
+vmCvar_t  g_nextMap;
 vmCvar_t  g_initialMapRotation;
 
 vmCvar_t  g_shove;
@@ -362,6 +364,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
   { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_mapVotesPercent, "g_mapVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
+  { &g_mapRotationVote, "g_mapRotationVote", "15", CVAR_ARCHIVE, 0, qfalse },
   { &g_layoutVotePercent, "g_layoutVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
   { &g_designateVotes, "g_designateVotes", "0", CVAR_ARCHIVE, 0, qfalse },
   { &g_admitDefeatVotePercent, "g_admitDefeatVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
@@ -412,6 +415,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_debugMapRotation, "g_debugMapRotation", "0", 0, 0, qfalse  },
   { &g_currentMapRotation, "g_currentMapRotation", "-1", 0, 0, qfalse  }, // -1 = NOT_ROTATING
   { &g_currentMap, "g_currentMap", "0", 0, 0, qfalse  },
+  { &g_nextMap, "g_nextMap", "", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue  },
   { &g_initialMapRotation, "g_initialMapRotation", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_shove, "g_shove", "15", CVAR_ARCHIVE, 0, qfalse  },
   { &g_mapConfigs, "g_mapConfigs", "", CVAR_ARCHIVE, 0, qfalse  },
@@ -1703,7 +1707,7 @@ void CalculateRanks( void )
   CheckExitRules( );
 
   // if we are at the intermission, send the new info to everyone
-  if( level.intermissiontime )
+  if( level.intermissiontime && !level.mapRotationVoteTime )
     SendScoreboardMessageToAllClients( );
 }
 
@@ -1843,6 +1847,32 @@ void BeginIntermission( void )
   SendScoreboardMessageToAllClients( );
 }
 
+void BeginMapRotationVote( void )
+{
+  gentity_t *ent;
+  int length;
+  int i;
+
+  if( level.mapRotationVoteTime )
+    return;
+
+  length = g_mapRotationVote.integer;
+  if( length > 60 )
+    length = 60;
+  level.mapRotationVoteTime = level.time + ( length * 1000 );
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    ent = g_entities + i;
+
+    if( !ent->inuse )
+      continue;
+
+    ent->client->ps.pm_type = PM_SPECTATOR;
+    ent->client->sess.sessionTeam = TEAM_SPECTATOR;
+    ent->client->sess.spectatorState = SPECTATOR_LOCKED;
+  }
+}
 
 /*
 =============
@@ -1859,6 +1889,19 @@ void ExitLevel( void )
   
   buildHistory_t *tmp, *mark;
  
+  if( level.mapRotationVoteTime )
+  {
+    if( level.time < level.mapRotationVoteTime &&
+        !G_IntermissionMapVoteWinner( ) )
+      return;
+  }
+  else if( g_mapRotationVote.integer > 0 &&
+           G_CheckMapRotationVote() )
+  {
+    BeginMapRotationVote( );
+    return;
+  }
+  
   while( ( tmp = level.buildHistory ) )
   {
     level.buildHistory = level.buildHistory->next;
@@ -1870,10 +1913,14 @@ void ExitLevel( void )
   }
    
 
-  if( G_MapRotationActive( ) )
+  if ( G_MapExists( g_nextMap.string ) )
+    trap_SendConsoleCommand( EXEC_APPEND, va("!map %s\n", g_nextMap.string ) );
+  else if( G_MapRotationActive( ) )
     G_AdvanceMapRotation( );
   else
     trap_SendConsoleCommand( EXEC_APPEND, "map_restart\n" );
+
+  trap_Cvar_Set( "g_nextMap", "" );
 
   level.restarted = qtrue;
   level.changemap = NULL;
@@ -2572,6 +2619,12 @@ void CheckMsgTimer( void )
     return;
 
   LastTime = level.time;
+
+  if( level.mapRotationVoteTime )
+  {
+    G_IntermissionMapVoteMessageAll( );
+    return;
+  }
 
   if( g_welcomeMsgTime.integer && g_welcomeMsg.string[ 0 ] )
   {

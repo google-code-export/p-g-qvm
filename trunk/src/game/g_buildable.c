@@ -3125,6 +3125,10 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       }
       level.markedBuildables[ level.numBuildablesForRemoval++ ] = tent;
     }
+    if( tent->r.contents != MASK_PLAYERSOLID && tent->s.eType != ET_BUILDABLE && ( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
+    {
+      reason = IBE_NONE;
+    }
   }
   if( reason != IBE_NONE )
   {
