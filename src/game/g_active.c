@@ -433,7 +433,8 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     G_TouchTriggers( ent );
     trap_UnlinkEntity( ent );
 
-    if( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) )
+    if( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) &&
+      !level.mapRotationVoteTime )
     {
       //if waiting in a queue remove from the queue
       if( client->ps.pm_flags & PMF_QUEUED )
@@ -475,6 +476,14 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
 
   if( ( client->buttons & BUTTON_USE_HOLDABLE ) && !( client->oldbuttons & BUTTON_USE_HOLDABLE ) )
     G_ToggleFollow( ent );
+
+  if( level.mapRotationVoteTime )
+  {
+    if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) )
+      G_IntermissionMapVoteCommand( ent, qtrue, qfalse );
+    if ( ( client->buttons & BUTTON_ATTACK2 ) && !( client->oldbuttons & BUTTON_ATTACK2 ) )
+      G_IntermissionMapVoteCommand( ent, qfalse, qfalse );
+  }
 }
 
 
@@ -1534,6 +1543,12 @@ void ClientThink_real( gentity_t *ent )
   //
   if( level.intermissiontime )
   {
+    if( level.mapRotationVoteTime )
+    {
+      SpectatorThink( ent, ucmd );
+      return;
+    }
+
     ClientIntermissionThink( client );
     return;
   }

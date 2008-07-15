@@ -1957,6 +1957,27 @@ void Cmd_CallVote_f( gentity_t *ent )
         sizeof( level.voteDisplayString ), "Change to layout '%s'", arg2 );
     level.votePercentToPass = g_layoutVotePercent.integer;
   }
+  else if( !Q_stricmp( arg1, "nextmap" ) )
+  {
+    if( G_MapExists( g_nextMap.string ) )
+    {
+      trap_SendServerCommand( ent - g_entities, va( "print \"callvote: "
+        "the next map is already set to '%s^7'\n\"", g_nextMap.string ) );
+      return;
+    }
+
+    if( !trap_FS_FOpenFile( va( "maps/%s.bsp", arg2 ), NULL, FS_READ ) )
+    {
+      trap_SendServerCommand( ent - g_entities, va( "print \"callvote: "
+        "'maps/%s^7.bsp' could not be found on the server\n\"", arg2 ) );
+      return;
+    }
+    Com_sprintf( level.voteString, sizeof( level.voteString ),
+      "set g_nextMap %s", arg2 );
+    Com_sprintf( level.voteDisplayString,
+        sizeof( level.voteDisplayString ), "Next map '%s^7'", arg2 );
+    level.votePercentToPass = g_mapVotesPercent.integer;
+  }
   else if( !Q_stricmp( arg1, "draw" ) )
   {
     Com_sprintf( level.voteString, sizeof( level.voteString ), "evacuation" );
@@ -2030,7 +2051,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands are: "
-      "map, map_restart, layout, draw, extend, kick, mute, unmute, poll, and sudden_death\n" );
+      "map, map_restart, nextmap, layout, draw, extend, kick, mute, unmute, poll, and sudden_death\n" );
     return;
   }
   
@@ -2079,6 +2100,18 @@ Cmd_Vote_f
 void Cmd_Vote_f( gentity_t *ent )
 {
   char msg[ 64 ];
+
+  if ( level.intermissiontime || level.paused )
+  {
+    if( level.mapRotationVoteTime )
+    {
+      trap_Argv( 1, msg, sizeof( msg ) );
+      if( msg[ 0 ] == 'y' || msg[ 1 ] == 'Y' || msg[ 1 ] == '1' )
+        G_IntermissionMapVoteCommand( ent, qfalse, qtrue );
+    }
+
+    return;
+  }
 
   if( !level.voteTime )
   { 
@@ -4409,6 +4442,12 @@ G_ToggleFollow
 */
 void G_ToggleFollow( gentity_t *ent )
 {
+  if( level.mapRotationVoteTime )
+  {
+    G_IntermissionMapVoteCommand( ent, qfalse, qtrue );
+    return;
+  }
+
   if( ent->client->sess.spectatorState == SPECTATOR_FOLLOW )
     G_StopFollowing( ent );
   else if( ent->client->sess.spectatorState == SPECTATOR_FREE )
@@ -5014,7 +5053,7 @@ static void Cmd_Ignore_f( gentity_t *ent )
 commands_t cmds[ ] = {
   // normal commands
   { "team", 0, Cmd_Team_f },
-  { "vote", 0, Cmd_Vote_f },
+  { "vote", CMD_INTERMISSION, Cmd_Vote_f },
   { "ignore", 0, Cmd_Ignore_f },
   { "unignore", 0, Cmd_Ignore_f },
 
