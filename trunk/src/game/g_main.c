@@ -255,6 +255,8 @@ vmCvar_t  g_AllStatsTime;
 
 vmCvar_t  g_wwNoHovelBuild;
 
+vmCvar_t  g_moverBuild;
+
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -491,7 +493,10 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_AllStats, "g_AllStats", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_AllStatsTime, "g_AllStatsTime", "", CVAR_ARCHIVE, 0, qfalse  },
   
-  { &g_wwNoHovelBuild, "g_wwNoHovelBuild", "0", CVAR_ARCHIVE, 0, qfalse  }
+  { &g_wwNoHovelBuild, "g_wwNoHovelBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
+  
+  
+  { &g_moverBuild, "g_moverBuild", "0", CVAR_ARCHIVE, 0, qfalse  }
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );

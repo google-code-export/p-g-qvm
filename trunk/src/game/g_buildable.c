@@ -3087,7 +3087,13 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   {
     gentity_t *tent = &g_entities[ entitylist[ i ] ];
     
-    if( tent->s.eType == ET_PLAYER )
+    if( tent->s.eType == ET_MOVER && !g_moverBuild.integer )
+    {
+      reason = IBE_NOROOM;
+      break;
+    }
+    
+    else if( tent->s.eType == ET_PLAYER )
     {
       reason = IBE_NOROOM;
       break;

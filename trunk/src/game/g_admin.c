@@ -241,6 +241,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
     
+    {"lockname", G_admin_lockname, "m",
+      "lock/unlock a players name from changing/updating.",
+      "[^3name|slot#^7]"
+    },
+    
     {"namelog", G_admin_namelog, "e",
       "display a list of names used by recently connected players",
       "(^5name^7)"
@@ -3328,7 +3333,7 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
   char lname[ MAX_NAME_LENGTH ];
   char lname2[ MAX_NAME_LENGTH ];
   char guid_stub[ 9 ];
-  char muted[ 2 ], denied[ 2 ], dbuilder[ 2 ],  immune[ 2 ];
+  char muted[ 2 ], denied[ 2 ], dbuilder[ 2 ], immune[ 2 ], nlocked[ 2 ];
   int l;
   char lname_fmt[ 5 ];
 
@@ -3364,7 +3369,12 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
     for( j = 0; j < 8; j++ )
       guid_stub[ j ] = p->pers.guid[ j + 24 ];
     guid_stub[ j ] = '\0';
-
+    
+    nlocked[ 0 ] = '\0';
+    if( p->pers.nlocked )
+    {
+      Q_strncpyz( nlocked, "N", sizeof( muted ) );
+    }
     muted[ 0 ] = '\0';
     if( p->pers.muted )
     {
@@ -3459,6 +3469,7 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
                ( *lname ) ? lname2 : "", 
                guid_stub,
 	       immune,
+	       nlocked,
                muted,
 	       dbuilder,
                denied,
@@ -3474,6 +3485,7 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
                i,
                c,
                t,
+	       nlocked,
                muted,
                dbuilder,
                denied,
@@ -6527,6 +6539,12 @@ qboolean G_admin_maplog( gentity_t *ent, int skiparg )
     ptr = end;
     count++;
   }
+
+  if( g_nextMap.string[0] )
+  {
+    ADMBP( va( "^5NextMap override: %s\n", g_nextMap.string ) );
+  }
+
   ADMBP_end( );
 
   return qtrue;
@@ -7401,3 +7419,50 @@ qboolean G_admin_bring( gentity_t *ent, int skiparg )
   
   return qtrue;
 }
+
+qboolean G_admin_lockname( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  char command[ MAX_ADMIN_CMD_LEN ];
+  gentity_t *vic;
+
+  if( G_SayArgc() < 2 + skiparg )
+  {
+    ADMP( "^3!lockname: ^7usage: !lockname [name|slot#]\n" );
+    return qfalse;
+  }
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!lockname: ^7%s\n", err ) );
+    return qfalse;
+  }
+  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
+  {
+    ADMP( "^3!lockname: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+  vic = &g_entities[ pids[ 0 ] ];
+  if( vic->client->pers.nlocked == qtrue )
+  {
+    vic->client->pers.nlocked = qfalse;
+    CPx( pids[ 0 ], "cp \"^1Your name has been unlocked\"" );
+    AP( va( "print \"^3!lockname: ^7%s^7's name has been unlocked by %s\n\"",
+            vic->client->pers.netname,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
+  else
+  {
+    vic->client->pers.nlocked = qtrue;
+    CPx( pids[ 0 ], "cp \"^1Your name has been locked\"" );
+    AP( va( "print \"^3!lockname: ^7%s^7's name has been locked by ^7%s\n\"",
+            vic->client->pers.netname,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
+  ClientUserinfoChanged( pids[ 0 ] );
+  return qtrue;
+}
+

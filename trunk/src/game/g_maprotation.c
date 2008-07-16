@@ -1018,7 +1018,7 @@ static int G_GetMapVoteWinner( int *winvotes, int *totalvotes )
 
   for( i = 0; i < MAX_MAP_ROTATION_CONDS; i++ )
   {
-    if( results[ i ] > winner )
+    if( results[ i ] > wv )
     {
       winner = i;
       wv = results[ i ];

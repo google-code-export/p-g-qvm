@@ -411,6 +411,8 @@ typedef struct
   
   qboolean	      grabbed;
   gentity_t	      *grabber;
+  
+  qboolean            nlocked;
 
   qboolean            firstConnect;
 } clientPersistant_t;
@@ -1462,6 +1464,8 @@ extern vmCvar_t  g_AllStats;
 extern vmCvar_t  g_AllStatsTime;
 
 extern vmCvar_t  g_wwNoHovelBuild;
+
+extern vmCvar_t  g_moverBuild;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );
