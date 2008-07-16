@@ -1151,7 +1151,6 @@ void ClientUserinfoChanged( int clientNum )
 	Q_strncpyz( oldname, G_NextNewbieName( ent ), sizeof( oldname ) );
     }
 
-
     if( client->pers.muted )
     {
       trap_SendServerCommand( ent - g_entities,
@@ -1178,6 +1177,12 @@ void ClientUserinfoChanged( int clientNum )
     else if( !G_admin_name_check( ent, newname, err, sizeof( err ) ) )
     {
       trap_SendServerCommand( ent - g_entities, va( "print \"%s\n\"", err ) );
+      revertName = qtrue;
+    }
+    else if( client->pers.nlocked )
+    {
+      trap_SendServerCommand( ent - g_entities,
+        "print \"Your name is locked, you can no longer rename.\n\"" );
       revertName = qtrue;
     }
 
