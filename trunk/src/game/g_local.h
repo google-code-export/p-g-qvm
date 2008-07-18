@@ -413,6 +413,9 @@ typedef struct
   gentity_t	      *grabber;
   
   qboolean            nlocked;
+  
+  qboolean            bubble;
+  int                 bubbletime;
 
   qboolean            firstConnect;
 } clientPersistant_t;
@@ -1456,7 +1459,7 @@ extern  vmCvar_t  g_modWeaponAmmo;       // Weapon ammo per clip
 extern  vmCvar_t  g_modWeaponReload;     // Weapon reload time
 extern  vmCvar_t  g_modTurretAngle;      // Allow high turret build angles
 extern  vmCvar_t  g_instantBuild;        // Enable instant building outside of devmap mode
-
+extern  vmCvar_t  g_defaultLayout;
 extern  vmCvar_t  g_teamStatus;          // Allow the use of /teamstatus
 extern  vmCvar_t  g_teamStatusTime;          // Allow the use of /teamstatus
 
@@ -1466,6 +1469,7 @@ extern vmCvar_t  g_AllStatsTime;
 extern vmCvar_t  g_wwNoHovelBuild;
 
 extern vmCvar_t  g_moverBuild;
+extern vmCvar_t  g_specNoclip;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

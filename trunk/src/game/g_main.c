@@ -247,7 +247,7 @@ vmCvar_t  g_modTurretAngle;
 vmCvar_t  g_teamStatus;
 vmCvar_t  g_teamStatusTime;
 
-
+vmCvar_t  g_defaultLayout;
 vmCvar_t  g_instantBuild;
 
 vmCvar_t  g_AllStats;
@@ -256,6 +256,8 @@ vmCvar_t  g_AllStatsTime;
 vmCvar_t  g_wwNoHovelBuild;
 
 vmCvar_t  g_moverBuild;
+
+vmCvar_t  g_specNoclip;
 
 
 static cvarTable_t   gameCvarTable[ ] =
@@ -479,7 +481,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_msgTime, "g_msgTime", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_welcomeMsg, "g_welcomeMsg", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_welcomeMsgTime, "g_welcomeMsgTime", "0", CVAR_ARCHIVE, 0, qfalse  },
-  
+  { &g_defaultLayout, "g_defaultLayout", "", CVAR_ARCHIVE, 0, qtrue  },
   { &g_rankings, "g_rankings", "0", 0, 0, qfalse },
   { &g_allowShare, "g_allowShare", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
   { &g_creditOverflow, "g_creditOverflow", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
@@ -496,7 +498,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_wwNoHovelBuild, "g_wwNoHovelBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
   
   
-  { &g_moverBuild, "g_moverBuild", "0", CVAR_ARCHIVE, 0, qfalse  }
+  { &g_moverBuild, "g_moverBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
+  
+  { &g_specNoclip, "g_specNoclip", "0", CVAR_ARCHIVE, 0, qtrue  }
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );
