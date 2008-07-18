@@ -393,7 +393,12 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   if( client->sess.spectatorState == SPECTATOR_LOCKED || client->sess.spectatorState == SPECTATOR_FOLLOW )
     client->ps.pm_type = PM_FREEZE;
   else
-    client->ps.pm_type = PM_SPECTATOR;
+  {
+    if( g_specNoclip.integer )
+     client->ps.pm_type = PM_NOCLIP;
+    else
+     client->ps.pm_type = PM_SPECTATOR;
+  }
 
   if ( client->sess.spectatorState == SPECTATOR_FOLLOW )
   {
@@ -1634,6 +1639,12 @@ void ClientThink_real( gentity_t *ent )
   clear[2] = 0;
   VectorCopy( clear, ent->client->ps.velocity );
   VectorCopy( ent->client->pers.grabber->s.origin, ent->client->ps.origin );
+  }
+  
+  if( client->pers.bubble && client->pers.bubbletime < level.time ){
+  gentity_t *bub;
+  bub = G_TempEntity( client->ps.origin, EV_PLAYER_TELEPORT_OUT );
+  client->pers.bubbletime += 500;
   }
 
   if( BG_InventoryContainsUpgrade( UP_MEDKIT, client->ps.stats ) &&

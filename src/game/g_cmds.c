@@ -1833,8 +1833,8 @@ void Cmd_CallVote_f( gentity_t *ent )
     
     // use ip in case this player disconnects before the vote ends
     Com_sprintf( level.voteString, sizeof( level.voteString ),
-      "!ban %s %d vote kick", level.clients[ clientNum ].pers.ip,
-      g_adminTempBan.integer + 1 );
+      "!ban %s %d %s", level.clients[ clientNum ].pers.ip,
+      g_adminTempBan.integer + 1, G_SayConcatArgs( 3 ) );
       //bit of a hack here, but it does work :)
     Com_sprintf( level.voteDisplayString, sizeof( level.voteDisplayString ),
       "Kick player \'%s^7\' for \'%s^7\'", name, G_SayConcatArgs( 3 )  );

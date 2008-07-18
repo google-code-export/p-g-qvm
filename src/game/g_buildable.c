@@ -4090,7 +4090,16 @@ void G_LayoutSelect( void )
   int cnt = 0;
   int layoutNum;
   
-  Q_strncpyz( layouts, g_layouts.string, sizeof( layouts ) );
+  Q_strncpyz( layouts, g_defaultLayout.string, sizeof( layouts ) );
+  Q_strncpyz( layouts2, g_layouts.string, sizeof( layouts2 ) );
+  
+  if( Q_stricmp( layouts, "" ) && !Q_stricmp( layouts2, "" ) ){
+    Q_strncpyz( layouts, g_defaultLayout.string, sizeof( layouts ) );
+  }
+  else{
+    Q_strncpyz( layouts, g_layouts.string, sizeof( layouts ) );
+  }
+  
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 
   // one time use cvar 

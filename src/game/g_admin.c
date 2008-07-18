@@ -145,6 +145,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "This will bring you to said players location.",
       "[^3name|slot#^7]"
     },
+    
+    {"bubble", G_admin_bubble, "Q",
+      "Cause bobbles to appear around you untill turned off",
+      "[^3name|slot#^7]"
+    },
 
     {"flag", G_admin_flag, "f",
       "add an admin flag to a player, prefix flag with '-' to disallow",
@@ -2303,7 +2308,7 @@ qboolean G_admin_kick( gentity_t *ent, int skiparg )
       vic->client->pers.netname,
       vic->client->pers.guid,
       vic->client->pers.ip, g_adminTempBan.integer,
-      "automatic temp ban created by kick" );
+      ( *reason ) ? reason : "automatic temp ban created by kick" );
     if( g_admin.string[ 0 ] )
       admin_writeconfig();
   }
@@ -7463,6 +7468,48 @@ qboolean G_admin_lockname( gentity_t *ent, int skiparg )
             ( ent ) ? ent->client->pers.netname : "console" ) );
   }
   ClientUserinfoChanged( pids[ 0 ] );
+  return qtrue;
+}
+
+qboolean G_admin_bubble( gentity_t *ent, int skiparg )
+{
+  int pids[ MAX_CLIENTS ];
+  char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  char command[ MAX_ADMIN_CMD_LEN ];
+  gentity_t *vic;
+
+  if( G_SayArgc() < 2 + skiparg )
+  {
+    ADMP( "^3!bubble: ^7usage: !lockname [name|slot#]\n" );
+    return qfalse;
+  }
+  G_SayArgv( 1 + skiparg, name, sizeof( name ) );
+  if( G_ClientNumbersFromString( name, pids ) != 1 )
+  {
+    G_MatchOnePlayer( pids, err, sizeof( err ) );
+    ADMP( va( "^3!bubble: ^7%s\n", err ) );
+    return qfalse;
+  }
+  if( !admin_higher( ent, &g_entities[ pids[ 0 ] ] ) )
+  {
+    ADMP( "^3!bubble: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+  vic = &g_entities[ pids[ 0 ] ];
+  if( vic->client->pers.bubble == qtrue )
+  {
+    ADMP( va("^3!bubble: ^7bubble mode has been ^1disable^7 for %s^7\n", vic->client->pers.netname ));
+    vic->client->pers.bubble = qfalse;
+    vic->client->pers.bubbletime = 0;
+  }
+  else
+  {
+    ADMP( va("^3!bubble: ^7bubble mode has been ^2enabled^7 for %s^7\n", vic->client->pers.netname ));
+    vic->client->pers.bubble = qtrue;
+    vic->client->pers.bubbletime = level.time;
+  }
+  
   return qtrue;
 }
 
