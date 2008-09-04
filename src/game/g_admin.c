@@ -343,8 +343,8 @@ g_admin_cmd_t g_admin_cmds[ ] =
      //kev: a bit of a hack, but there is no real point to
      //creating a new admin flag for this, so i stole it from !help
     {"specme", G_admin_putmespec, "h",
-        "moves you to the spectators",
-	""
+        "moves you to the spectators (can be done silently with the 's' argument)",
+	"(^5s^7)"
     },
 	
     {"suspendban", G_admin_suspendban, "B",
@@ -3338,7 +3338,7 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
   char lname[ MAX_NAME_LENGTH ];
   char lname2[ MAX_NAME_LENGTH ];
   char guid_stub[ 9 ];
-  char muted[ 2 ], denied[ 2 ], dbuilder[ 2 ], immune[ 2 ], nlocked[ 2 ];
+  char muted[ 2 ], denied[ 2 ], dbuilder[ 2 ], immune[ 2 ];
   int l;
   char lname_fmt[ 5 ];
 
@@ -3375,15 +3375,14 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
       guid_stub[ j ] = p->pers.guid[ j + 24 ];
     guid_stub[ j ] = '\0';
     
-    nlocked[ 0 ] = '\0';
-    if( p->pers.nlocked )
-    {
-      Q_strncpyz( nlocked, "N", sizeof( muted ) );
-    }
     muted[ 0 ] = '\0';
     if( p->pers.muted )
     {
       Q_strncpyz( muted, "M", sizeof( muted ) );
+    }
+    else if( p->pers.nlocked )
+    {
+      Q_strncpyz( muted, "N", sizeof( muted ) );
     }
     denied[ 0 ] = '\0';
     if( p->pers.denyBuild )
@@ -3474,7 +3473,6 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
                ( *lname ) ? lname2 : "", 
                guid_stub,
 	       immune,
-	       nlocked,
                muted,
 	       dbuilder,
                denied,
@@ -3490,7 +3488,6 @@ qboolean G_admin_listplayers( gentity_t *ent, int skiparg )
                i,
                c,
                t,
-	       nlocked,
                muted,
                dbuilder,
                denied,
@@ -4571,6 +4568,20 @@ qboolean G_admin_putmespec( gentity_t *ent, int skiparg )
   }
   
   G_ChangeTeam( ent, PTE_NONE );
+
+  // check for silent '!specme s' - requires !kick permission
+  if( G_SayArgc() > 1 + skiparg )
+  {
+    char arg[ 2 ];
+
+    G_SayArgv( 1 + skiparg, arg, sizeof( arg ) );
+    if( ( arg[0] == 's' || arg[0] == 'S' ) && G_admin_permission( ent, 'k' ) )
+    {
+      ADMP("^3!specme: ^7 You have silently joined the spectators\n");
+      return qtrue;
+    }
+  }
+
   AP( va("print \"^3!specme: ^7%s^7 decided to join the spectators\n\"", ent->client->pers.netname ) );
   return qtrue;
 }
@@ -7122,7 +7133,11 @@ qboolean G_admin_outlaw( gentity_t *ent, int skiparg )
   }
   else
   {
-    vic->client->pers.statscounters.spreebleeds = 1;
+    vic->client->pers.statscounters.spreebleeds = 0;
+    if( vic->client->pers.bleeder )
+      vic->client->pers.bleeder = qfalse;
+    if( level.bleeders )
+      level.bleeders--;
 
     AP( va( "print \"^3!outlaw: ^7%s^7 has been pardoned by ^7%s\n\"",
             vic->client->pers.netname,

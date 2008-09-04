@@ -3087,20 +3087,18 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   {
     gentity_t *tent = &g_entities[ entitylist[ i ] ];
     
-    if( tent->s.eType == ET_MOVER && !g_moverBuild.integer )
-    {
-      reason = IBE_NOROOM;
-      break;
-    }
-    
-    else if( tent->s.eType == ET_PLAYER )
+    if( tent->s.eType == ET_PLAYER )
     {
       reason = IBE_NOROOM;
       break;
     }
     else if( tent->biteam != ent->client->ps.stats[ STAT_PTEAM ] )
     {
-      reason = IBE_NOROOM;
+      if( tent->r.contents == CONTENTS_BODY && tent->s.eType == ET_BUILDABLE)
+      {
+      	reason = IBE_NOROOM;
+      	break;
+      }
     }
     else if( tent->s.eType == ET_BUILDABLE && !tent->deconstruct )
     {
@@ -3130,10 +3128,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         break;
       }
       level.markedBuildables[ level.numBuildablesForRemoval++ ] = tent;
-    }
-    if( tent->r.contents != MASK_PLAYERSOLID && tent->s.eType != ET_BUILDABLE && ( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
-    {
-      reason = IBE_NONE;
     }
   }
   if( reason != IBE_NONE )

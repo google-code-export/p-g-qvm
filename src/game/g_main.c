@@ -95,6 +95,7 @@ vmCvar_t  g_mapRotationVote;
 vmCvar_t  g_layoutVotePercent;
 vmCvar_t  g_designateVotes;
 vmCvar_t  g_admitDefeatVotePercent;
+vmCvar_t  g_admitDefeatTime;
 vmCvar_t  g_teamAutoJoin;
 vmCvar_t  g_teamForceBalance;
 vmCvar_t  g_banIPs;
@@ -255,9 +256,8 @@ vmCvar_t  g_AllStatsTime;
 
 vmCvar_t  g_wwNoHovelBuild;
 
-vmCvar_t  g_moverBuild;
-
 vmCvar_t  g_specNoclip;
+vmCvar_t  g_allowDevolve;
 
 
 static cvarTable_t   gameCvarTable[ ] =
@@ -372,6 +372,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_layoutVotePercent, "g_layoutVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
   { &g_designateVotes, "g_designateVotes", "0", CVAR_ARCHIVE, 0, qfalse },
   { &g_admitDefeatVotePercent, "g_admitDefeatVotePercent", "50", CVAR_ARCHIVE, 0, qfalse },
+  
+  { &g_admitDefeatTime, "g_admitDefeatTime", "300", CVAR_ARCHIVE, 0, qtrue  },
   
   { &g_listEntity, "g_listEntity", "0", 0, 0, qfalse },
   { &g_minCommandPeriod, "g_minCommandPeriod", "500", 0, 0, qfalse},
@@ -497,10 +499,10 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_wwNoHovelBuild, "g_wwNoHovelBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
   
+  { &g_specNoclip, "g_specNoclip", "0", CVAR_ARCHIVE, 0, qtrue  },
   
-  { &g_moverBuild, "g_moverBuild", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_allowDevolve, "g_allowDevolve", "0", CVAR_ARCHIVE, 0, qtrue  },
   
-  { &g_specNoclip, "g_specNoclip", "0", CVAR_ARCHIVE, 0, qtrue  }
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );
