@@ -1518,7 +1518,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
         // bleeding spree
-        if( g_bleedingSpree.integer > 1 )
+        if( g_bleedingSpree.integer > 1 && attacker != targ )
         {
           attacker->client->pers.statscounters.spreebleeds += take;
           if( attacker->client->pers.statscounters.spreebleeds > g_bleedingSpree.integer * 100 &&
@@ -1540,9 +1540,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           {
             attacker->client->pers.bleederLastWarn = level.time;
             trap_SendServerCommand( attacker - g_entities,
-              "print \"^3Your bleeding is close to aggravating your base!\"" );
+              "print \"^3Your bleeding is close to aggravating your base!\n\"" );
             trap_SendServerCommand( attacker - g_entities,
-              "cp \"^1Your bleeding is close to aggravating your base!\n\"" );
+              "cp \"^1Your bleeding is close to aggravating your base!\"" );
           }
         }
       }
@@ -1578,6 +1578,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           if( attacker->client->pers.statscounters.spreefeeds < 0 )
             attacker->client->pers.statscounters.spreefeeds = 0;
         }
+
+        if( attacker->client->pers.statscounters.spreebleeds > 10 )
+        {
+          attacker->client->pers.statscounters.spreebleeds -= take / 3;
+          if( attacker->client->pers.statscounters.spreebleeds < 10 )
+            attacker->client->pers.statscounters.spreebleeds = 10;
+        }
       }
       else if( targ->client )
       {
@@ -1597,6 +1604,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           attacker->client->pers.statscounters.spreefeeds -= take;
           if( attacker->client->pers.statscounters.spreefeeds < 0 )
             attacker->client->pers.statscounters.spreefeeds = 0;
+        }
+
+        if( attacker->client->pers.statscounters.spreebleeds > 10 )
+        {
+          attacker->client->pers.statscounters.spreebleeds -= take / 3;
+          if( attacker->client->pers.statscounters.spreebleeds < 10 )
+            attacker->client->pers.statscounters.spreebleeds = 10;
         }
       }	
     }

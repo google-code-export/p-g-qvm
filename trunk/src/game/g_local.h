@@ -1319,6 +1319,7 @@ extern  vmCvar_t  g_mapRotationVote;
 extern  vmCvar_t  g_layoutVotePercent;
 extern  vmCvar_t  g_designateVotes;
 extern  vmCvar_t  g_admitDefeatVotePercent;
+extern  vmCvar_t  g_admitDefeatTime;
 extern  vmCvar_t  g_teamAutoJoin;
 extern  vmCvar_t  g_teamForceBalance;
 extern  vmCvar_t  g_banIPs;
@@ -1467,9 +1468,8 @@ extern vmCvar_t  g_AllStats;
 extern vmCvar_t  g_AllStatsTime;
 
 extern vmCvar_t  g_wwNoHovelBuild;
-
-extern vmCvar_t  g_moverBuild;
 extern vmCvar_t  g_specNoclip;
+extern vmCvar_t  g_allowDevolve;
 
 void      trap_Printf( const char *fmt );
 void      trap_Error( const char *fmt );

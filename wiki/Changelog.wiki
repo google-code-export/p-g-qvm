@@ -1,6 +1,15 @@
 #summary A list of all changes with each update.
 #labels Info-Help,Featured
 =1.6x=
+==1.6.5==
+ * Damage done to self does not raise bleed counter. (Issue 157)
+ * BleedingSpree goes down when damage is done to other team, but at 1/3 the damage done (Issue 157)
+ * Admitdefeat votes cannot be spammed anymore by players, can't be called before `g_admitDefeatTime`, or by admin (Issue 159)
+ * Fixed bug in listplayers and lockname (Issue 161)
+ * Cleans up build near doors code (Issue 163)
+ * Adds `/devolve` command for aliens. Does not give credits back, player must have full health, and is cvar controlled by `g_allowDevolve` (Issue 166)
+ * Added silent specme, when `!specme s` is done by an admin (anyone with kick flag k), they are put to spec team, but it is not announced. (Issue 168)
+ * Increase max registered players. (Issue 177)
 ==1.6.2==
  * Teamstatus now flood limited, via cvar `g_teamStatusTime`, and updated quite a bit (Issue 121)
  * New Marauder obituary (toggled via cvar `g_maraObituary`) (Issue 125 and seperate cvar)

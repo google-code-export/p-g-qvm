@@ -2419,6 +2419,14 @@ void Cmd_CallTeamVote_f( gentity_t *ent )
       trap_SendServerCommand( ent-g_entities, "print \"admitdefeat votes are disabled\n\"" );
       return;
     }
+    if( g_admitDefeatTime.integer > 0 &&
+        level.time - level.startTime < g_admitDefeatTime.integer * 1000 )
+    {
+       trap_SendServerCommand( ent-g_entities,
+         va( "print \"Cannot call an admitdefeat vote before %d:%02d\n\"",
+         g_admitDefeatTime.integer / 60, g_admitDefeatTime.integer % 60 ) );
+       return;
+    }
     level.teamVotePercentToPass[ cs_offset ] = g_admitDefeatVotePercent.integer;
     Com_sprintf( level.teamVoteString[ cs_offset ],
       sizeof( level.teamVoteString[ cs_offset ] ), "admitdefeat %i", team );
@@ -2842,6 +2850,124 @@ void Cmd_Class_f( gentity_t *ent )
 
     G_PushSpawnQueue( &level.humanSpawnQueue, clientNum );
   }
+}
+
+/*
+=================
+Cmd_Class_f
+=================
+*/
+void Cmd_Devolve_f( gentity_t *ent )
+{
+  int       clientNum;
+  int       i;
+  vec3_t    infestOrigin;
+  int       allowedClasses[ PCL_NUM_CLASSES ];
+  int       numClasses = 0;
+  pClass_t  currentClass = ent->client->ps.stats[ STAT_PCLASS ];
+  pClass_t  newClass;
+  int       numLevels;
+  int       entityList[ MAX_GENTITIES ];
+  vec3_t    range = { AS_OVER_RT3, AS_OVER_RT3, AS_OVER_RT3 };
+  vec3_t    mins, maxs;
+  int       num;
+  gentity_t *other;
+  qboolean  nearOM = qfalse;
+
+  if( ent->client->ps.stats[ STAT_HEALTH ] <= 0 )
+    return;
+  
+  if( !g_allowDevolve.integer )
+  {
+  	trap_SendServerCommand( ent-g_entities, "print \"Devolve has been disabled\n\"" );
+  	return;
+  }
+
+  clientNum = ent->client - level.clients;
+
+  if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0 ) )
+    allowedClasses[ numClasses++ ] = PCL_ALIEN_BUILDER0;
+
+  if( ent->client->pers.teamSelection == PTE_ALIENS &&
+      !( ent->client->ps.stats[ STAT_STATE ] & SS_INFESTING ) &&
+      !( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) )
+  {
+      newClass = PCL_ALIEN_BUILDER0;
+
+      if( !level.overmindPresent )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
+        return;
+      }
+      
+      // Check if near OM
+      VectorAdd( ent->client->ps.origin, range, maxs );
+      VectorSubtract( ent->client->ps.origin, range, mins );
+      
+      num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+      for( i = 0; i < num; i++ )
+      {
+        other = &g_entities[ entityList[ i ] ];
+
+        if(other->s.eType == ET_BUILDABLE && other->s.modelindex == BA_A_OVERMIND)
+        {
+          nearOM = qtrue;
+          break;
+        }
+      }
+      
+      //Don't devolve if already a granger
+      if( !nearOM )
+      {
+        trap_SendServerCommand( ent-g_entities,
+            va( "print \"Must be near the overmind to devolve\n\"" ) );
+        return;
+      }
+      
+      if( ( ent->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) ||
+          ( ent->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBINGCEILING ) )
+      {
+        trap_SendServerCommand( ent-g_entities, va( "print \"You cannot devolve while wallwalking\n\"" ) );
+        return;
+      }
+
+      //Don't devolve if already a granger
+      if( currentClass == PCL_ALIEN_BUILDER0 || currentClass == PCL_ALIEN_BUILDER0_UPG )
+      {
+        trap_SendServerCommand( ent-g_entities,
+            va( "print \"You are already a granger!\n\"" ) );
+        return;
+      }
+      
+      //Don't devolve if not full health
+      if( ent->client->ps.stats[ STAT_HEALTH ] != BG_FindHealthForClass( currentClass ) )
+      {
+        trap_SendServerCommand( ent-g_entities,
+            va( "print \"You have to be at full health to devolve\n\"" ) );
+        return;
+      }
+
+      if( G_RoomForClassChange( ent, newClass, infestOrigin ) )
+      {
+        
+          G_LogOnlyPrintf("ClientTeamClass: %i alien builder\n", clientNum);
+
+          ent->client->pers.evolveHealthFraction = (float)ent->client->ps.stats[ STAT_HEALTH ] /
+            (float)BG_FindHealthForClass( currentClass );
+
+          if( ent->client->pers.evolveHealthFraction < 0.0f )
+            ent->client->pers.evolveHealthFraction = 0.0f;
+          else if( ent->client->pers.evolveHealthFraction > 1.0f )
+            ent->client->pers.evolveHealthFraction = 1.0f;
+
+          //remove credit
+          ent->client->pers.classSelection = newClass;
+          ClientUserinfoChanged( clientNum );
+          VectorCopy( infestOrigin, ent->s.pos.trBase );
+          ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+          return;
+      }
+   }
 }
 
 /*
@@ -5114,7 +5240,8 @@ commands_t cmds[ ] = {
   { "where", CMD_TEAM, Cmd_Where_f },
   { "teamvote", CMD_TEAM, Cmd_TeamVote_f },
   { "class", CMD_TEAM, Cmd_Class_f },
-
+  { "devolve", CMD_TEAM, Cmd_Devolve_f },
+  
   { "build", CMD_TEAM|CMD_LIVING, Cmd_Build_f },
   { "deconstruct", CMD_TEAM|CMD_LIVING, Cmd_Destroy_f },
   { "mark", CMD_TEAM|CMD_LIVING, Cmd_Mark_f },
